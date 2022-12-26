@@ -8,13 +8,13 @@
 The main task is to give the most complete information about how a person has to prepare for a meeting with a new family member.
 ## Table of Contents
 
-[Features](https://linktoFeatures)
+[Features](https://github.com/SlavZ27/AnimalShelter4/tree/master#features)
 
-[Authors](https://linktodocumentation)
+[Authors](https://github.com/SlavZ27/AnimalShelter4/tree/master#authors)
 
-[Contribute](https://linktodocumentation)
+[Contribute](https://github.com/SlavZ27/AnimalShelter4/tree/master#contribute)
 
-[License](https://linktodocumentation)
+[License](https://github.com/SlavZ27/AnimalShelter4/tree/master#-license)
 ## Features
 
 - The bot can answer popular questions from people about what you need to know and be able to take an animal from a shelter
