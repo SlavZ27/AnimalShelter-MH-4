@@ -1,4 +1,4 @@
 package pro.sky.animalshelter4.service;
 
-public class VolunteerService {
+public class RoleDetector {
 }

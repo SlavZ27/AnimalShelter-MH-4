@@ -1,4 +1,4 @@
-package pro.sky.animalshelter4;
+package pro.sky.animalshelter4.configuration;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.DeleteMyCommands;
