@@ -1,34 +1,43 @@
 package pro.sky.animalshelter4.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Objects;
 
 @Entity(name = "need_finish_request_client")
 public class NeedFinishRequestClient {
     @Id
-    private Long idClient;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @ManyToOne
+    @JoinColumn(name = "id_client")
+    private Client client;
     private String command;
 
     public NeedFinishRequestClient() {
     }
 
-    public Long getIdClient() {
-        return idClient;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdClient(Long id) {
-        this.idClient = id;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     public String getCommand() {
         return command;
     }
 
-    public void setCommand(String name) {
-        this.command = name;
+    public void setCommand(String command) {
+        this.command = command;
     }
 
     @Override
@@ -36,19 +45,20 @@ public class NeedFinishRequestClient {
         if (this == o) return true;
         if (!(o instanceof NeedFinishRequestClient)) return false;
         NeedFinishRequestClient that = (NeedFinishRequestClient) o;
-        return getIdClient().equals(that.getIdClient()) && getCommand().equals(that.getCommand());
+        return getId().equals(that.getId()) && getClient().equals(that.getClient()) && getCommand().equals(that.getCommand());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getIdClient(), getCommand());
+        return Objects.hash(getId(), getClient(), getCommand());
     }
 
     @Override
     public String toString() {
         return "NeedFinishRequestClient{" +
-                "id=" + idClient +
-                ", name='" + command + '\'' +
+                "id=" + id +
+                ", client=" + client +
+                ", command='" + command + '\'' +
                 '}';
     }
 }
