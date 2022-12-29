@@ -2,26 +2,27 @@ package pro.sky.animalshelter4.entity;
 
 
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity(name = "request_volunteer")
 public class RequestVolunteer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long idClient;
-    private Long idVolunteer;
+    @ManyToOne
+    @JoinColumn(name = "id_chat_client")
+    private Chat chatClient;
+    @ManyToOne
+    @JoinColumn(name = "id_chat_volunteer")
+    private Chat chatVolunteer;
     private boolean isOpen;
     private LocalDateTime localDateTimeOpen;
     private LocalDateTime localDateTimeClose;
 
     public RequestVolunteer() {
     }
+
     public Long getId() {
         return id;
     }
@@ -30,20 +31,20 @@ public class RequestVolunteer {
         this.id = id;
     }
 
-    public Long getIdClient() {
-        return idClient;
+    public Chat getChatClient() {
+        return chatClient;
     }
 
-    public void setIdClient(Long idClient) {
-        this.idClient = idClient;
+    public void setChatClient(Chat chatClient) {
+        this.chatClient = chatClient;
     }
 
-    public Long getIdVolunteer() {
-        return idVolunteer;
+    public Chat getChatVolunteer() {
+        return chatVolunteer;
     }
 
-    public void setIdVolunteer(Long idVolunteer) {
-        this.idVolunteer = idVolunteer;
+    public void setChatVolunteer(Chat chatVolunteer) {
+        this.chatVolunteer = chatVolunteer;
     }
 
     public boolean isOpen() {
@@ -68,30 +69,5 @@ public class RequestVolunteer {
 
     public void setLocalDateTimeClose(LocalDateTime localDateTimeClose) {
         this.localDateTimeClose = localDateTimeClose;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof RequestVolunteer)) return false;
-        RequestVolunteer that = (RequestVolunteer) o;
-        return isOpen() == that.isOpen() && getId().equals(that.getId()) && getIdClient().equals(that.getIdClient()) && getIdVolunteer().equals(that.getIdVolunteer()) && getLocalDateTimeOpen().equals(that.getLocalDateTimeOpen()) && getLocalDateTimeClose().equals(that.getLocalDateTimeClose());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getIdClient(), getIdVolunteer(), isOpen(), getLocalDateTimeOpen(), getLocalDateTimeClose());
-    }
-
-    @Override
-    public String toString() {
-        return "RequestVolunteer{" +
-                "id=" + id +
-                ", idClient=" + idClient +
-                ", idVolunteer=" + idVolunteer +
-                ", isOpen=" + isOpen +
-                ", localDateTimeOpen=" + localDateTimeOpen +
-                ", localDateTimeClose=" + localDateTimeClose +
-                '}';
     }
 }
