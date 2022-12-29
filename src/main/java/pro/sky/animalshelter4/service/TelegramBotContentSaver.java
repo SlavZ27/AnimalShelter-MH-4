@@ -28,6 +28,33 @@ public class TelegramBotContentSaver {
         this.telegramBot = telegramBot;
     }
 
+    public void savePhoto(Update update) throws IOException {
+        Long idChat = update.message().chat().id();
+        logger.info("ChatId={}; Method savePhoto was start for save receive photo", idChat);
+        int maxPhotoIndex = update.message().photo().length - 1;
+        logger.debug("ChatId={}; Method savePhoto go to save photo: width = {}, heugh = {}, file size = {}",
+                idChat,
+                update.message().photo()[maxPhotoIndex].width(),
+                update.message().photo()[maxPhotoIndex].height(),
+                update.message().photo()[maxPhotoIndex].fileSize());
+
+        GetFile getFile = new GetFile(update.message().photo()[maxPhotoIndex].fileId());
+        GetFileResponse response = telegramBot.execute(getFile);
+        File file = response.file();
+        String fileFormat = parseFileFormat(file.filePath());
+        if (fileFormat == null) {
+            logger.error("ChatId={}; Method savePhoto don't detect format in name of files = {}", idChat, file.filePath());
+            return;
+        }
+        Path myPath = getAndCreatePath(idChat, "report-1", fileFormat);
+        if (myPath == null) {
+            logger.error("ChatId={}; Method savePhoto can't find or create folder for save photo", idChat);
+            return;
+        }
+        Files.write(myPath, telegramBot.getFileContent(file).clone());
+        logger.info("ChatId={}; Method savePhoto successfully received the photo", idChat);
+    }
+
     private boolean checkOrCreateFolder(String path) {
         java.io.File folder = new java.io.File(path);
         if (!folder.exists()) {
@@ -63,32 +90,5 @@ public class TelegramBotContentSaver {
             return filePath.substring(index + 1);
         }
         return null;
-    }
-
-    public void savePhoto(Update update) throws IOException {
-        Long idChat = update.message().chat().id();
-        logger.info("ChatId={}; Method savePhoto was start for save receive photo", idChat);
-        int maxPhotoIndex = update.message().photo().length - 1;
-        logger.debug("ChatId={}; Method savePhoto go to save photo: width = {}, heugh = {}, file size = {}",
-                idChat,
-                update.message().photo()[maxPhotoIndex].width(),
-                update.message().photo()[maxPhotoIndex].height(),
-                update.message().photo()[maxPhotoIndex].fileSize());
-
-        GetFile getFile = new GetFile(update.message().photo()[maxPhotoIndex].fileId());
-        GetFileResponse response = telegramBot.execute(getFile);
-        File file = response.file();
-        String fileFormat = parseFileFormat(file.filePath());
-        if (fileFormat == null) {
-            logger.error("ChatId={}; Method savePhoto don't detect format in name of files = {}", idChat, file.filePath());
-            return;
-        }
-        Path myPath = getAndCreatePath(idChat, "report-1", fileFormat);
-        if (myPath == null) {
-            logger.error("ChatId={}; Method savePhoto can't find or create folder for save photo", idChat);
-            return;
-        }
-        Files.write(myPath, telegramBot.getFileContent(file).clone());
-        logger.info("ChatId={}; Method savePhoto successfully received the photo", idChat);
     }
 }
