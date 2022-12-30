@@ -7,7 +7,7 @@ import java.util.List;
 
 public enum Command {
     START("/start", "START", true, true, false),
-    INFO("/info", "INFO", false, true, false),
+    INFO("/info", "About shelter", false, true, false),
     EMPTY_CALLBACK_DATA_FOR_BUTTON("...", "", true, true, false);
 
 
@@ -15,22 +15,22 @@ public enum Command {
     private final String nameButton;
     private final boolean isHide;
     private final boolean isPublic;
-    private final boolean isAdmin;
+    private final boolean isVolunteer;
 
-    Command(String title, String nameButton, boolean isHide, boolean isPublic, boolean isAdmin) {
+    Command(String title, String nameButton, boolean isHide, boolean isPublic, boolean isVolunteer) {
         this.title = title;
         this.nameButton = nameButton;
         this.isHide = isHide;
         this.isPublic = isPublic;
-        this.isAdmin = isAdmin;
+        this.isVolunteer = isVolunteer;
     }
 
     public boolean isPublic() {
         return isPublic;
     }
 
-    public boolean isAdmin() {
-        return isAdmin;
+    public boolean isVolunteer() {
+        return isVolunteer;
     }
 
     public boolean isHide() {

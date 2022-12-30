@@ -5,12 +5,18 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.SendPhoto;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import pro.sky.animalshelter4.info.InfoAboutShelter;
 import pro.sky.animalshelter4.component.Command;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -21,7 +27,6 @@ public class TelegramBotSenderService {
     public static final String MESSAGE_SELECT_COMMAND = "Select action";
 
     private final static String MESSAGE_UNKNOWN = "I don't know this command";
-    private final static String INFO_ABOUT_SHELTER = "INFO_ABOUT_SHELTER";
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotSenderService.class);
     private final TelegramBot telegramBot;
@@ -61,8 +66,7 @@ public class TelegramBotSenderService {
         String firstName = update.message().from().firstName();
         Long idChat = getChatId(update);
         logger.info("ChatId={}; Method sendStartButtons was started for send a welcome message", idChat);
-        sendMessage(idChat, "Hello " + firstName + ".\n" +
-                "I know some command:");
+        sendMessage(idChat, "Hello " + firstName + ".\n");
         sendButtonsCommandForChat(update);
     }
 
@@ -76,7 +80,7 @@ public class TelegramBotSenderService {
     public void sendInfoAboutShelter(Update update) {
         Long idChat = getChatId(update);
         logger.info("ChatId={}; Method sendInfoAboutShelter was started for send send info about shelter", idChat);
-        sendMessage(idChat, INFO_ABOUT_SHELTER);
+        sendMessage(idChat, InfoAboutShelter.getInfoEn());
     }
 
     public void sendButtonsWithOneData(Long idChat, String caption, String command, List<String> nameButtons, List<String> dataButtons, int width, int height) {
@@ -177,7 +181,6 @@ public class TelegramBotSenderService {
                 idChat,
                 MESSAGE_SELECT_COMMAND,
                 Command.getListsForButtonExcludeHideCommand().
-
                         getFirst(),
                 Command.getListsForButtonExcludeHideCommand().
                         getSecond(),
@@ -195,6 +198,14 @@ public class TelegramBotSenderService {
             return update.callbackQuery().from().id();
         }
         return null;
+    }
+
+    public void sendPhoto(Update update, String pathFile) throws IOException {
+        Long idChat = update.message().chat().id();
+        Path path = Paths.get(pathFile);
+        byte[] file = Files.readAllBytes(path);
+        SendPhoto sendPhoto = new SendPhoto(idChat, file);
+        telegramBot.execute(sendPhoto).message();
     }
 
 }
