@@ -66,8 +66,7 @@ public class TelegramBotSenderService {
         String firstName = update.message().from().firstName();
         Long idChat = getChatId(update);
         logger.info("ChatId={}; Method sendStartButtons was started for send a welcome message", idChat);
-        sendMessage(idChat, "Hello " + firstName + ".\n" +
-                "I know some command:");
+        sendMessage(idChat, "Hello " + firstName + ".\n");
         sendButtonsCommandForChat(update);
     }
 
@@ -182,7 +181,6 @@ public class TelegramBotSenderService {
                 idChat,
                 MESSAGE_SELECT_COMMAND,
                 Command.getListsForButtonExcludeHideCommand().
-
                         getFirst(),
                 Command.getListsForButtonExcludeHideCommand().
                         getSecond(),
@@ -202,7 +200,7 @@ public class TelegramBotSenderService {
         return null;
     }
 
-    public void sendPhoto(Update update,String pathFile) throws IOException {
+    public void sendPhoto(Update update, String pathFile) throws IOException {
         Long idChat = update.message().chat().id();
         Path path = Paths.get(pathFile);
         byte[] file = Files.readAllBytes(path);
