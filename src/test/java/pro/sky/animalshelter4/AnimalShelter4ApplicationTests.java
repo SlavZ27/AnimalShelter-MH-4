@@ -103,6 +103,37 @@ class AnimalShelter4ApplicationTests {
         verify(telegramBotSenderService, times(1)).sendInfoAboutShelter(updateListWithCommandINFO.get(0));
         verify(telegramBotSenderService, times(1)).sendButtonsCommandForChat(updateListWithCommandINFO.get(0));
     }
+    @Test
+    public void receivingMessageCommandHOW() {
+        List<Update> updateListWithCommandHOW = List.of(generateUpdateCallbackQueryWithReflection(
+                "",
+                "",
+                "",
+                50L,
+                Command.HOW.getTitle()
+        ));
+
+        telegramBotUpdatesListener.process(updateListWithCommandHOW);
+
+        verify(telegramBotSenderService, times(1)).sendHowTakeDog(updateListWithCommandHOW.get(0));
+        verify(telegramBotSenderService, times(1)).sendButtonsCommandForChat(updateListWithCommandHOW.get(0));
+    }
+
+    @Test
+    public void receivingCallbackQueryCommandHOW() {
+        List<Update> updateListWithCommandHOW = List.of(generateUpdateMessageWithReflection(
+                "",
+                "",
+                "",
+                50L,
+                Command.HOW.getTitle()
+        ));
+
+        telegramBotUpdatesListener.process(updateListWithCommandHOW);
+
+        verify(telegramBotSenderService, times(1)).sendHowTakeDog(updateListWithCommandHOW.get(0));
+        verify(telegramBotSenderService, times(1)).sendButtonsCommandForChat(updateListWithCommandHOW.get(0));
+    }
 
 
     private Chat mapUpdateToChat(Update update) {

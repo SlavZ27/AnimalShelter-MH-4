@@ -8,9 +8,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public enum Command {
+    // isHide не надо показывать в списке команд,
     START(0, "/start", "START", true, true, false),
     INFO(1, "/info", "About shelter", false, true, false),
-    HOW(2, "/HOW", "rghfrtdhgdrtg", false, true, false),
+    HOW(2, "/HOW", "Take a dog?", false, true, false),
     EMPTY_CALLBACK_DATA_FOR_BUTTON(-1, "...", "", true, true, false);
 
 
