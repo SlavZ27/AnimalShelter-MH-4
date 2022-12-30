@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 public enum Command {
     START(0, "/start", "START", true, true, false),
     INFO(1, "/info", "About shelter", false, true, false),
+    HOW(2, "/HOW", "rghfrtdhgdrtg", false, true, false),
     EMPTY_CALLBACK_DATA_FOR_BUTTON(-1, "...", "", true, true, false);
 
 
