@@ -2,31 +2,37 @@ package pro.sky.animalshelter4.component;
 
 import org.springframework.data.util.Pair;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public enum Command {
     // isHide не надо показывать в списке команд,
-    START("/start", "START", true, true, false),
-    INFO("/info", "About shelter", false, true, false),
-
-    HOW("/how", "Take a dog?", false, true, false ),
-    EMPTY_CALLBACK_DATA_FOR_BUTTON("...", "", true, true, false);
-
+    START(0, "/start", "START", true, true, false),
+    INFO(1, "/info", "About shelter", false, true, false),
+    HOW(2, "/HOW", "Take a dog?", false, true, false),
+    EMPTY_CALLBACK_DATA_FOR_BUTTON(-1, "...", "", true, true, false);
 
 
+    private final int order;
     private final String title;
     private final String nameButton;
     private final boolean isHide;
     private final boolean isPublic;
     private final boolean isVolunteer;
 
-    Command(String title, String nameButton, boolean isHide, boolean isPublic, boolean isVolunteer) {
+    Command(int order, String title, String nameButton, boolean isHide, boolean isPublic, boolean isVolunteer) {
+        this.order = order;
         this.title = title;
         this.nameButton = nameButton;
         this.isHide = isHide;
         this.isPublic = isPublic;
         this.isVolunteer = isVolunteer;
+    }
+
+    public int getOrder() {
+        return order;
     }
 
     public boolean isPublic() {
@@ -60,34 +66,39 @@ public enum Command {
 
     public static String getAllValuesFromNewLineExcludeHideCommand() {
         StringBuilder sb = new StringBuilder();
-        for (Command commandClient : Command.values()) {
-            if (!commandClient.isHide) {
-                sb.append(commandClient.getTitle());
-                sb.append("\n");
-            }
-        }
+        Stream.of(
+                        Command.values()).
+                filter(command -> !command.isHide).
+                sorted(Comparator.comparingInt(Command::getOrder)).
+                forEach(command -> {
+                    sb.append(command.getTitle());
+                    sb.append("\n");
+                });
         return sb.toString();
     }
 
     public static List<String> getListValuesExcludeHideCommand() {
-        List<String> stringList = new ArrayList<>();
-        for (Command commandClient : Command.values()) {
-            if (!commandClient.isHide) {
-                stringList.add(commandClient.getTitle());
-            }
-        }
-        return stringList;
+        return Stream.of(
+                        Command.values()).
+                filter(command -> !command.isHide).
+                sorted(Comparator.comparingInt(Command::getOrder)).
+                map(Command::getTitle).
+                collect(Collectors.toList());
     }
 
     public static Pair<List<String>, List<String>> getListsForButtonExcludeHideCommand() {
-        List<String> commandList = new ArrayList<>();
-        List<String> nameList = new ArrayList<>();
-        for (Command commandClient : Command.values()) {
-            if (!commandClient.isHide) {
-                commandList.add(commandClient.getTitle());
-                nameList.add(commandClient.getNameButton());
-            }
-        }
-        return Pair.of(nameList, commandList);
+        return Pair.of(
+                Stream.of(
+                                Command.values()).
+                        filter(command -> !command.isHide).
+                        sorted(Comparator.comparingInt(Command::getOrder)).
+                        map(Command::getNameButton).
+                        collect(Collectors.toList()),
+                Stream.of(
+                                Command.values()).
+                        filter(command -> !command.isHide).
+                        sorted(Comparator.comparingInt(Command::getOrder)).
+                        map(Command::getTitle).
+                        collect(Collectors.toList()));
     }
 }
