@@ -73,6 +73,11 @@ public class TelegramBotUpdatesService {
                             telegramBotSenderService.sendInfoAboutShelter(update);
                             telegramBotSenderService.sendButtonsCommandForChat(update);
                             break;
+                        case HOW:
+                            logProcessUpdateDetectedValidMessageCommand(command.getTitle(), idChat);
+                            telegramBotSenderService.sendHowTakeDog(update);
+                            telegramBotSenderService.sendButtonsCommandForChat(update);
+                            break;
                         default:
                             logger.info("ChatId={}; Method processUpdate detected unknown command", idChat);
                             telegramBotSenderService.sendUnknownProcess(update);
@@ -109,6 +114,11 @@ public class TelegramBotUpdatesService {
                 case INFO:
                     logProcessUpdateDetectedValidCallbackQueryCommand(callbackQueryCommand.getTitle(), idChat);
                     telegramBotSenderService.sendInfoAboutShelter(update);
+                    telegramBotSenderService.sendButtonsCommandForChat(update);
+                    break;
+                case HOW:
+                    logProcessUpdateDetectedValidMessageCommand(callbackQueryCommand.getTitle(), idChat);
+                    telegramBotSenderService.sendHowTakeDog(update);
                     telegramBotSenderService.sendButtonsCommandForChat(update);
                     break;
             }

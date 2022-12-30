@@ -6,9 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public enum Command {
+    // isHide не надо показывать в списке команд,
     START("/start", "START", true, true, false),
     INFO("/info", "About shelter", false, true, false),
+
+    HOW("/how", "Take a dog?", false, true, false ),
     EMPTY_CALLBACK_DATA_FOR_BUTTON("...", "", true, true, false);
+
 
 
     private final String title;
