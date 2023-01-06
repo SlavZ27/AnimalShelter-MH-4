@@ -86,7 +86,7 @@ public enum Command {
                 collect(Collectors.toList());
     }
 
-    public static Pair<List<String>, List<String>> getListsForButtonExcludeHideCommand() {
+    public static Pair<List<String>, List<String>> getPairListsForButtonExcludeHideCommand() {
         return Pair.of(
                 Stream.of(
                                 Command.values()).

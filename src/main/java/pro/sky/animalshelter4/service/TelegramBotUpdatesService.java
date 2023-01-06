@@ -55,6 +55,7 @@ public class TelegramBotUpdatesService {
                     if (command == null) {
                         logger.debug("Method processUpdate don't detected command from = {}", message);
                         telegramBotSenderService.sendUnknownProcess(update);
+                        telegramBotSenderService.sendButtonsCommandForChat(update);
                         return;
                     }
                     switch (command) {
@@ -84,6 +85,9 @@ public class TelegramBotUpdatesService {
                             telegramBotSenderService.sendButtonsCommandForChat(update);
                             break;
                     }
+                } else {
+                    logger.info("ChatId={}; Method processUpdate don't detected command", idChat);
+                    telegramBotSenderService.sendSorryWhatICan(update);
                 }
             }
         }
