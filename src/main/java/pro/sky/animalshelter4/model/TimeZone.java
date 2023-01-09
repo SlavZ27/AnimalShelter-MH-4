@@ -1,4 +1,4 @@
-package pro.sky.animalshelter4.component;
+package pro.sky.animalshelter4.model;
 
 import java.util.List;
 

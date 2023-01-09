@@ -1,5 +1,6 @@
 package pro.sky.animalshelter4.service;
 
+import com.pengrad.telegrambot.model.Update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,5 +24,18 @@ public class ParserService {
         }
         logger.debug("Method parseWord return {}", sMas[indexWord]);
         return sMas[indexWord];
+    }
+
+    public Long parseChatId(Update update) {
+        if (update.message() != null &&
+                update.message().from() != null &&
+                update.message().from().id() != null) {
+            return update.message().from().id();
+        } else if (update.callbackQuery() != null &&
+                update.callbackQuery().from() != null &&
+                update.callbackQuery().from().id() != null) {
+            return update.callbackQuery().from().id();
+        }
+        return null;
     }
 }

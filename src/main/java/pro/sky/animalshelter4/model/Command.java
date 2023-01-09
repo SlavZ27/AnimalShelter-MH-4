@@ -1,4 +1,4 @@
-package pro.sky.animalshelter4.component;
+package pro.sky.animalshelter4.model;
 
 import org.springframework.data.util.Pair;
 
@@ -64,7 +64,7 @@ public enum Command {
         return null;
     }
 
-    public static String getAllValuesFromNewLineExcludeHideCommand() {
+    public static String getAllTitlesAsListExcludeHideCommand() {
         StringBuilder sb = new StringBuilder();
         Stream.of(
                         Command.values()).
@@ -77,7 +77,7 @@ public enum Command {
         return sb.toString();
     }
 
-    public static List<String> getListValuesExcludeHideCommand() {
+    public static List<String> getAllTitlesExcludeHideCommand() {
         return Stream.of(
                         Command.values()).
                 filter(command -> !command.isHide).

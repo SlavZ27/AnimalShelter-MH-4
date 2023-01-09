@@ -1,4 +1,4 @@
-package pro.sky.animalshelter4.component;
+package pro.sky.animalshelter4.model;
 
 public enum TimeUnit
 {

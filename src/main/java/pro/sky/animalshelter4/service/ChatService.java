@@ -9,12 +9,10 @@ import pro.sky.animalshelter4.repository.ChatRepository;
 @Service
 public class ChatService {
 
-    private final TelegramBotSenderService telegramBotSenderService;
-    protected ChatRepository chatRepository;
+    private final ChatRepository chatRepository;
     private final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
-    public ChatService(TelegramBotSenderService telegramBotSenderService, ChatRepository chatRepository) {
-        this.telegramBotSenderService = telegramBotSenderService;
+    public ChatService(ChatRepository chatRepository) {
         this.chatRepository = chatRepository;
     }
 
