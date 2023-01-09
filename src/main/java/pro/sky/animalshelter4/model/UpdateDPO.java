@@ -1,11 +1,12 @@
 package pro.sky.animalshelter4.model;
 
 import org.springframework.stereotype.Component;
-import pro.sky.animalshelter4.entity.Chat;
+
+import java.util.Objects;
 
 //Data Processing object
 @Component
-public class Update_DPO {
+public class UpdateDPO {
     private Long idChat;
     private String userName;
     private Command command;
@@ -13,7 +14,16 @@ public class Update_DPO {
     private String idMedia;
     private InteractionUnit interactionUnit;
 
-    public Update_DPO() {
+    public UpdateDPO() {
+    }
+
+    public UpdateDPO(Long idChat, String userName, Command command, String message, String idMedia, InteractionUnit interactionUnit) {
+        this.idChat = idChat;
+        this.userName = userName;
+        this.command = command;
+        this.message = message;
+        this.idMedia = idMedia;
+        this.interactionUnit = interactionUnit;
     }
 
     public String getUserName() {
@@ -62,5 +72,18 @@ public class Update_DPO {
 
     public void setInteractionUnit(InteractionUnit interactionUnit) {
         this.interactionUnit = interactionUnit;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UpdateDPO updateDpo = (UpdateDPO) o;
+        return idChat.equals(updateDpo.idChat) && userName.equals(updateDpo.userName) && command == updateDpo.command && Objects.equals(message, updateDpo.message) && Objects.equals(idMedia, updateDpo.idMedia) && interactionUnit == updateDpo.interactionUnit;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idChat, userName, command, message, idMedia, interactionUnit);
     }
 }

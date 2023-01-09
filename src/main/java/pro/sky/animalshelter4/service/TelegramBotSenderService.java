@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.info.InfoAboutShelter;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.info.InfoTakeADog;
-import pro.sky.animalshelter4.model.Update_DPO;
 
 import java.io.IOException;
 import java.nio.file.Files;

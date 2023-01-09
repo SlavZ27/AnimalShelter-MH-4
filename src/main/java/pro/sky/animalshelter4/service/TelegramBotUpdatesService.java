@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.model.Command;
-import pro.sky.animalshelter4.model.Update_DPO;
+import pro.sky.animalshelter4.model.UpdateDPO;
 
 import java.io.IOException;
 
@@ -33,7 +33,7 @@ public class TelegramBotUpdatesService {
             return;
         }
 
-        Update_DPO updateDpo = mapperService.toDPO(update);
+        UpdateDPO updateDpo = mapperService.toDPO(update);
         if (updateDpo == null) {
             logger.debug("Method processUpdate detected null updateDpo");
             return;

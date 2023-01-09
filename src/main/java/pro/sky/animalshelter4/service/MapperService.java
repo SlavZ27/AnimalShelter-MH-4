@@ -4,28 +4,22 @@ import com.pengrad.telegrambot.model.Update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.InteractionUnit;
-import pro.sky.animalshelter4.model.Update_DPO;
+import pro.sky.animalshelter4.model.UpdateDPO;
 
 @Service
 public class MapperService {
 
     private final Logger logger = LoggerFactory.getLogger(MapperService.class);
-    private final ParserService parserService;
 
-    public MapperService(ParserService parserService) {
-        this.parserService = parserService;
-    }
-
-    public Update_DPO toDPO(Update update) {
+    public UpdateDPO toDPO(Update update) {
 //update
         if (update == null) {
             logger.debug("Method toDPO detected null update");
             return null;
         }
-        Update_DPO updateDpo = new Update_DPO();
+        UpdateDPO updateDpo = new UpdateDPO();
 //message!=null
         if (update.message() != null) {
             logger.debug("Method toDPO detected message into update");
@@ -97,10 +91,10 @@ public class MapperService {
         if (updateDpo.getMessage() != null && updateDpo.getMessage().startsWith("/")) {
             updateDpo.setInteractionUnit(InteractionUnit.COMMAND);
             updateDpo.setCommand(Command.fromString(
-                    parserService.parseWord(updateDpo.getMessage(), 0)));
+                    toWord(updateDpo.getMessage(), 0)));
             if (updateDpo.getCommand() != null) {
                 logger.debug("ChatId={}; Method toDPO detected command = {}", updateDpo.getIdChat(), updateDpo.getCommand().getTitle());
-                if (updateDpo.getCommand().getTitle().trim().length() > updateDpo.getCommand().getTitle().length()) {
+                if (updateDpo.getCommand().getTitle().trim().length() >= updateDpo.getCommand().getTitle().length()) {
                     updateDpo.setMessage(updateDpo.getMessage().
                             substring(
                                     updateDpo.getCommand().getTitle().length()).
@@ -116,6 +110,36 @@ public class MapperService {
 
     private boolean isNotNullOrEmpty(String s) {
         return s != null && s.length() > 0;
+    }
+
+    public String toWord(String s, int indexWord) {
+        logger.debug("Method toWord was start for parse from string = {} word # = {}", s, indexWord);
+
+        if (!s.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
+            logger.debug("Method toWord don't found REQUEST_SPLIT_SYMBOL = {} and return", TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
+            return s;
+        }
+        String[] sMas = s.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
+
+        if (indexWord >= sMas.length) {
+            logger.debug("Method toWord detect index of word bigger of sum words in string and return empty string");
+            return "";
+        }
+        logger.debug("Method toWord return {}", sMas[indexWord]);
+        return sMas[indexWord];
+    }
+
+    public Long toChatId(Update update) {
+        if (update.message() != null &&
+                update.message().from() != null &&
+                update.message().from().id() != null) {
+            return update.message().from().id();
+        } else if (update.callbackQuery() != null &&
+                update.callbackQuery().from() != null &&
+                update.callbackQuery().from().id() != null) {
+            return update.callbackQuery().from().id();
+        }
+        return null;
     }
 
 }
