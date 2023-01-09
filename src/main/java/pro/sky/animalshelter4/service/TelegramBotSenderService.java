@@ -26,8 +26,10 @@ public class TelegramBotSenderService {
 
     public static final String REQUEST_SPLIT_SYMBOL = " ";
     public static final String MESSAGE_SELECT_COMMAND = "Select action";
+    public static final String MESSAGE_UNKNOWN = "Sorry, I don't know this command";
+    public static final String MESSAGE_SORRY_WHAT_CAN = "Sorry.\nI know only this command:\n";
+    public static final String MESSAGE_HELLO = "Hello ";
 
-    private final static String MESSAGE_UNKNOWN = "I don't know this command";
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotSenderService.class);
     private final TelegramBot telegramBot;
@@ -40,7 +42,10 @@ public class TelegramBotSenderService {
         logger.info("ChatId={}; Method sendMessage was started for send a message : {}", idChat, textMessage);
         SendMessage sendMessage = new SendMessage(idChat, textMessage);
         SendResponse response = telegramBot.execute(sendMessage);
-        if (response.isOk()) {
+        if (response == null) {
+            logger.debug("ChatId={}; Method sendMessage did not receive a response", idChat);
+            return null;
+        } else if (response.isOk()) {
             logger.debug("ChatId={}; Method sendMessage has completed sending the message", idChat);
         } else {
             logger.debug("ChatId={}; Method sendMessage received an error : {}", idChat, response.errorCode());
@@ -52,7 +57,7 @@ public class TelegramBotSenderService {
         String firstName = update.message().from().firstName();
         Long idChat = getChatId(update);
         logger.info("ChatId={}; Method sendUnknownProcess was started for send a message about unknown command", idChat);
-        sendMessage(idChat, "Sorry, " + firstName + ". " + MESSAGE_UNKNOWN);
+        sendMessage(idChat, MESSAGE_UNKNOWN);
     }
 
     public void sendStart(Update update) {
@@ -67,15 +72,15 @@ public class TelegramBotSenderService {
         String firstName = update.message().from().firstName();
         Long idChat = getChatId(update);
         logger.info("ChatId={}; Method sendStartButtons was started for send a welcome message", idChat);
-        sendMessage(idChat, "Hello " + firstName + ".\n");
+        sendMessage(idChat, MESSAGE_HELLO + firstName + ".\n");
         sendButtonsCommandForChat(update);
     }
 
     public void sendSorryWhatICan(Update update) {
         Long idChat = getChatId(update);
         logger.info("ChatId={}; Method processWhatICan was started for send ability", idChat);
-        sendMessage(idChat, "Sorry." + "\n" +
-                "I know only this command:\n" + Command.getAllValuesFromNewLineExcludeHideCommand());
+        sendMessage(idChat, MESSAGE_SORRY_WHAT_CAN);
+        sendButtonsCommandForChat(update);
     }
 
     public void sendInfoAboutShelter(Update update) {
@@ -83,6 +88,7 @@ public class TelegramBotSenderService {
         logger.info("ChatId={}; Method sendInfoAboutShelter was started for send info about shelter", idChat);
         sendMessage(idChat, InfoAboutShelter.getInfoEn());
     }
+
     public void sendHowTakeDog(Update update) {
         Long idChat = getChatId(update);
         logger.info("ChatId={}; Method sendHowTakeDog was started for send how take a dog", idChat);
@@ -142,7 +148,10 @@ public class TelegramBotSenderService {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(tableButtons);
         SendMessage message = new SendMessage(idChat, caption).replyMarkup(inlineKeyboardMarkup);
         SendResponse response = telegramBot.execute(message);
-        if (response.isOk()) {
+        if (response == null) {
+            logger.debug("ChatId={}; Method sendButtonsWithDifferentData did not receive a response", idChat);
+            return;
+        } else if (response.isOk()) {
             logger.debug("ChatId={}; Method sendButtonsWithDifferentData has completed sending the message", idChat);
         } else {
             logger.debug("ChatId={}; Method sendButtonsWithDifferentData received an error : {}", idChat, response.errorCode());
@@ -159,7 +168,7 @@ public class TelegramBotSenderService {
     public void sendButtonsCommandForChat(Update update) {
         Long idChat = getChatId(update);
         logger.info("ChatId={}; Method sendListCommandForChat was started for send list of command", idChat);
-        int countButtons = Command.getListsForButtonExcludeHideCommand().getFirst().size();
+        int countButtons = Command.getPairListsForButtonExcludeHideCommand().getFirst().size();
         int width = 0;
         int height = 0;
 
@@ -186,9 +195,9 @@ public class TelegramBotSenderService {
         sendButtonsWithDifferentData(
                 idChat,
                 MESSAGE_SELECT_COMMAND,
-                Command.getListsForButtonExcludeHideCommand().
+                Command.getPairListsForButtonExcludeHideCommand().
                         getFirst(),
-                Command.getListsForButtonExcludeHideCommand().
+                Command.getPairListsForButtonExcludeHideCommand().
                         getSecond(),
                 width, height);
     }
