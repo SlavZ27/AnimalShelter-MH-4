@@ -30,10 +30,15 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     @Override
     public int process(List<Update> updates) {
-        updates.forEach(update -> {
-            logger.info("Processing update: {}", update);
-            telegramBotUpdatesService.processUpdate(update);
-        });
-        return UpdatesListener.CONFIRMED_UPDATES_ALL;
+        try {
+            updates.forEach(update -> {
+                logger.info("Processing update: {}", update);
+                telegramBotUpdatesService.processUpdate(update);
+            });
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        } finally {
+            return UpdatesListener.CONFIRMED_UPDATES_ALL;
+        }
     }
 }

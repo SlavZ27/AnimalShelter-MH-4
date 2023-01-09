@@ -8,34 +8,25 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.request.SendMessage;
-import com.pengrad.telegrambot.response.SendResponse;
 import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import pro.sky.animalshelter4.component.Command;
+import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.entity.City;
 import pro.sky.animalshelter4.info.InfoAboutShelter;
 import pro.sky.animalshelter4.info.InfoTakeADog;
-import pro.sky.animalshelter4.service.ParserService;
-import pro.sky.animalshelter4.service.TelegramBotContentSaver;
-import pro.sky.animalshelter4.service.TelegramBotSenderService;
-import pro.sky.animalshelter4.service.TelegramBotUpdatesService;
+import pro.sky.animalshelter4.repository.ChatRepository;
+import pro.sky.animalshelter4.service.*;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 
@@ -45,15 +36,16 @@ import static org.mockito.Mockito.*;
 class TelegramBotUpdatesListenerTest {
     private final TelegramBot telegramBot = mock(TelegramBot.class);
     private final ParserService parserService = new ParserService();
+    private final MapperService mapperService = new MapperService(parserService);
     private final TelegramBotSenderService telegramBotSenderService = new TelegramBotSenderService(telegramBot);
     private final TelegramBotContentSaver telegramBotContentSaver = new TelegramBotContentSaver("./materials", telegramBotSenderService, telegramBot);
-    private final TelegramBotUpdatesService telegramBotUpdatesService = new TelegramBotUpdatesService(telegramBotSenderService, parserService, telegramBotContentSaver);
-    private TelegramBotUpdatesListener telegramBotUpdatesListener;
+    private final TelegramBotUpdatesService telegramBotUpdatesService = new TelegramBotUpdatesService(telegramBotSenderService, mapperService, telegramBotContentSaver);
+    private final TelegramBotUpdatesListener telegramBotUpdatesListener = new TelegramBotUpdatesListener(telegramBot, telegramBotUpdatesService);
+    ;
     private final Faker faker = new Faker();
 
     @BeforeEach
     public void init() {
-        telegramBotUpdatesListener = new TelegramBotUpdatesListener(telegramBot, telegramBotUpdatesService);
     }
 
     @Test
@@ -149,7 +141,7 @@ class TelegramBotUpdatesListenerTest {
         SendMessage actual0 = actualList.get(0);
         SendMessage actual1 = actualList.get(1);
         Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(id);
-        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_UNKNOWN);
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SORRY_I_DONT_KNOW_COMMAND);
         Assertions.assertThat(actual1.getParameters().get("chat_id")).isEqualTo(id);
         Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
     }
@@ -168,9 +160,19 @@ class TelegramBotUpdatesListenerTest {
         SendMessage actual0 = actualList.get(0);
         SendMessage actual1 = actualList.get(1);
         Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(id);
-        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SORRY_WHAT_CAN);
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SORRY_I_KNOW_THIS);
         Assertions.assertThat(actual1.getParameters().get("chat_id")).isEqualTo(id);
         Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+    }
+
+    @Test
+    public void requestEmptyCommandTest() {
+        Long id = 50L;
+        String command = Command.EMPTY_CALLBACK_DATA_FOR_BUTTON.getTitle();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generateUpdateCallbackQueryWithReflection("", "", "", id, command)));
+        telegramBotUpdatesListener.process(updateList);
+        Mockito.verify(telegramBot, times(0)).execute(any());
     }
 
 
