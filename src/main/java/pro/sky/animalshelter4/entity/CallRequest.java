@@ -18,6 +18,9 @@ public class CallRequest {
     private LocalDateTime localDateTimeOpen;
     private LocalDateTime localDateTimeClose;
 
+    public CallRequest() {
+    }
+
     public Chat getChatVolunteer() {
         return chatVolunteer;
     }
@@ -34,9 +37,35 @@ public class CallRequest {
         this.chatClient = chatClient;
     }
 
-    public CallRequest() {
+    public Long getId() {
+        return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
+    public boolean isOpen() {
+        return isOpen;
+    }
 
+    public void setOpen(boolean open) {
+        isOpen = open;
+    }
+
+    public LocalDateTime getLocalDateTimeOpen() {
+        return localDateTimeOpen;
+    }
+
+    public void setLocalDateTimeOpen(LocalDateTime localDateTimeOpen) {
+        this.localDateTimeOpen = localDateTimeOpen;
+    }
+
+    public LocalDateTime getLocalDateTimeClose() {
+        return localDateTimeClose;
+    }
+
+    public void setLocalDateTimeClose(LocalDateTime localDateTimeClose) {
+        this.localDateTimeClose = localDateTimeClose;
+    }
 }

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.repository.ChatRepository;
 
+import java.util.List;
+
 @Service
 public class ChatService {
 
@@ -16,24 +18,18 @@ public class ChatService {
         this.chatRepository = chatRepository;
     }
 
-    public Chat getChatByIdOrNew(Long id) {
+    public Chat getChatByIdOrNewWithName(Long id, String name) {
         logger.info("Method getChatByIdOrNew was start for find Chat by id = {}, or return new Chat", id);
         Chat chat = chatRepository.getChatById(id);
         if (chat == null) {
             logger.debug("Method getChatByIdOrNew will return the new chat");
             chat = new Chat();
             chat.setId(id);
-            chatRepository.save(chat);
-            return chat;
         }
+        chat.setName(name);
+        chatRepository.save(chat);
         logger.debug("Method getChatByIdOrNew will return the found chat");
         return chat;
-    }
-
-    public Chat addChat(Long id) {
-        Chat chat = new Chat();
-        chat.setId(id);
-        return addChat(chat);
     }
 
     public Chat addChat(Chat chat) {
@@ -57,11 +53,16 @@ public class ChatService {
     public boolean isVolunteer(Long id) {
         logger.info("Method isVolunteer was start for to check if the chat with id = {} is a volunteer", id);
         Chat chat = findChat(id);
-        if (chat == null || chat.isVolunteer()) {
+        if (chat == null || !chat.isVolunteer()) {
             logger.debug("Method isVolunteer detected volunteer by idChat = {}", id);
             return false;
         }
         logger.debug("Method isVolunteer don't detected volunteer by idChat = {}", id);
         return true;
+    }
+
+    public Chat getChatOfVolunteer() {
+        return chatRepository.getChatOfVolunteer();
+//        return null;
     }
 }

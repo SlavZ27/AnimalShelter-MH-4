@@ -15,11 +15,13 @@ public class TelegramBotUpdatesService {
     private final TelegramBotSenderService telegramBotSenderService;
     private final MapperService mapperService;
     private final TelegramBotContentSaver telegramBotContentSaver;
+    private final CallRequestService callRequestService;
 
-    public TelegramBotUpdatesService(TelegramBotSenderService telegramBotSenderService, MapperService mapperService, TelegramBotContentSaver telegramBotContentSaver) {
+    public TelegramBotUpdatesService(TelegramBotSenderService telegramBotSenderService, MapperService mapperService, TelegramBotContentSaver telegramBotContentSaver, CallRequestService callRequestService) {
         this.telegramBotSenderService = telegramBotSenderService;
         this.mapperService = mapperService;
         this.telegramBotContentSaver = telegramBotContentSaver;
+        this.callRequestService = callRequestService;
     }
 
     public void processUpdate(Update update) {
@@ -27,23 +29,19 @@ public class TelegramBotUpdatesService {
             logger.debug("Method processUpdate detected null update");
             return;
         }
-
         if (detectEmptyCommand(update)) {
             logger.debug("Method processUpdate detected empty command");
             return;
         }
-
         UpdateDPO updateDpo = mapperService.toDPO(update);
         if (updateDpo == null) {
             logger.debug("Method processUpdate detected null updateDpo");
             return;
         }
 
-        Long idChat = updateDpo.getIdChat();
-
         switch (updateDpo.getInteractionUnit()) {
             case PHOTO:
-                logger.debug("ChatId={}; Method processUpdate detected photo in message()", idChat);
+                logger.debug("ChatId={}; Method processUpdate detected photo in message()", updateDpo.getIdChat());
                 try {
                     telegramBotContentSaver.savePhoto(update);
                 } catch (IOException e) {
@@ -51,25 +49,31 @@ public class TelegramBotUpdatesService {
                 }
                 return;
             case MESSAGE:
-                telegramBotSenderService.sendSorryWhatICan(idChat);
+                telegramBotSenderService.sendSorryIKnowThis(updateDpo.getIdChat());
                 return;
             case COMMAND:
-                logger.info("ChatId={}; Method processUpdate start process command = {}", idChat, updateDpo.getCommand());
+                logger.info("ChatId={}; Method processUpdate start process command = {}",
+                        updateDpo.getIdChat(), updateDpo.getCommand());
                 if (updateDpo.getCommand() == null) {
-                    telegramBotSenderService.sendUnknownProcess(idChat);
-                    telegramBotSenderService.sendButtonsCommandForChat(idChat);
+                    telegramBotSenderService.sendUnknownProcess(updateDpo.getIdChat());
+                    telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
                 } else switch (updateDpo.getCommand()) {
                     case START:
-                        System.out.println("Detected enter : " + idChat + " / " + updateDpo.getUserName());
-                        telegramBotSenderService.sendStartButtons(idChat, updateDpo.getUserName());
+                        System.out.println("Detected enter : " +
+                                updateDpo.getIdChat() + " / " + updateDpo.getUserName());
+                        telegramBotSenderService.sendStartButtons(updateDpo.getIdChat(), updateDpo.getUserName());
                         break;
                     case INFO:
-                        telegramBotSenderService.sendInfoAboutShelter(idChat);
-                        telegramBotSenderService.sendButtonsCommandForChat(idChat);
+                        telegramBotSenderService.sendInfoAboutShelter(updateDpo.getIdChat());
+                        telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
                         break;
                     case HOW:
-                        telegramBotSenderService.sendHowTakeDog(idChat);
-                        telegramBotSenderService.sendButtonsCommandForChat(idChat);
+                        telegramBotSenderService.sendHowTakeDog(updateDpo.getIdChat());
+                        telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+                        break;
+                    case CALL_REQUEST:
+                        callRequestService.process(updateDpo);
+                        telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
                         break;
                     case EMPTY_CALLBACK_DATA_FOR_BUTTON:
                         return;

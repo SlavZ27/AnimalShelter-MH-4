@@ -6,15 +6,47 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
 import pro.sky.animalshelter4.entity.Chat;
-import pro.sky.animalshelter4.entity.City;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Random;
 
-public class UpdateGenerator {
+public class Generator {
 
     private final Faker faker = new Faker();
+    private final Random random = new Random();
 
-    private Chat mapUpdateToChat(Update update) {
+    public int genInt(int max) {
+        return random.nextInt(max);
+    }
+
+    public int genInt(int min, int max) {
+        return random.nextInt(max - min) + min;
+    }
+
+    public LocalDateTime generateDateTime(boolean isPast, LocalDateTime localDateTime) {
+        LocalDateTime tldt = LocalDateTime.now();
+        if (isPast) {
+            tldt = localDateTime.plusYears(1L);
+            while (tldt.isBefore(localDateTime)) {
+                LocalDate localDate = LocalDate.of(genInt(2020, 2022), genInt(12), genInt(25));
+                LocalTime localTime = LocalTime.of(genInt(23), genInt(59));
+                tldt = LocalDateTime.of(localDate, localTime);
+            }
+        } else {
+            tldt = localDateTime.minusYears(1L);
+            while (tldt.isAfter(localDateTime)) {
+                LocalDate localDate = LocalDate.of(genInt(2020, 2022), genInt(12), genInt(25));
+                LocalTime localTime = LocalTime.of(genInt(23), genInt(59));
+                tldt = LocalDateTime.of(localDate, localTime);
+            }
+        }
+        return tldt;
+    }
+
+    public Chat mapUpdateToChat(Update update) {
         Chat chat = new Chat();
         if (update.message() != null) {
             chat.setId(update.message().chat().id());
@@ -25,25 +57,38 @@ public class UpdateGenerator {
         }
         chat.setVolunteer(false);
         chat.setPhone(generatePhoneIfEmpty(""));
-        City city = new City();
-        city.setCityName(generateCityIfEmpty(""));
-        city.setApproved(true);
-        city.setTimeZone(generateTimeZoneIfNull(null));
-        city.setId(generateIdIfEmpty(null));
-        chat.setCity(city);
         return chat;
     }
 
-    public Update generateUpdateCallbackQueryWithReflection(String username,
+    public Chat generateChat(Long idChat, String name, String address, String phone, boolean isVolunteer, boolean needGenerate) {
+        if (needGenerate) {
+            idChat = generateIdIfEmpty(idChat);
+            name = generateNameIfEmpty(name);
+            address = generateAddressIfEmpty(address);
+            phone = generatePhoneIfEmpty(phone);
+        }
+        Chat chat = new Chat();
+        chat.setId(idChat);
+        chat.setName(name);
+        chat.setPhone(phone);
+        chat.setAddress(address);
+        chat.setVolunteer(isVolunteer);
+        return chat;
+    }
+
+    public Update generateUpdateCallbackQueryWithReflection(String userName,
                                                             String firstName,
                                                             String lastName,
                                                             Long chatId,
-                                                            String callbackQueryData) {
-        username = generateNameIfEmpty(username);
-        firstName = generateNameIfEmpty(firstName);
-        lastName = generateNameIfEmpty(lastName);
-        chatId = generateIdIfEmpty(chatId);
-        callbackQueryData = generateMessageIfEmpty(callbackQueryData);
+                                                            String callbackQueryData,
+                                                            boolean needGenerate) {
+        if (needGenerate) {
+            userName = generateNameIfEmpty(userName);
+            firstName = generateNameIfEmpty(firstName);
+            lastName = generateNameIfEmpty(lastName);
+            chatId = generateIdIfEmpty(chatId);
+            callbackQueryData = generateMessageIfEmpty(callbackQueryData);
+        }
 
         Update update = new Update();
         CallbackQuery callbackQuery = new CallbackQuery();
@@ -58,7 +103,7 @@ public class UpdateGenerator {
             lastNameField.setAccessible(true);
             Field userId = user.getClass().getDeclaredField("id");
             userId.setAccessible(true);
-            userNameField.set(user, username);
+            userNameField.set(user, userName);
             firstNameField.set(user, firstName);
             lastNameField.set(user, lastName);
             userId.set(user, chatId);
@@ -80,19 +125,22 @@ public class UpdateGenerator {
     }
 
     public Update generateUpdateMessageWithReflection() {
-        return generateUpdateMessageWithReflection("", "", "", -1L, "");
+        return generateUpdateMessageWithReflection("", "", "", -1L, "", true);
     }
 
-    public Update generateUpdateMessageWithReflection(String username,
+    public Update generateUpdateMessageWithReflection(String userName,
                                                       String firstName,
                                                       String lastName,
                                                       Long chatId,
-                                                      String messageText) {
-        username = generateNameIfEmpty(username);
-        firstName = generateNameIfEmpty(firstName);
-        lastName = generateNameIfEmpty(lastName);
-        messageText = generateMessageIfEmpty(messageText);
-        chatId = generateIdIfEmpty(chatId);
+                                                      String messageText,
+                                                      boolean needGenerate) {
+        if (needGenerate) {
+            userName = generateNameIfEmpty(userName);
+            firstName = generateNameIfEmpty(firstName);
+            lastName = generateNameIfEmpty(lastName);
+            messageText = generateMessageIfEmpty(messageText);
+            chatId = generateIdIfEmpty(chatId);
+        }
 
         Update update = new Update();
         Message message = new Message();
@@ -108,7 +156,7 @@ public class UpdateGenerator {
             lastNameField.setAccessible(true);
             Field userId = user.getClass().getDeclaredField("id");
             userId.setAccessible(true);
-            userNameField.set(user, username);
+            userNameField.set(user, userName);
             firstNameField.set(user, firstName);
             lastNameField.set(user, lastName);
             userId.set(user, chatId);
@@ -137,54 +185,58 @@ public class UpdateGenerator {
         return update;
     }
 
-    private int generateTimeZoneIfNull(Integer timeZone) {
+    public int generateTimeZoneIfNull(Integer timeZone) {
         if (timeZone == null || timeZone < 0) {
             timeZone = faker.random().nextInt(-11, 12);
         }
         return timeZone;
     }
 
-    private String generateAddressIfEmpty(String address) {
+    public String generateAddressIfEmpty(String address) {
         if (address == null || address.length() == 0) {
             return faker.address().streetAddress();
         }
         return address;
     }
 
-    private String generateCityIfEmpty(String city) {
+    public String generateCityIfEmpty(String city) {
         if (city == null || city.length() == 0) {
             return faker.address().city();
         }
         return city;
     }
 
-    private String generatePhoneIfEmpty(String phone) {
+    public String generatePhoneIfEmpty(String phone) {
         if (phone == null || phone.length() == 0) {
-            return faker.phoneNumber().phoneNumber();
+            String tempPhone = faker.phoneNumber().phoneNumber();
+            if (tempPhone.length() > 15) {
+                tempPhone = tempPhone.substring(0, 14);
+            }
+            return tempPhone;
         }
         return phone;
     }
 
-    private String generateNameIfEmpty(String name) {
+    public String generateNameIfEmpty(String name) {
         if (name == null || name.length() == 0) {
             return faker.name().username();
         }
         return name;
     }
 
-    private Long generateIdIfEmpty(Long id) {
+    public Long generateIdIfEmpty(Long id) {
         if (id == null || id < 0) {
             long idTemp = -1L;
             //id with <100 I leave for my needs
             while (idTemp < 100) {
-                idTemp = faker.random().nextLong();
+                idTemp = faker.random().nextLong(999_999_999 - 100_000_000) + 100_000_000;
             }
             return idTemp;
         }
         return id;
     }
 
-    private String generateMessageIfEmpty(String message) {
+    public String generateMessageIfEmpty(String message) {
         if (message == null || message.length() == 0) {
             return faker.lordOfTheRings().character();
         }

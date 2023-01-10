@@ -7,7 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pro.sky.animalshelter4.UpdateGenerator;
+import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.InteractionUnit;
 import pro.sky.animalshelter4.model.UpdateDPO;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class MapperServiceTest {
-    private static final UpdateGenerator updateGenerator = new UpdateGenerator();
+    private static final Generator GENERATOR = new Generator();
     private final MapperService mapperService = new MapperService();
 
     @ParameterizedTest
@@ -27,24 +27,29 @@ class MapperServiceTest {
     void toDPO(Update updateTdo, UpdateDPO updateDpo) {
         UpdateDPO actual = updateDpo;
         UpdateDPO expected = mapperService.toDPO(updateTdo);
-        assertThat(actual.getMessage()).isEqualTo(expected.getMessage());
-        assertThat(actual.getUserName()).isEqualTo(expected.getUserName());
-        assertThat(actual.getIdMedia()).isEqualTo(expected.getIdMedia());
-        assertThat(actual.getIdChat()).isEqualTo(expected.getIdChat());
-        assertThat(actual.getCommand()).isEqualTo(expected.getCommand());
-        assertThat(actual.getInteractionUnit()).isEqualTo(expected.getInteractionUnit());
-        Assertions.assertTrue(actual.equals(expected));
+
+        if (actual != null) {
+            assertThat(actual.getMessage()).isEqualTo(expected.getMessage());
+            assertThat(actual.getUserName()).isEqualTo(expected.getUserName());
+            assertThat(actual.getIdMedia()).isEqualTo(expected.getIdMedia());
+            assertThat(actual.getIdChat()).isEqualTo(expected.getIdChat());
+            assertThat(actual.getCommand()).isEqualTo(expected.getCommand());
+            assertThat(actual.getInteractionUnit()).isEqualTo(expected.getInteractionUnit());
+        }
+        Assertions.assertEquals(actual, expected);
     }
 
     public static Stream<Arguments> paramForToDPO() {
         return Stream.of(
+                //standard positive
                 Arguments.of(
-                        updateGenerator.generateUpdateMessageWithReflection(
+                        GENERATOR.generateUpdateMessageWithReflection(
                                 "123",
                                 "456",
                                 "789",
                                 50L,
-                                Command.START.getTitle()),
+                                Command.START.getTitle(),
+                                false),
                         new UpdateDPO(
                                 50L,
                                 "456",
@@ -54,13 +59,15 @@ class MapperServiceTest {
                                 InteractionUnit.COMMAND
                         )
                 ),
+                //message text = Command + " " + text
                 Arguments.of(
-                        updateGenerator.generateUpdateMessageWithReflection(
+                        GENERATOR.generateUpdateMessageWithReflection(
                                 "123",
                                 "456",
                                 "789",
                                 50L,
-                                Command.START.getTitle() + " fsfdsfs"),
+                                Command.START.getTitle() + " fsfdsfs",
+                                false),
                         new UpdateDPO(
                                 50L,
                                 "456",
@@ -69,6 +76,82 @@ class MapperServiceTest {
                                 null,
                                 InteractionUnit.COMMAND
                         )
+                ),
+                //firstName = "", lastName = null, message = Command + " fsfdsfs sdfsdf sdf s "
+                Arguments.of(
+                        GENERATOR.generateUpdateMessageWithReflection(
+                                "123",
+                                "",
+                                null,
+                                50L,
+                                Command.START.getTitle() + " fsfdsfs sdfsdf sdf s ",
+                                false),
+                        new UpdateDPO(
+                                50L,
+                                "123",
+                                Command.START,
+                                "fsfdsfs sdfsdf sdf s",
+                                null,
+                                InteractionUnit.COMMAND
+                        )
+                ),
+                //firstName = null, lastName = null, userName=null, message = Command + Command
+                Arguments.of(
+                        GENERATOR.generateUpdateMessageWithReflection(
+                                "123",
+                                "",
+                                null,
+                                50L,
+                                Command.START.getTitle() + " " + Command.INFO.getTitle(),
+                                false),
+                        new UpdateDPO(
+                                50L,
+                                "123",
+                                Command.START,
+                                Command.INFO.getTitle(),
+                                null,
+                                InteractionUnit.COMMAND
+                        )
+                ),
+                //chatId = null
+                Arguments.of(
+                        GENERATOR.generateUpdateMessageWithReflection(
+                                "123",
+                                "456",
+                                "789",
+                                null,
+                                Command.START.getTitle() + " " + Command.INFO.getTitle(),
+                                false),
+                        null
+                ),
+                //Command = /sagfasd
+                Arguments.of(
+                        GENERATOR.generateUpdateMessageWithReflection(
+                                "123",
+                                "456",
+                                "789",
+                                50L,
+                                "/sagfasd",
+                                false),
+                        new UpdateDPO(
+                                50L,
+                                "456",
+                                null,
+                                "/sagfasd",
+                                null,
+                                InteractionUnit.COMMAND
+                        )
+                ),
+                //chatId < 0
+                Arguments.of(
+                        GENERATOR.generateUpdateMessageWithReflection(
+                                "123",
+                                "456",
+                                "789",
+                                -50L,
+                                "/sagfasd",
+                                false),
+                        null
                 )
         );
     }

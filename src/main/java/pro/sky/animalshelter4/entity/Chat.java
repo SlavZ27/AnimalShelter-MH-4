@@ -5,13 +5,9 @@ import javax.persistence.*;
 @Entity(name = "chat")
 public class Chat {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private String phone;
-    @ManyToOne
-    @JoinColumn(name = "city_id")
-    private City city;
     private String address;
     boolean isVolunteer;
 
@@ -48,14 +44,6 @@ public class Chat {
 
     public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public City getCity() {
-        return city;
-    }
-
-    public void setCity(City city) {
-        this.city = city;
     }
 
     public String getAddress() {
