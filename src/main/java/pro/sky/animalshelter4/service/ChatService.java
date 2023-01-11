@@ -18,7 +18,7 @@ public class ChatService {
         this.chatRepository = chatRepository;
     }
 
-    public Chat getChatByIdOrNewWithName(Long id, String name) {
+    public Chat getChatByIdOrNewWithNameAndUserName(Long id, String name, String userName) {
         logger.info("Method getChatByIdOrNew was start for find Chat by id = {}, or return new Chat", id);
         Chat chat = chatRepository.getChatById(id);
         if (chat == null) {
@@ -27,6 +27,7 @@ public class ChatService {
             chat.setId(id);
         }
         chat.setName(name);
+        chat.setUserName(userName);
         chatRepository.save(chat);
         logger.debug("Method getChatByIdOrNew will return the found chat");
         return chat;

@@ -8,6 +8,7 @@ import com.pengrad.telegrambot.request.SendPhoto;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.info.InfoAboutShelter;
 import pro.sky.animalshelter4.model.Command;
@@ -32,11 +33,11 @@ public class TelegramBotSenderService {
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotSenderService.class);
     private final TelegramBot telegramBot;
-    private final ChatService chatService;
+    private final CommandService commandService;
 
-    public TelegramBotSenderService(TelegramBot telegramBot, ChatService chatService) {
+    public TelegramBotSenderService(TelegramBot telegramBot, CommandService commandService) {
         this.telegramBot = telegramBot;
-        this.chatService = chatService;
+        this.commandService = commandService;
     }
 
     public void sendMessage(Long idChat, String textMessage) {
@@ -58,13 +59,7 @@ public class TelegramBotSenderService {
         sendMessage(idChat, MESSAGE_SORRY_I_DONT_KNOW_COMMAND);
     }
 
-    public void sendStart(Long idChat, String userName) {
-        logger.info("ChatId={}; Method sendStart was started for send a welcome message", idChat);
-        sendMessage(idChat, "Hello " + userName + ".\n" +
-                "I know some command:\n" + Command.getAllTitlesAsListExcludeHide(chatService.isVolunteer(idChat)));
-    }
-
-    public void sendStartButtons(Long idChat, String userName) {
+    public void sendHello(Long idChat, String userName) {
         logger.info("ChatId={}; Method sendStartButtons was started for send a welcome message", idChat);
         sendMessage(idChat, MESSAGE_HELLO + userName + ".\n");
         sendButtonsCommandForChat(idChat);
@@ -107,7 +102,7 @@ public class TelegramBotSenderService {
                             .callbackData(command + REQUEST_SPLIT_SYMBOL + dataButtons.get(countNameButtons));
                 } else {
                     tableButtons[i][j] = new InlineKeyboardButton(EMPTY_SYMBOL_FOR_BUTTON)
-                            .callbackData(Command.EMPTY_CALLBACK_DATA_FOR_BUTTON.getTitle());
+                            .callbackData(Command.EMPTY_CALLBACK_DATA_FOR_BUTTON.getTextCommand());
                 }
                 countNameButtons++;
             }
@@ -143,7 +138,7 @@ public class TelegramBotSenderService {
                             .callbackData(dataButtons.get(indexLists));
                 } else {
                     tableButtons[i][j] = new InlineKeyboardButton(EMPTY_SYMBOL_FOR_BUTTON)
-                            .callbackData(Command.EMPTY_CALLBACK_DATA_FOR_BUTTON.getTitle());
+                            .callbackData(Command.EMPTY_CALLBACK_DATA_FOR_BUTTON.getTextCommand());
                 }
                 indexLists++;
             }
@@ -165,38 +160,48 @@ public class TelegramBotSenderService {
 
     public void sendListCommandForChat(Long idChat) {
         logger.info("ChatId={}; Method sendListCommandForChat was started for send list of command", idChat);
-        sendMessage(idChat, Command.getAllTitlesAsListExcludeHide(chatService.isVolunteer(idChat)));
+        sendMessage(idChat, commandService.getAllTitlesAsListExcludeHide(idChat));
+    }
+
+    public Pair<Integer, Integer> getTableSize(int countElements) {
+        int width = 0;
+        int height = 0;
+        if (countElements == 1) {
+            width = 1;
+            height = 1;
+        } else if (countElements % 7 == 0) {
+            width = 7;
+            height = countElements / 7;
+        } else if (countElements % 5 == 0) {
+            width = 5;
+            height = countElements / 5;
+        } else if (countElements % 3 == 0) {
+            width = 3;
+            height = countElements / 3;
+        } else if (countElements % 2 == 0) {
+            width = 2;
+            height = countElements / 2;
+        }
+        return Pair.of(width, height);
     }
 
     public void sendButtonsCommandForChat(Long idChat) {
         logger.info("ChatId={}; Method sendListCommandForChat was started for send list of command", idChat);
-        boolean isVolunteer = chatService.isVolunteer(idChat);
-        List<String> nameList = Command.getPairListsForButtonExcludeHide(isVolunteer).getFirst();
-        List<String> dataList = Command.getPairListsForButtonExcludeHide(isVolunteer).getSecond();
+        Pair<List<String>, List<String>> nameAndDataOfButtons = commandService.getPairListsForButtonExcludeHide(idChat);
+
+        List<String> nameList = nameAndDataOfButtons.getFirst();
+        List<String> dataList = nameAndDataOfButtons.getSecond();
         int countButtons = nameList.size();
-        int width = 0;
-        int height = 0;
 
         if (countButtons == 0) {
             logger.debug("ChatId={}; Method sendButtonsCommandForChat detected count of command = 0", idChat);
             return;
         }
-        if (countButtons == 1) {
-            width = 1;
-            height = 1;
-        } else if (countButtons % 7 == 0) {
-            width = 7;
-            height = countButtons / 7;
-        } else if (countButtons % 5 == 0) {
-            width = 5;
-            height = countButtons / 5;
-        } else if (countButtons % 3 == 0) {
-            width = 3;
-            height = countButtons / 3;
-        } else if (countButtons % 2 == 0) {
-            width = 2;
-            height = countButtons / 2;
-        }
+        Pair<Integer, Integer> widthAndHeight = getTableSize(countButtons);
+        int width = widthAndHeight.getFirst();
+        int height = widthAndHeight.getSecond();
+
+
         sendButtonsWithDifferentData(
                 idChat,
                 MESSAGE_SELECT_COMMAND,
