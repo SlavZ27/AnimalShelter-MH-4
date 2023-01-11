@@ -1,13 +1,12 @@
 package pro.sky.animalshelter4.model;
 
-import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 //Data Processing object
-@Component
 public class UpdateDPO {
     private Long idChat;
+    private String name;
     private String userName;
     private Command command;
     private String message;
@@ -17,13 +16,22 @@ public class UpdateDPO {
     public UpdateDPO() {
     }
 
-    public UpdateDPO(Long idChat, String userName, Command command, String message, String idMedia, InteractionUnit interactionUnit) {
+    public UpdateDPO(Long idChat, String name, String userName, Command command, String message, String idMedia, InteractionUnit interactionUnit) {
         this.idChat = idChat;
+        this.name = name;
         this.userName = userName;
         this.command = command;
         this.message = message;
         this.idMedia = idMedia;
         this.interactionUnit = interactionUnit;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getUserName() {

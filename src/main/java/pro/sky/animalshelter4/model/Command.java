@@ -1,37 +1,36 @@
 package pro.sky.animalshelter4.model;
 
-import org.springframework.data.util.Pair;
-
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public enum Command {
-    // isHide скрытая для всех
-    // isPublic видна для всех(не волонтёры)
-    // isVolunteer видна для админов(волонтёров)
-    START(0, "/start", "START", true, true, true),
-    INFO(1, "/info", "About shelter", false, true, true),
-    HOW(2, "/HOW", "Take a dog?", false, true, true),
-    CALL_REQUEST(3, "/CALL_REQUEST", "Ask to call back", false, true, false),
-    CALL_CLIENT(4, "/CALL_CLIENT", "Call client", false, false, true),
-    EMPTY_CALLBACK_DATA_FOR_BUTTON(-1, "...", "", true, true, true);
+    // isShow команду нужно показывать, но даже если isShow=false команда доступна для выполнения
+    // isClient доступна для клиента(не волонтёры)
+    // isVolunteer доступна для админов(волонтёров)
+    // textCommand.substring(1).toUpperCase() = value
+    START(0, "/start", "START", false, true, true),
+    INFO(1, "/info", "About shelter", true, true, true),
+    HOW(2, "/HOW", "Take a dog?", true, true, true),
+    CALL_REQUEST(3, "/CALL_REQUEST", "Ask to call back", true, true, false),
+    CALL_CLIENT(4, "/CALL_CLIENT", "Call client", true, false, true),
+    EMPTY_CALLBACK_DATA_FOR_BUTTON(-1, "...", "", false, true, true);
 
 
     private final int order;
-    private final String title;
+    private final String textCommand;
     private final String nameButton;
-    private final boolean isHide;
-    private final boolean isPublic;
+    private final boolean isShow;
+    private final boolean isClient;
     private final boolean isVolunteer;
 
-    Command(int order, String title, String nameButton, boolean isHide, boolean isPublic, boolean isVolunteer) {
+    Command(int order, String textCommand, String nameButton, boolean isShow, boolean isClient, boolean isVolunteer) {
         this.order = order;
-        this.title = title;
+        this.textCommand = textCommand;
         this.nameButton = nameButton;
-        this.isHide = isHide;
-        this.isPublic = isPublic;
+        this.isShow = isShow;
+        this.isClient = isClient;
         this.isVolunteer = isVolunteer;
     }
 
@@ -39,114 +38,66 @@ public enum Command {
         return order;
     }
 
-    public boolean isPublic() {
-        return isPublic;
+    public boolean isClient() {
+        return isClient;
     }
 
     public boolean isVolunteer() {
         return isVolunteer;
     }
 
-    public boolean isHide() {
-        return isHide;
+    public boolean isShow() {
+        return isShow;
     }
 
-    public String getTitle() {
-        return title;
+    public String getTextCommand() {
+        return textCommand;
     }
 
     public String getNameButton() {
         return nameButton;
     }
 
-    public static Command fromString(String text) {
+
+    public static Command fromStringIteration(String text) {
         for (Command command : Command.values()) {
-            if (command.getTitle().equalsIgnoreCase(text)) {
+            if (command.getTextCommand().equalsIgnoreCase(text)) {
                 return command;
             }
         }
         return null;
     }
 
-    public static String getAllTitlesAsListExcludeHide(boolean forVolunteer) {
-        StringBuilder sb = new StringBuilder();
-        if (!forVolunteer) {
-            Stream.of(
-                            Command.values()).
-                    filter(command -> !command.isHide).
-                    filter(command -> command.isPublic).
-                    sorted(Comparator.comparingInt(Command::getOrder)).
-                    forEach(command -> {
-                        sb.append(command.getTitle());
-                        sb.append("\n");
-                    });
-        } else {
-            Stream.of(
-                            Command.values()).
-                    filter(command -> !command.isHide).
-                    filter(command -> command.isPublic).
-                    sorted(Comparator.comparingInt(Command::getOrder)).
-                    forEach(command -> {
-                        sb.append(command.getTitle());
-                        sb.append("\n");
-                    });
+    public static Command fromStringUpperCase(String text) {
+        if (text == null || text.length() < 2) {
+            return null;
         }
-        return sb.toString();
-    }
-
-    public static List<String> getAllTitlesExcludeHide(boolean forVolunteer) {
-        if (!forVolunteer) {
-            return Stream.of(
-                            Command.values()).
-                    filter(command -> !command.isHide).
-                    filter(command -> command.isPublic).
-                    sorted(Comparator.comparingInt(Command::getOrder)).
-                    map(Command::getTitle).
-                    collect(Collectors.toList());
-        } else {
-            return Stream.of(
-                            Command.values()).
-                    filter(command -> !command.isVolunteer).
-                    filter(command -> command.isPublic).
-                    sorted(Comparator.comparingInt(Command::getOrder)).
-                    map(Command::getTitle).
-                    collect(Collectors.toList());
+        text = text.substring(1).toUpperCase();
+        try {
+            return Command.valueOf(Command.class, text);
+        } catch (IllegalArgumentException e) {
+            return null;
         }
     }
 
-    public static Pair<List<String>, List<String>> getPairListsForButtonExcludeHide(boolean forVolunteer) {
-        if (!forVolunteer) {
-            return Pair.of(
-                    Stream.of(
-                                    Command.values()).
-                            filter(command -> !command.isHide).
-                            filter(command -> command.isPublic).
-                            sorted(Comparator.comparingInt(Command::getOrder)).
-                            map(Command::getNameButton).
-                            collect(Collectors.toList()),
-                    Stream.of(
-                                    Command.values()).
-                            filter(command -> !command.isHide).
-                            filter(command -> command.isPublic).
-                            sorted(Comparator.comparingInt(Command::getOrder)).
-                            map(Command::getTitle).
-                            collect(Collectors.toList()));
-        } else {
-            return Pair.of(
-                    Stream.of(
-                                    Command.values()).
-                            filter(command -> !command.isHide).
-                            filter(command -> command.isVolunteer).
-                            sorted(Comparator.comparingInt(Command::getOrder)).
-                            map(Command::getNameButton).
-                            collect(Collectors.toList()),
-                    Stream.of(
-                                    Command.values()).
-                            filter(command -> !command.isHide).
-                            filter(command -> command.isVolunteer).
-                            sorted(Comparator.comparingInt(Command::getOrder)).
-                            map(Command::getTitle).
-                            collect(Collectors.toList()));
-        }
+    private static List<Command> getOnlyShowCommand() {
+        return Stream.of(
+                        Command.values()).
+                filter(command -> command.isShow).
+                sorted(Comparator.comparingInt(Command::getOrder)).
+                collect(Collectors.toList());
     }
+
+    public static List<Command> getOnlyShowCommandForClient() {
+        return getOnlyShowCommand().stream().
+                filter(command -> command.isClient).
+                collect(Collectors.toList());
+    }
+
+    public static List<Command> getOnlyShowCommandForVolunteer() {
+        return getOnlyShowCommand().stream().
+                filter(command -> command.isVolunteer).
+                collect(Collectors.toList());
+    }
+
 }

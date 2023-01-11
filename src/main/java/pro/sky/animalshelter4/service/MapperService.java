@@ -26,13 +26,15 @@ public class MapperService {
             logger.debug("Method toDPO detected message into update");
 //message from
             if (update.message().from() != null &&
-                    update.message().from().id() != null) {
+                    update.message().from().id() != null &&
+                    update.message().from().username() != null) {
                 if (update.message().from().id() < 0) {
                     logger.error("Method toDPO detected userId < 0");
                     return null;
                 }
                 updateDpo.setIdChat(update.message().from().id());
-                updateDpo.setUserName(toUserName(update.message().from()));
+                updateDpo.setName(toUserName(update.message().from()));
+                updateDpo.setUserName(update.message().from().username());
                 logger.debug("ChatId={}; Method toDPO detected idChat", updateDpo.getIdChat());
             } else {
                 logger.error("Method toDPO detected null user in update.message()");
@@ -61,13 +63,15 @@ public class MapperService {
             updateDpo.setInteractionUnit(InteractionUnit.CALLBACK_QUERY);
 //callbackQuery from
             if (update.callbackQuery().from() != null &&
-                    update.callbackQuery().from().id() != null) {
+                    update.callbackQuery().from().id() != null &&
+                    update.callbackQuery().from().username() != null) {
                 if (update.callbackQuery().from().id() < 0) {
                     logger.error("Method toDPO detected userId < 0");
                     return null;
                 }
                 updateDpo.setIdChat(update.callbackQuery().from().id());
-                updateDpo.setUserName(toUserName(update.callbackQuery().from()));
+                updateDpo.setName(toUserName(update.callbackQuery().from()));
+                updateDpo.setUserName(update.callbackQuery().from().username());
                 logger.debug("ChatId={}; Method toDPO detected idChat", updateDpo.getIdChat());
             } else {
                 logger.error("Method toDPO detected null user in update.callbackQuery()");
@@ -83,15 +87,15 @@ public class MapperService {
 //updateDpo.Message -> Command
         if (updateDpo.getMessage() != null && updateDpo.getMessage().startsWith("/")) {
             updateDpo.setInteractionUnit(InteractionUnit.COMMAND);
-            updateDpo.setCommand(Command.fromString(
+            updateDpo.setCommand(Command.fromStringUpperCase(
                     toWord(updateDpo.getMessage(), 0)));
             if (updateDpo.getCommand() != null) {
                 logger.debug("ChatId={}; Method toDPO detected command = {}",
-                        updateDpo.getIdChat(), updateDpo.getCommand().getTitle());
-                if (updateDpo.getCommand().getTitle().trim().length() >= updateDpo.getCommand().getTitle().length()) {
+                        updateDpo.getIdChat(), updateDpo.getCommand().getTextCommand());
+                if (updateDpo.getCommand().getTextCommand().trim().length() >= updateDpo.getCommand().getTextCommand().length()) {
                     updateDpo.setMessage(updateDpo.getMessage().
                             substring(
-                                    updateDpo.getCommand().getTitle().length()).
+                                    updateDpo.getCommand().getTextCommand().length()).
                             trim());
                 }
             }
@@ -138,14 +142,17 @@ public class MapperService {
     }
 
     public String toUserName(User user) {
-        String name = "";
+        StringBuilder name = new StringBuilder();
         if (isNotNullOrEmpty(user.firstName())) {
-            name = user.firstName();
-        } else if (isNotNullOrEmpty(user.lastName())) {
-            name = user.lastName();
-        } else if (isNotNullOrEmpty(user.username())) {
-            name = user.username();
+            name.append(user.firstName());
         }
-        return name;
+        if (isNotNullOrEmpty(user.lastName())) {
+            name.append(" ");
+            name.append(user.lastName());
+        }
+        if (name.length() == 0) {
+            return user.username();
+        }
+        return name.toString();
     }
 }

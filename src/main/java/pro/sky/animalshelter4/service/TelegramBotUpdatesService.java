@@ -16,12 +16,14 @@ public class TelegramBotUpdatesService {
     private final MapperService mapperService;
     private final TelegramBotContentSaver telegramBotContentSaver;
     private final CallRequestService callRequestService;
+    private final CommandService commandService;
 
-    public TelegramBotUpdatesService(TelegramBotSenderService telegramBotSenderService, MapperService mapperService, TelegramBotContentSaver telegramBotContentSaver, CallRequestService callRequestService) {
+    public TelegramBotUpdatesService(TelegramBotSenderService telegramBotSenderService, MapperService mapperService, TelegramBotContentSaver telegramBotContentSaver, CallRequestService callRequestService, CommandService commandService) {
         this.telegramBotSenderService = telegramBotSenderService;
         this.mapperService = mapperService;
         this.telegramBotContentSaver = telegramBotContentSaver;
         this.callRequestService = callRequestService;
+        this.commandService = commandService;
     }
 
     public void processUpdate(Update update) {
@@ -52,31 +54,39 @@ public class TelegramBotUpdatesService {
                 telegramBotSenderService.sendSorryIKnowThis(updateDpo.getIdChat());
                 return;
             case COMMAND:
-                logger.info("ChatId={}; Method processUpdate start process command = {}",
+                logger.info("ChatId={}; Method processUpdate launch process command = {}",
                         updateDpo.getIdChat(), updateDpo.getCommand());
                 if (updateDpo.getCommand() == null) {
                     telegramBotSenderService.sendUnknownProcess(updateDpo.getIdChat());
                     telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                } else switch (updateDpo.getCommand()) {
-                    case START:
-                        System.out.println("Detected enter : " +
-                                updateDpo.getIdChat() + " / " + updateDpo.getUserName());
-                        telegramBotSenderService.sendStartButtons(updateDpo.getIdChat(), updateDpo.getUserName());
-                        break;
-                    case INFO:
-                        telegramBotSenderService.sendInfoAboutShelter(updateDpo.getIdChat());
-                        telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                        break;
-                    case HOW:
-                        telegramBotSenderService.sendHowTakeDog(updateDpo.getIdChat());
-                        telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                        break;
-                    case CALL_REQUEST:
-                        callRequestService.process(updateDpo);
-                        telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                        break;
-                    case EMPTY_CALLBACK_DATA_FOR_BUTTON:
+                } else {
+                    if (!commandService.approveLaunchCommand(updateDpo.getCommand(), updateDpo.getIdChat())) {
+                        logger.debug("ChatId={}; Method processUpdate detected no rights to execute command = {} ",
+                                updateDpo.getIdChat(), updateDpo.getCommand());
+                        telegramBotSenderService.sendSorryIKnowThis(updateDpo.getIdChat());
                         return;
+                    }
+                    switch (updateDpo.getCommand()) {
+                        case START:
+                            System.out.println("Detected enter : " +
+                                    updateDpo.getIdChat() + " / " + updateDpo.getUserName());
+                            telegramBotSenderService.sendHello(updateDpo.getIdChat(), updateDpo.getName());
+                            break;
+                        case INFO:
+                            telegramBotSenderService.sendInfoAboutShelter(updateDpo.getIdChat());
+                            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+                            break;
+                        case HOW:
+                            telegramBotSenderService.sendHowTakeDog(updateDpo.getIdChat());
+                            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+                            break;
+                        case CALL_REQUEST:
+                            callRequestService.process(updateDpo);
+                            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+                            break;
+                        case EMPTY_CALLBACK_DATA_FOR_BUTTON:
+                            return;
+                    }
                 }
         }
     }
@@ -84,7 +94,7 @@ public class TelegramBotUpdatesService {
     private boolean detectEmptyCommand(Update update) {
         return update.callbackQuery() != null &&
                 update.callbackQuery().data() != null &&
-                update.callbackQuery().data().equals(Command.EMPTY_CALLBACK_DATA_FOR_BUTTON.getTitle());
+                update.callbackQuery().data().equals(Command.EMPTY_CALLBACK_DATA_FOR_BUTTON.getTextCommand());
     }
 
 }

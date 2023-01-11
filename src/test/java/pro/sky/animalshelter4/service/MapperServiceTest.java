@@ -2,11 +2,9 @@ package pro.sky.animalshelter4.service;
 
 import com.pengrad.telegrambot.model.Update;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.junit.jupiter.MockitoExtension;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.InteractionUnit;
@@ -17,9 +15,8 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
-@ExtendWith(MockitoExtension.class)
 class MapperServiceTest {
-    private static final Generator GENERATOR = new Generator();
+    private static final Generator generator = new Generator();
     private final MapperService mapperService = new MapperService();
 
     @ParameterizedTest
@@ -43,16 +40,17 @@ class MapperServiceTest {
         return Stream.of(
                 //standard positive
                 Arguments.of(
-                        GENERATOR.generateUpdateMessageWithReflection(
+                        generator.generateUpdateMessageWithReflection(
                                 "123",
                                 "456",
                                 "789",
                                 50L,
-                                Command.START.getTitle(),
+                                Command.START.getTextCommand(),
                                 false),
                         new UpdateDPO(
                                 50L,
                                 "456",
+                                "123",
                                 Command.START,
                                 "",
                                 null,
@@ -61,16 +59,17 @@ class MapperServiceTest {
                 ),
                 //message text = Command + " " + text
                 Arguments.of(
-                        GENERATOR.generateUpdateMessageWithReflection(
+                        generator.generateUpdateMessageWithReflection(
                                 "123",
                                 "456",
                                 "789",
                                 50L,
-                                Command.START.getTitle() + " fsfdsfs",
+                                Command.START.getTextCommand() + " fsfdsfs",
                                 false),
                         new UpdateDPO(
                                 50L,
                                 "456",
+                                "123",
                                 Command.START,
                                 "fsfdsfs",
                                 null,
@@ -79,15 +78,16 @@ class MapperServiceTest {
                 ),
                 //firstName = "", lastName = null, message = Command + " fsfdsfs sdfsdf sdf s "
                 Arguments.of(
-                        GENERATOR.generateUpdateMessageWithReflection(
+                        generator.generateUpdateMessageWithReflection(
                                 "123",
                                 "",
                                 null,
                                 50L,
-                                Command.START.getTitle() + " fsfdsfs sdfsdf sdf s ",
+                                Command.START.getTextCommand() + " fsfdsfs sdfsdf sdf s ",
                                 false),
                         new UpdateDPO(
                                 50L,
+                                "123",
                                 "123",
                                 Command.START,
                                 "fsfdsfs sdfsdf sdf s",
@@ -95,38 +95,31 @@ class MapperServiceTest {
                                 InteractionUnit.COMMAND
                         )
                 ),
-                //firstName = null, lastName = null, userName=null, message = Command + Command
+                //firstName = null, lastName = null, userName=null,
                 Arguments.of(
-                        GENERATOR.generateUpdateMessageWithReflection(
-                                "123",
-                                "",
+                        generator.generateUpdateMessageWithReflection(
+                                null,
+                                null,
                                 null,
                                 50L,
-                                Command.START.getTitle() + " " + Command.INFO.getTitle(),
+                                Command.START.getTextCommand(),
                                 false),
-                        new UpdateDPO(
-                                50L,
-                                "123",
-                                Command.START,
-                                Command.INFO.getTitle(),
-                                null,
-                                InteractionUnit.COMMAND
-                        )
+                        null
                 ),
                 //chatId = null
                 Arguments.of(
-                        GENERATOR.generateUpdateMessageWithReflection(
+                        generator.generateUpdateMessageWithReflection(
                                 "123",
                                 "456",
                                 "789",
                                 null,
-                                Command.START.getTitle() + " " + Command.INFO.getTitle(),
+                                Command.START.getTextCommand() + " " + Command.INFO.getTextCommand(),
                                 false),
                         null
                 ),
                 //Command = /sagfasd
                 Arguments.of(
-                        GENERATOR.generateUpdateMessageWithReflection(
+                        generator.generateUpdateMessageWithReflection(
                                 "123",
                                 "456",
                                 "789",
@@ -136,15 +129,16 @@ class MapperServiceTest {
                         new UpdateDPO(
                                 50L,
                                 "456",
+                                "123",
                                 null,
                                 "/sagfasd",
                                 null,
                                 InteractionUnit.COMMAND
                         )
                 ),
-                //chatId < 0
+                //message chatId < 0
                 Arguments.of(
-                        GENERATOR.generateUpdateMessageWithReflection(
+                        generator.generateUpdateMessageWithReflection(
                                 "123",
                                 "456",
                                 "789",
@@ -152,6 +146,36 @@ class MapperServiceTest {
                                 "/sagfasd",
                                 false),
                         null
+                ),
+                //CallbackQuery chatId < 0
+                Arguments.of(
+                        generator.generateUpdateCallbackQueryWithReflection(
+                                "123",
+                                "456",
+                                "789",
+                                -50L,
+                                "/sagfasd",
+                                false),
+                        null
+                ),
+                //message = simple text
+                Arguments.of(
+                        generator.generateUpdateMessageWithReflection(
+                                "123",
+                                "456",
+                                "789",
+                                50L,
+                                "fgdhfgfhfjgghhffdf",
+                                false),
+                        new UpdateDPO(
+                                50L,
+                                "456",
+                                "123",
+                                null,
+                                "fgdhfgfhfjgghhffdf",
+                                null,
+                                InteractionUnit.MESSAGE
+                        )
                 )
         );
     }

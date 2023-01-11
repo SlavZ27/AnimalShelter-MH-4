@@ -7,11 +7,29 @@ public class Chat {
     @Id
     private Long id;
     private String name;
+    private String userName;
     private String phone;
     private String address;
     boolean isVolunteer;
 
     public Chat() {
+    }
+
+    public Chat(Long id, String name, String userName, String phone, String address, boolean isVolunteer) {
+        this.id = id;
+        this.name = name;
+        this.userName = userName;
+        this.phone = phone;
+        this.address = address;
+        this.isVolunteer = isVolunteer;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public boolean isVolunteer() {

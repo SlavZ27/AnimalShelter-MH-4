@@ -25,9 +25,7 @@ public class CallRequestService {
     }
 
     public void process(UpdateDPO updateDpo) {
-        Chat chatClient = chatService.getChatByIdOrNewWithName(updateDpo.getIdChat(), updateDpo.getUserName());
-        chatClient.setName(updateDpo.getUserName());
-        chatService.addChat(chatClient);
+        Chat chatClient = chatService.getChatByIdOrNewWithNameAndUserName(updateDpo.getIdChat(), updateDpo.getName(), updateDpo.getUserName());
 
         Chat chatVolunteer = chatService.getChatOfVolunteer();
         if (chatVolunteer == null) {
@@ -58,6 +56,8 @@ public class CallRequestService {
             getAllOpenByChat(idChat).forEach(callRequest -> {
                 sb.append(MESSAGE_ABOUT_CALL_REQUEST);
                 sb.append(callRequest.getChatClient().getName());
+                sb.append(" @");
+                sb.append(callRequest.getChatClient().getUserName());
                 sb.append("\n");
             });
             telegramBotSenderService.sendMessage(idChat, sb.toString());

@@ -53,27 +53,28 @@ public class Generator {
             chat.setName(generateNameIfEmpty(update.message().chat().firstName()));
         } else if (update.callbackQuery() != null) {
             chat.setId(update.callbackQuery().from().id());
-            chat.setName(generateNameIfEmpty(update.callbackQuery().from().firstName()));
+            chat.setName(update.callbackQuery().from().firstName() + " " + update.callbackQuery().from().lastName());
         }
+        chat.setUserName(update.callbackQuery().from().username());
         chat.setVolunteer(false);
         chat.setPhone(generatePhoneIfEmpty(""));
         return chat;
     }
 
-    public Chat generateChat(Long idChat, String name, String address, String phone, boolean isVolunteer, boolean needGenerate) {
+    public Chat generateChat(Long idChat, String name, String userName, String address, String phone, boolean isVolunteer, boolean needGenerate) {
         if (needGenerate) {
             idChat = generateIdIfEmpty(idChat);
             name = generateNameIfEmpty(name);
             address = generateAddressIfEmpty(address);
             phone = generatePhoneIfEmpty(phone);
         }
-        Chat chat = new Chat();
-        chat.setId(idChat);
-        chat.setName(name);
-        chat.setPhone(phone);
-        chat.setAddress(address);
-        chat.setVolunteer(isVolunteer);
-        return chat;
+        return new Chat(
+                idChat,
+                name,
+                userName,
+                phone,
+                address,
+                isVolunteer);
     }
 
     public Update generateUpdateCallbackQueryWithReflection(String userName,
