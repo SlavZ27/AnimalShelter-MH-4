@@ -28,7 +28,7 @@ The main task is to give the most complete information about how a person has to
 - [@SlavZ27](https://github.com/SlavZ27)
 
 - [@Exesebaf](https://github.com/Exesebaf)
-- 
+
 ## Contribute
 
 Contributions are always welcome! Please create a PR to add Github Profile.
