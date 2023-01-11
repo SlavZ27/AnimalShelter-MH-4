@@ -8,13 +8,13 @@
 The main task is to give the most complete information about how a person has to prepare for a meeting with a new family member.
 ## Table of Contents
 
-[Features](https://github.com/SlavZ27/AnimalShelter4/tree/master#features)
+[Features](https://github.com/SlavZ27/AnimalShelter-MH-4/tree/master#features)
 
-[Authors](https://github.com/SlavZ27/AnimalShelter4/tree/master#authors)
+[Authors](https://github.com/SlavZ27/AnimalShelter-MH-4/tree/master#authors)
 
-[Contribute](https://github.com/SlavZ27/AnimalShelter4/tree/master#contribute)
+[Contribute](https://github.com/SlavZ27/AnimalShelter-MH-4/tree/master#contribute)
 
-[License](https://github.com/SlavZ27/AnimalShelter4/tree/master#-license)
+[License](https://github.com/SlavZ27/AnimalShelter-MH-4/tree/master#-license)
 ## Features
 
 - The bot can answer popular questions from people about what you need to know and be able to take an animal from a shelter
@@ -27,17 +27,8 @@ The main task is to give the most complete information about how a person has to
 
 - [@SlavZ27](https://github.com/SlavZ27)
 
-- [@FetisovDen](https://github.com/FetisovDen)
-
-- [@AnastasiyaFrost](https://github.com/AnastasiyaFrost)
-
 - [@Exesebaf](https://github.com/Exesebaf)
-
-- [@unclejah](https://github.com/unclejah)
-
-- [@mukhobug](https://github.com/mukhobug)
-
-- [@voldem999](https://github.com/voldem999)
+- 
 ## Contribute
 
 Contributions are always welcome! Please create a PR to add Github Profile.
