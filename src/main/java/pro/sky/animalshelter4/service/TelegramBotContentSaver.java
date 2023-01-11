@@ -43,7 +43,8 @@ public class TelegramBotContentSaver {
         File file = response.file();
         String fileFormat = parseFileFormat(file.filePath());
         if (fileFormat == null) {
-            logger.error("ChatId={}; Method savePhoto don't detect format in name of files = {}", idChat, file.filePath());
+            logger.error("ChatId={}; Method savePhoto don't detect format in name of files = {}",
+                    idChat, file.filePath());
             return;
         }
         Path myPath = getAndCreatePath(idChat, "report-1", fileFormat);
