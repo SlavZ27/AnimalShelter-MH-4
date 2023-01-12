@@ -64,6 +64,5 @@ public class ChatService {
 
     public Chat getChatOfVolunteer() {
         return chatRepository.getChatOfVolunteer();
-//        return null;
     }
 }
