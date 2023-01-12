@@ -3,6 +3,7 @@ package pro.sky.animalshelter4.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
@@ -35,6 +36,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.*;
 
 
+/**
+ * The class contains methods for testing all the chains of interaction between the telegram bot and the program.
+ * Interaction starts {@link TelegramBotUpdatesListener#process}, ends {@link TelegramBot#execute(BaseRequest)}
+ */
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
@@ -62,6 +67,9 @@ class TelegramBotUpdatesListenerTest {
     private final Generator generator = new Generator();
 
 
+    /**
+     * 1 volunteer and 10 clients are generated and a call request is created for them
+     */
     @BeforeEach
     public void generateData() {
         callRequestRepository.deleteAll();
@@ -104,6 +112,9 @@ class TelegramBotUpdatesListenerTest {
         assertThat(telegramBotUpdatesListener).isNotNull();
     }
 
+    /**
+     * testing an incoming message with {@link Command#START}
+     */
     @Test
     public void STARTTest() {
         Long id = 50L;
@@ -124,6 +135,9 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
     }
 
+    /**
+     * testing an incoming message and press button with {@link Command#INFO}
+     */
     @Test
     public void INFOTest() {
         Long id = 50L;
@@ -157,6 +171,9 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual5.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
     }
 
+    /**
+     * testing an incoming message and press button with {@link Command#HOW}
+     */
     @Test
     public void HOWTest() {
         Long id = 50L;
@@ -183,6 +200,9 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual3.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
     }
 
+    /**
+     * testing an incoming message with unknown Command
+     */
     @Test
     public void UNKNOWNCommandTest() {
         Long id = 50L;
@@ -202,6 +222,9 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
     }
 
+    /**
+     * testing an incoming message with {@link Command#START}
+     */
     @Test
     public void UnknownTextTest() {
         Long id = 50L;
@@ -221,6 +244,9 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
     }
 
+    /**
+     * testing an incoming press button with {@link Command#EMPTY_CALLBACK_DATA_FOR_BUTTON}
+     */
     @Test
     public void EmptyCommandTest() {
         Long id = 50L;
@@ -231,6 +257,10 @@ class TelegramBotUpdatesListenerTest {
         Mockito.verify(telegramBot, times(0)).execute(any());
     }
 
+    /**
+     * testing an incoming message and press button with {@link Command#CALL_REQUEST}
+     * With and without Volunteers in {@link ChatRepository}
+     */
     @Test
     public void CALL_REQUESTTest() {
         int countCallRequestRepository = callRequestRepository.findAll().size();
@@ -311,6 +341,9 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
     }
 
+    /**
+     * A test that verifies the execution of a {@link Command#CALL_REQUEST} that is not intended for the volunteer
+     */
     @Test
     public void permissionTest() {
         Long id1 = 50L;

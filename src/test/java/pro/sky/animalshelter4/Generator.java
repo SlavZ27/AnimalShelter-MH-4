@@ -13,19 +13,45 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Random;
 
+/**
+ * The method contains methods for generating objects with the necessary parameters that are needed to perform tests
+ * Using {@link Faker}
+ */
 public class Generator {
 
     private final Faker faker = new Faker();
     private final Random random = new Random();
 
+
+    /**
+     * The method returns a random number up to the specified value.
+     * Using {@link Random#nextInt(int)}
+     *
+     * @param max
+     * @return
+     */
     public int genInt(int max) {
         return random.nextInt(max);
     }
 
+    /**
+     * The method returns a random number between the parameters
+     * Using {@link Random#nextInt(int)}
+     *
+     * @param min
+     * @param max
+     * @return
+     */
     public int genInt(int min, int max) {
         return random.nextInt(max - min) + min;
     }
 
+
+    /**
+     * @param isPast
+     * @param localDateTime
+     * @return Method generates the date and time in {@link LocalDateTime} format before or after the parameter
+     */
     public LocalDateTime generateDateTime(boolean isPast, LocalDateTime localDateTime) {
         LocalDateTime tldt = LocalDateTime.now();
         if (isPast) {
@@ -46,6 +72,14 @@ public class Generator {
         return tldt;
     }
 
+    /**
+     * The method does the mapping update in comparison with the check
+     * {@link Update#message()}!=null or
+     * {@link Update#callbackQuery()} ()}!=null
+     *
+     * @param update
+     * @return
+     */
     public Chat mapUpdateToChat(Update update) {
         Chat chat = new Chat();
         if (update.message() != null) {
@@ -61,6 +95,23 @@ public class Generator {
         return chat;
     }
 
+    /**
+     * The method generates a {@link Chat} object. there is an automatic field filling function.
+     * If you want to generate values, then specify needGenerate=true and leave the fields equal to "" or -1
+     * Using {@link Generator#generateIdIfEmpty(Long)} 
+     * Using {@link Generator#generateNameIfEmpty(String)} 
+     * Using {@link Generator#generateAddressIfEmpty(String)} 
+     * Using {@link Generator#generatePhoneIfEmpty(String)} 
+     *
+     * @param idChat
+     * @param name
+     * @param userName
+     * @param address
+     * @param phone
+     * @param isVolunteer
+     * @param needGenerate
+     * @return
+     */
     public Chat generateChat(Long idChat, String name, String userName, String address, String phone, boolean isVolunteer, boolean needGenerate) {
         if (needGenerate) {
             idChat = generateIdIfEmpty(idChat);
@@ -77,6 +128,22 @@ public class Generator {
                 isVolunteer);
     }
 
+
+    /**
+     * The method generates a {@link Update} with {@link Update#callbackQuery()} object. there is an automatic field filling function.
+     * If you want to generate values, then specify needGenerate=true and leave the fields equal to "" or -1
+     * Using {@link Generator#generateNameIfEmpty(String)}
+     * Using {@link Generator#generateMessageIfEmpty(String)}
+     * Using {@link Generator#generateIdIfEmpty(Long)}
+     *
+     * @param userName
+     * @param firstName
+     * @param lastName
+     * @param chatId
+     * @param callbackQueryData
+     * @param needGenerate
+     * @return
+     */
     public Update generateUpdateCallbackQueryWithReflection(String userName,
                                                             String firstName,
                                                             String lastName,
@@ -129,6 +196,21 @@ public class Generator {
         return generateUpdateMessageWithReflection("", "", "", -1L, "", true);
     }
 
+    /**
+     * The method generates a {@link Update} with {@link Update#message()} ()} object. there is an automatic field filling function.
+     * If you want to generate values, then specify needGenerate=true and leave the fields equal to "" or -1. <br>
+     * Using {@link Generator#generateNameIfEmpty(String)}
+     * Using {@link Generator#generateMessageIfEmpty(String)}
+     * Using {@link Generator#generateIdIfEmpty(Long)}
+     *
+     * @param userName
+     * @param firstName
+     * @param lastName
+     * @param chatId
+     * @param messageText
+     * @param needGenerate
+     * @return
+     */
     public Update generateUpdateMessageWithReflection(String userName,
                                                       String firstName,
                                                       String lastName,
@@ -186,13 +268,28 @@ public class Generator {
         return update;
     }
 
+
+    /**
+     * The method generates a random time zone if it gets null
+     * Using {@link Faker#random()#nextInt}
+     *
+     * @param timeZone
+     * @return
+     */
     public int generateTimeZoneIfNull(Integer timeZone) {
-        if (timeZone == null || timeZone < 0) {
+        if (timeZone == null) {
             timeZone = faker.random().nextInt(-11, 12);
         }
         return timeZone;
     }
 
+    /**
+     * The method generates a random address if it receives null or an empty string
+     * Using {@link Faker#address()#streetAddress}
+     *
+     * @param address
+     * @return
+     */
     public String generateAddressIfEmpty(String address) {
         if (address == null || address.length() == 0) {
             return faker.address().streetAddress();
@@ -200,6 +297,13 @@ public class Generator {
         return address;
     }
 
+    /**
+     * The method generates a random city if it receives null or an empty string
+     * Using {@link Faker#address()#city}
+     *
+     * @param city
+     * @return
+     */
     public String generateCityIfEmpty(String city) {
         if (city == null || city.length() == 0) {
             return faker.address().city();
@@ -207,6 +311,14 @@ public class Generator {
         return city;
     }
 
+    /**
+     * The method generates a random phone if it receives null or an empty string.
+     * Limited to 15 characters due to database rules.
+     * Using {@link Faker#phoneNumber()#phoneNumber()}
+     *
+     * @param phone
+     * @return
+     */
     public String generatePhoneIfEmpty(String phone) {
         if (phone == null || phone.length() == 0) {
             String tempPhone = faker.phoneNumber().phoneNumber();
@@ -218,6 +330,13 @@ public class Generator {
         return phone;
     }
 
+    /**
+     * The method generates a random name if it receives null or an empty string.
+     * Using {@link Faker#name()#username()}
+     *
+     * @param name
+     * @return
+     */
     public String generateNameIfEmpty(String name) {
         if (name == null || name.length() == 0) {
             return faker.name().username();
@@ -225,6 +344,14 @@ public class Generator {
         return name;
     }
 
+    /**
+     * The method generates a random id for telegram if it receives null or id<0.
+     * Values from 100_000_000 to 999_999_999
+     * Using {@link Faker#random()#nextLong()}
+     *
+     * @param id
+     * @return
+     */
     public Long generateIdIfEmpty(Long id) {
         if (id == null || id < 0) {
             long idTemp = -1L;
@@ -237,6 +364,13 @@ public class Generator {
         return id;
     }
 
+    /**
+     * The method generates a random message for telegram if it receives null or an empty string
+     * Using {@link Faker#lordOfTheRings()#character()}
+     *
+     * @param message
+     * @return
+     */
     public String generateMessageIfEmpty(String message) {
         if (message == null || message.length() == 0) {
             return faker.lordOfTheRings().character();

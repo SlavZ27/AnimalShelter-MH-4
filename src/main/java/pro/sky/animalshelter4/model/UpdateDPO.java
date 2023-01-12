@@ -1,8 +1,18 @@
 package pro.sky.animalshelter4.model;
 
 
+import com.pengrad.telegrambot.model.Update;
+
 import java.util.Objects;
 
+/**
+ * The class is needed for simplified program interaction with {@link com.pengrad.telegrambot.model.Update}.
+ * The class is mapped from {@link com.pengrad.telegrambot.model.Update}.
+ * The class contains all the fields necessary for the work, which are filled in as needed and immediately pass checks
+ * where {@link com.pengrad.telegrambot.model.Update} map to UpdateDPO by
+ * {@link pro.sky.animalshelter4.service.MapperService#toDPO(Update)}
+ * Which has a positive effect on the fault tolerance of the application
+ */
 //Data Processing object
 public class UpdateDPO {
     private Long idChat;
