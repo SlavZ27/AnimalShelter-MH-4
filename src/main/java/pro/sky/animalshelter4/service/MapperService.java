@@ -9,11 +9,40 @@ import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.InteractionUnit;
 import pro.sky.animalshelter4.model.UpdateDPO;
 
+
+/**
+ * The class is intended for mapping objects into other objects.
+ * A very important class, greatly affects the fault tolerance of the application
+ */
 @Service
 public class MapperService {
 
     private final Logger logger = LoggerFactory.getLogger(MapperService.class);
 
+    /**
+     * The method deals with mapping Update to Update and data validation.
+     * For example, idChat and userName must not be null for the program to work.
+     * The method determines which command to execute depending on {@link Update}.
+     * For example, if update.message().photo()!=null,
+     * then {@link UpdateDPO#setInteractionUnit(InteractionUnit)} changes to {@link InteractionUnit#PHOTO}
+     * If update.message().text()!=null && update.message().text().startWith("/")
+     * then {@link UpdateDPO#setInteractionUnit(InteractionUnit)} changes to {@link InteractionUnit#COMMAND}
+     *
+     * @param update
+     * @return {@link UpdateDPO}  <br>
+     * where UpdateDPO.IdChat() must be not null <br>
+     * where UpdateDPO.name() must be not null <br>
+     * where UpdateDPO.userName() must be not null <br>
+     * return null if update == null <br>
+     * return null if update.message().from() == null <br>
+     * return null if update.message().from().id() == null <br>
+     * return null if update.message().from().id() < 0 <br>
+     * return null if update.message().from().username() != null <br>
+     * return null if update.callbackQuery().from() == null <br>
+     * return null if update.callbackQuery().from().id() == null <br>
+     * return null if update.callbackQuery().from().id() < 0 <br>
+     * return null if update.callbackQuery().from().username() != null <br>
+     */
     public UpdateDPO toDPO(Update update) {
 //update
         if (update == null) {
@@ -50,14 +79,15 @@ public class MapperService {
                 } else {
                     logger.debug("ChatId={}; Method toDPO detected null fileId in photo", updateDpo.getIdChat());
                 }
-            }
 //message text
-            if (update.message().text() != null) {
-                logger.debug("ChatId={}; Method toDPO detected text in message()", updateDpo.getIdChat());
-                updateDpo.setInteractionUnit(InteractionUnit.MESSAGE);
-                updateDpo.setMessage(update.message().text().trim());
-//callbackQuery!=null
+            } else {
+                if (update.message().text() != null) {
+                    logger.debug("ChatId={}; Method toDPO detected text in message()", updateDpo.getIdChat());
+                    updateDpo.setInteractionUnit(InteractionUnit.MESSAGE);
+                    updateDpo.setMessage(update.message().text().trim());
+                }
             }
+//callbackQuery!=null
         } else if (update.callbackQuery() != null) {
             logger.debug("Method toDPO detected callbackQuery into update");
             updateDpo.setInteractionUnit(InteractionUnit.CALLBACK_QUERY);
@@ -106,12 +136,31 @@ public class MapperService {
         return updateDpo;
     }
 
+    /**
+     * The method checks the string so that it is not null, or empty
+     * @param s
+     * @return true or false
+     */
     private boolean isNotNullOrEmpty(String s) {
         return s != null && s.length() > 0;
     }
 
+    /**
+     * The method makes a single word from a string with many words
+     *
+     * @param s,
+     * @param indexWord
+     * @return word with indexWord <br>
+     * if (s==null) then return null <br>
+     * if (indexWord > sum of words into string) then return "" <br>
+     * if (string don't contain {@link TelegramBotSenderService#REQUEST_SPLIT_SYMBOL}) then return string without changes <br>
+     *
+     */
     public String toWord(String s, int indexWord) {
         logger.debug("Method toWord was start for parse from string = {} word # = {}", s, indexWord);
+        if (s == null) {
+            return null;
+        }
 
         if (!s.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
             logger.debug("Method toWord don't found REQUEST_SPLIT_SYMBOL = {} and return",
@@ -128,6 +177,11 @@ public class MapperService {
         return sMas[indexWord];
     }
 
+    /**
+     * The method finds idChat in {@link Update} in {@link Update#message()} or {@link Update#callbackQuery()}
+     * @param update
+     * @return idChat or null
+     */
     public Long toChatId(Update update) {
         if (update.message() != null &&
                 update.message().from() != null &&
@@ -141,6 +195,13 @@ public class MapperService {
         return null;
     }
 
+    /**
+     * The method makes a string from {@link User}
+     * consisting of {@link User#firstName()} and {@link User#lastName()} <br>
+     * if firstName==null or firstName=="" <br> and <br> lastName==null or lastName=="" <br> then return {@link User#username()}
+     * @param {@link User}
+     * @return String of {@link User#firstName()} + " " + {@link User#lastName()} or {@link User#username()}
+     */
     public String toUserName(User user) {
         StringBuilder name = new StringBuilder();
         if (isNotNullOrEmpty(user.firstName())) {

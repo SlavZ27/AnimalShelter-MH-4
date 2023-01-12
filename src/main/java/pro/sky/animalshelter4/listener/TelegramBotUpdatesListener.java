@@ -11,6 +11,13 @@ import pro.sky.animalshelter4.service.TelegramBotUpdatesService;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
+/**
+ * The class implementing the UpdateListener interface of the Pengrad library
+ * Class engaged in communicating with Telegram services
+ * and sending the received list of {@link Update} objects
+ * to the {@link TelegramBotUpdatesService#processUpdate(Update)} class for processing.
+ * At the end of the method {@link TelegramBotUpdatesListener#process(List)}, objects are marked as processed, despite possible errors.
+ */
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
     private final TelegramBot telegramBot;
@@ -28,6 +35,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.setUpdatesListener(this);
     }
 
+    /**
+     * The method sends the received objects as a list
+     * to the {@link TelegramBotUpdatesService#processUpdate(Update)} for processing.
+     * At the end of the processing method {@link TelegramBotUpdatesListener#process(List)},
+     * objects are marked as processed, despite possible errors.
+     * @param updates
+     */
     @Override
     public int process(List<Update> updates) {
         try {
