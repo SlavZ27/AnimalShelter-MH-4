@@ -15,32 +15,16 @@ public class CallRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @ManyToOne
-    @JoinColumn(name = "id_chat_client")
-    private Chat chatClient;
+    @JoinColumn(name = "id_client")
+    private User client;
     @ManyToOne
-    @JoinColumn(name = "id_chat_volunteer")
-    private Chat chatVolunteer;
+    @JoinColumn(name = "id_volunteer")
+    private User volunteer;
     private boolean isOpen;
     private LocalDateTime localDateTimeOpen;
     private LocalDateTime localDateTimeClose;
 
     public CallRequest() {
-    }
-
-    public Chat getChatVolunteer() {
-        return chatVolunteer;
-    }
-
-    public void setChatVolunteer(Chat chatVolunteer) {
-        this.chatVolunteer = chatVolunteer;
-    }
-
-    public Chat getChatClient() {
-        return chatClient;
-    }
-
-    public void setChatClient(Chat chatClient) {
-        this.chatClient = chatClient;
     }
 
     public Long getId() {
@@ -49,6 +33,22 @@ public class CallRequest {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public User getClient() {
+        return client;
+    }
+
+    public void setClient(User client) {
+        this.client = client;
+    }
+
+    public User getVolunteer() {
+        return volunteer;
+    }
+
+    public void setVolunteer(User volunteer) {
+        this.volunteer = volunteer;
     }
 
     public boolean isOpen() {

@@ -20,14 +20,14 @@ import java.util.List;
 public class TelegramBotUpdatesService {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesService.class);
     private final TelegramBotSenderService telegramBotSenderService;
-    private final MapperService mapperService;
+    private final TelegramMapperService telegramMapperService;
     private final TelegramBotContentSaver telegramBotContentSaver;
     private final CallRequestService callRequestService;
     private final CommandService commandService;
 
-    public TelegramBotUpdatesService(TelegramBotSenderService telegramBotSenderService, MapperService mapperService, TelegramBotContentSaver telegramBotContentSaver, CallRequestService callRequestService, CommandService commandService) {
+    public TelegramBotUpdatesService(TelegramBotSenderService telegramBotSenderService, TelegramMapperService telegramMapperService, TelegramBotContentSaver telegramBotContentSaver, CallRequestService callRequestService, CommandService commandService) {
         this.telegramBotSenderService = telegramBotSenderService;
-        this.mapperService = mapperService;
+        this.telegramMapperService = telegramMapperService;
         this.telegramBotContentSaver = telegramBotContentSaver;
         this.callRequestService = callRequestService;
         this.commandService = commandService;
@@ -38,11 +38,12 @@ public class TelegramBotUpdatesService {
      * The method deals with the choice of actions depending
      * on the incoming object that came from {@link TelegramBotUpdatesListener#process(List)}
      * The definition and conversion of a hostile {@link Update}
-     * to native {@link UpdateDPO} is handled by the {@link MapperService#toDPO(Update)}.
+     * to native {@link UpdateDPO} is handled by the {@link TelegramMapperService#toDPO(Update)}.
      * Then, depending on the type of interaction {@link pro.sky.animalshelter4.model.InteractionUnit}
      * and command {@link Command} and other parameters, the next action is selected.
      * The method terminates if it detects an {@link Command#EMPTY_CALLBACK_DATA_FOR_BUTTON} in {@link Update},
-     * or when receiving an unexpected {@link Update}, when null comes from {@link MapperService#toDPO(Update)}.
+     * or when receiving an unexpected {@link Update}, when null comes from {@link TelegramMapperService#toDPO(Update)}.
+     *
      * @param update
      */
     public void processUpdate(Update update) {
@@ -55,7 +56,7 @@ public class TelegramBotUpdatesService {
             return;
         }
 
-        UpdateDPO updateDpo = mapperService.toDPO(update);
+        UpdateDPO updateDpo = telegramMapperService.toDPO(update);
         if (updateDpo == null) {
             logger.debug("Method processUpdate detected null updateDpo");
             return;
@@ -90,7 +91,8 @@ public class TelegramBotUpdatesService {
                         case START:
                             System.out.println("Detected enter : " +
                                     updateDpo.getIdChat() + " / " + updateDpo.getUserName());
-                            telegramBotSenderService.sendHello(updateDpo.getIdChat(), updateDpo.getName());
+                            telegramBotSenderService.sendHello(updateDpo.getIdChat(),
+                                    updateDpo.getFirstName() + " " + updateDpo.getLastName());
                             break;
                         case INFO:
                             telegramBotSenderService.sendInfoAboutShelter(updateDpo.getIdChat());

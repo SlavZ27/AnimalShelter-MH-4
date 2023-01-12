@@ -1,30 +1,13 @@
-package pro.sky.animalshelter4.entity;
+package pro.sky.animalshelter4.entityDto;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import java.time.LocalDateTime;
 
-@Entity(name = "telegram_chat")
-public class Chat {
-    @Id
+public class ChatDto {
     private Long id;
     private String userNameTelegram;
     private String firstNameUser;
     private String lastNameUser;
     private LocalDateTime last_activity;
-
-    public Chat() {
-    }
-
-    public Chat(Long id, String userNameTelegram, String firstNameUser, String lastNameUser, LocalDateTime last_activity) {
-        this.id = id;
-        this.userNameTelegram = userNameTelegram;
-        this.firstNameUser = firstNameUser;
-        this.lastNameUser = lastNameUser;
-        this.last_activity = last_activity;
-    }
 
     public Long getId() {
         return id;

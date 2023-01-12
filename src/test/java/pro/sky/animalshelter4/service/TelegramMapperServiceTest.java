@@ -19,14 +19,15 @@ import static org.mockito.Mockito.mock;
  * A test of the mapper class for correct mapping of the {@link Update} object in {@link UpdateDPO}.
  * The correctness of this class greatly affects the operation of the entire program
  */
-class MapperServiceTest {
+class TelegramMapperServiceTest {
     private static final Generator generator = new Generator();
-    private final MapperService mapperService = new MapperService();
+    private final TelegramMapperService telegramMapperService = new TelegramMapperService();
 
 
     /**
      * The parameterized test compares all the fields that are in the {@link UpdateDPO}
      * and UpdateDPO converted from {@link Update} using the stream arguments
+     *
      * @param updateTdo Original incoming {@link Update}
      * @param updateDpo Expected result after mapping
      */
@@ -34,10 +35,13 @@ class MapperServiceTest {
     @MethodSource("paramForToDPO")
     void toDPO(Update updateTdo, UpdateDPO updateDpo) {
         UpdateDPO expected = updateDpo;
-        UpdateDPO actual = mapperService.toDPO(updateTdo);
+        UpdateDPO actual = telegramMapperService.toDPO(updateTdo);
 
         if (expected != null) {
             assertThat(actual.getMessage()).isEqualTo(expected.getMessage());
+            assertThat(actual.getUserName()).isEqualTo(expected.getUserName());
+            assertThat(actual.getLastName()).isEqualTo(expected.getLastName());
+            assertThat(actual.getFirstName()).isEqualTo(expected.getFirstName());
             assertThat(actual.getUserName()).isEqualTo(expected.getUserName());
             assertThat(actual.getIdMedia()).isEqualTo(expected.getIdMedia());
             assertThat(actual.getIdChat()).isEqualTo(expected.getIdChat());
@@ -61,6 +65,7 @@ class MapperServiceTest {
                         new UpdateDPO(
                                 50L,
                                 "456",
+                                "789",
                                 "123",
                                 Command.START,
                                 "",
@@ -80,6 +85,7 @@ class MapperServiceTest {
                         new UpdateDPO(
                                 50L,
                                 "456",
+                                "789",
                                 "123",
                                 Command.START,
                                 "fsfdsfs",
@@ -98,7 +104,8 @@ class MapperServiceTest {
                                 false),
                         new UpdateDPO(
                                 50L,
-                                "123",
+                                "",
+                                null,
                                 "123",
                                 Command.START,
                                 "fsfdsfs sdfsdf sdf s",
@@ -140,6 +147,7 @@ class MapperServiceTest {
                         new UpdateDPO(
                                 50L,
                                 "456",
+                                "789",
                                 "123",
                                 null,
                                 "/sagfasd",
@@ -161,9 +169,9 @@ class MapperServiceTest {
                 //CallbackQuery chatId < 0
                 Arguments.of(
                         generator.generateUpdateCallbackQueryWithReflection(
-                                "123",
                                 "456",
                                 "789",
+                                "123",
                                 -50L,
                                 "/sagfasd",
                                 false),
@@ -181,6 +189,7 @@ class MapperServiceTest {
                         new UpdateDPO(
                                 50L,
                                 "456",
+                                "789",
                                 "123",
                                 null,
                                 "fgdhfgfhfjgghhffdf",

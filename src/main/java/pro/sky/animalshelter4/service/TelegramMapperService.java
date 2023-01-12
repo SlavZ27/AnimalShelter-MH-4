@@ -5,9 +5,15 @@ import com.pengrad.telegrambot.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import pro.sky.animalshelter4.entity.CallRequest;
+import pro.sky.animalshelter4.entity.Chat;
+import pro.sky.animalshelter4.entityDto.CallRequestDto;
+import pro.sky.animalshelter4.entityDto.ChatDto;
+import pro.sky.animalshelter4.exception.ChatNotFoundException;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.InteractionUnit;
 import pro.sky.animalshelter4.model.UpdateDPO;
+import pro.sky.animalshelter4.repository.ChatRepository;
 
 
 /**
@@ -15,9 +21,10 @@ import pro.sky.animalshelter4.model.UpdateDPO;
  * A very important class, greatly affects the fault tolerance of the application
  */
 @Service
-public class MapperService {
+public class TelegramMapperService {
 
-    private final Logger logger = LoggerFactory.getLogger(MapperService.class);
+    private final Logger logger = LoggerFactory.getLogger(TelegramMapperService.class);
+
 
     /**
      * The method deals with mapping Update to Update and data validation.
@@ -62,7 +69,8 @@ public class MapperService {
                     return null;
                 }
                 updateDpo.setIdChat(update.message().from().id());
-                updateDpo.setName(toUserName(update.message().from()));
+                updateDpo.setFirstName(update.message().from().firstName());
+                updateDpo.setLastName(update.message().from().lastName());
                 updateDpo.setUserName(update.message().from().username());
                 logger.debug("ChatId={}; Method toDPO detected idChat", updateDpo.getIdChat());
             } else {
@@ -100,7 +108,8 @@ public class MapperService {
                     return null;
                 }
                 updateDpo.setIdChat(update.callbackQuery().from().id());
-                updateDpo.setName(toUserName(update.callbackQuery().from()));
+                updateDpo.setFirstName(update.callbackQuery().from().firstName());
+                updateDpo.setLastName(update.callbackQuery().from().lastName());
                 updateDpo.setUserName(update.callbackQuery().from().username());
                 logger.debug("ChatId={}; Method toDPO detected idChat", updateDpo.getIdChat());
             } else {
@@ -138,6 +147,7 @@ public class MapperService {
 
     /**
      * The method checks the string so that it is not null, or empty
+     *
      * @param s
      * @return true or false
      */
@@ -154,7 +164,6 @@ public class MapperService {
      * if (s==null) then return null <br>
      * if (indexWord > sum of words into string) then return "" <br>
      * if (string don't contain {@link TelegramBotSenderService#REQUEST_SPLIT_SYMBOL}) then return string without changes <br>
-     *
      */
     public String toWord(String s, int indexWord) {
         logger.debug("Method toWord was start for parse from string = {} word # = {}", s, indexWord);
@@ -179,6 +188,7 @@ public class MapperService {
 
     /**
      * The method finds idChat in {@link Update} in {@link Update#message()} or {@link Update#callbackQuery()}
+     *
      * @param update
      * @return idChat or null
      */
@@ -199,6 +209,7 @@ public class MapperService {
      * The method makes a string from {@link User}
      * consisting of {@link User#firstName()} and {@link User#lastName()} <br>
      * if firstName==null or firstName=="" <br> and <br> lastName==null or lastName=="" <br> then return {@link User#username()}
+     *
      * @param {@link User}
      * @return String of {@link User#firstName()} + " " + {@link User#lastName()} or {@link User#username()}
      */
@@ -216,4 +227,5 @@ public class MapperService {
         }
         return name.toString();
     }
+
 }
