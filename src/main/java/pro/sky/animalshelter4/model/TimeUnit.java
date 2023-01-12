@@ -1,5 +1,8 @@
 package pro.sky.animalshelter4.model;
 
+/**
+ * Listing objects and setting the exact time.
+ */
 public enum TimeUnit
 {
     YEAR("year"),

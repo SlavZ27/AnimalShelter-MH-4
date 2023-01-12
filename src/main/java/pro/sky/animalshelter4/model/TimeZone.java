@@ -2,6 +2,9 @@ package pro.sky.animalshelter4.model;
 
 import java.util.List;
 
+/**
+ * This class allows you to set the time zone relative to Greenwich and also lists different time zones.
+ */
 public enum TimeZone {
     TM11(-11, "-11"),
     TM10(-10, "-10"),
