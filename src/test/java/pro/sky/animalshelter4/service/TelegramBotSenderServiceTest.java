@@ -15,14 +15,23 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Class contains a test for reliability and understanding of the method that outputs the dimensions of the button grid
+ */
 class TelegramBotSenderServiceTest {
     private final TelegramBotSenderService telegramBotSenderService = new TelegramBotSenderService(null, null);
 
+    /**
+     * the test takes the number of objects to be placed in a rectangle and outputs a pair of height and width
+     *
+     * @param count
+     * @param expected
+     */
     @ParameterizedTest
     @MethodSource("paramForGetTableSize")
-    void getTableSize(int count, Pair<Integer, Integer> actual) {
-        Pair<Integer, Integer> expected = telegramBotSenderService.getTableSize(count);
-        org.assertj.core.api.Assertions.assertThat(actual).isEqualTo(expected);
+    void getTableSize(int count, Pair<Integer, Integer> expected) {
+        Pair<Integer, Integer> actual = telegramBotSenderService.getTableSize(count);
+        org.assertj.core.api.Assertions.assertThat(expected).isEqualTo(actual);
     }
 
     public static Stream<Arguments> paramForGetTableSize() {

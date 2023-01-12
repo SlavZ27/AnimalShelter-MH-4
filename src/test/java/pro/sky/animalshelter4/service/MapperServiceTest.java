@@ -15,17 +15,28 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.mock;
 
+/**
+ * A test of the mapper class for correct mapping of the {@link Update} object in {@link UpdateDPO}.
+ * The correctness of this class greatly affects the operation of the entire program
+ */
 class MapperServiceTest {
     private static final Generator generator = new Generator();
     private final MapperService mapperService = new MapperService();
 
+
+    /**
+     * The parameterized test compares all the fields that are in the {@link UpdateDPO}
+     * and UpdateDPO converted from {@link Update} using the stream arguments
+     * @param updateTdo Original incoming {@link Update}
+     * @param updateDpo Expected result after mapping
+     */
     @ParameterizedTest
     @MethodSource("paramForToDPO")
     void toDPO(Update updateTdo, UpdateDPO updateDpo) {
-        UpdateDPO actual = updateDpo;
-        UpdateDPO expected = mapperService.toDPO(updateTdo);
+        UpdateDPO expected = updateDpo;
+        UpdateDPO actual = mapperService.toDPO(updateTdo);
 
-        if (actual != null) {
+        if (expected != null) {
             assertThat(actual.getMessage()).isEqualTo(expected.getMessage());
             assertThat(actual.getUserName()).isEqualTo(expected.getUserName());
             assertThat(actual.getIdMedia()).isEqualTo(expected.getIdMedia());
