@@ -2,6 +2,12 @@ package pro.sky.animalshelter4.entity;
 
 import javax.persistence.*;
 
+/**
+ * This entity is engaged in creating a chat model.
+ * This entity is used in several classes.
+ *  The class has a getters, setters constructor.
+ * Since other classes need them for their functioning and for better data protection.
+ */
 @Entity(name = "chat")
 public class Chat {
     @Id

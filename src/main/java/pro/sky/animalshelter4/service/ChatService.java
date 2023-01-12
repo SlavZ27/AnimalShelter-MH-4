@@ -8,6 +8,10 @@ import pro.sky.animalshelter4.repository.ChatRepository;
 
 import java.util.List;
 
+/**
+ * The class is designed for the operation of the Call Request Service class
+ * An important parameter that affects the operation of the CALL_REQUEST CALL_CLIENT command.
+ */
 @Service
 public class ChatService {
 

@@ -3,6 +3,12 @@ package pro.sky.animalshelter4.entity;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * This entity is engaged in creating a data model for the ability to make a Call Request.
+ * This entity is used in several classes
+ * The class must have constructor, getters, setters.
+ * Since other classes need them for their functioning and for better data protection.
+ */
 @Entity(name = "call_request")
 public class CallRequest {
     @Id
