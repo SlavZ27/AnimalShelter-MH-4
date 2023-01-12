@@ -18,6 +18,15 @@ public class ChatService {
         this.chatRepository = chatRepository;
     }
 
+
+    /**
+     * The method searches for and returns an existing {@link Chat} instance,
+     * if it does not exist, then creates a new one with the necessary parameters
+     * @param id must be not null
+     * @param name must be not null
+     * @param userName must be not null
+     * @return {@link Chat} new or found
+     */
     public Chat getChatByIdOrNewWithNameAndUserName(Long id, String name, String userName) {
         logger.info("Method getChatByIdOrNew was start for find Chat by id = {}, or return new Chat", id);
         Chat chat = chatRepository.getChatById(id);
@@ -33,24 +42,52 @@ public class ChatService {
         return chat;
     }
 
+    /**
+     * The method adds a new chat to the repository and returns the same instance
+     * using {@link ChatRepository#save(Object)}
+     * @param chat id of chat must be not null
+     * @return {@link Chat}
+     */
     public Chat addChat(Chat chat) {
         return chatRepository.save(chat);
     }
 
+    /**
+     * The method searches for a chat in the repository by id of chat
+     * using {@link ChatRepository#getChatById(Long)}
+     * @param id
+     * @return found chat
+     */
     public Chat findChat(Long id) {
         return chatRepository.getChatById(id);
     }
 
+    /**
+     * The method delete chat from repository
+     * using {@link ChatService#deleteChat(Chat)}
+     * @param id must be not null
+     */
     public void deleteChat(Long id) {
         Chat chat = new Chat();
         chat.setId(id);
         deleteChat(chat);
     }
 
+    /**
+     * The method delete chat from repository
+     * using {@link ChatRepository#delete(Object)}
+     * @param chat
+     */
     public void deleteChat(Chat chat) {
         chatRepository.delete(chat);
     }
 
+
+    /**
+     * the method determines by id whether the user is a volunteer or not
+     * @param id must be not null
+     * @return true if user is volunteer, false if else
+     */
     public boolean isVolunteer(Long id) {
         logger.info("Method isVolunteer was start for to check if the chat with id = {} is a volunteer", id);
         Chat chat = findChat(id);
@@ -62,6 +99,9 @@ public class ChatService {
         return true;
     }
 
+    /**
+     * @return chat belonging to a volunteer or null
+     */
     public Chat getChatOfVolunteer() {
         return chatRepository.getChatOfVolunteer();
     }
