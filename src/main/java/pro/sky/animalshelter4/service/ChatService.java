@@ -8,16 +8,27 @@ import pro.sky.animalshelter4.repository.ChatRepository;
 
 import java.util.List;
 
+/**
+ * The class is designed for the operation of the Call Request Service class
+ * An important parameter that affects the operation of the CALL_REQUEST CALL_CLIENT command.
+ */
 @Service
 public class ChatService {
 
     private final ChatRepository chatRepository;
     private final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
+
     public ChatService(ChatRepository chatRepository) {
         this.chatRepository = chatRepository;
     }
 
+    /**
+     * @param id
+     * @param name
+     * @param userName
+     * @return
+     */
     public Chat getChatByIdOrNewWithNameAndUserName(Long id, String name, String userName) {
         logger.info("Method getChatByIdOrNew was start for find Chat by id = {}, or return new Chat", id);
         Chat chat = chatRepository.getChatById(id);
@@ -33,24 +44,42 @@ public class ChatService {
         return chat;
     }
 
+    /**
+     * @param chat
+     * @return
+     */
     public Chat addChat(Chat chat) {
         return chatRepository.save(chat);
     }
 
+    /**
+     * @param id
+     * @return
+     */
     public Chat findChat(Long id) {
         return chatRepository.getChatById(id);
     }
 
+    /**
+     * @param id
+     */
     public void deleteChat(Long id) {
         Chat chat = new Chat();
         chat.setId(id);
         deleteChat(chat);
     }
 
+    /**
+     * @param chat
+     */
     public void deleteChat(Chat chat) {
         chatRepository.delete(chat);
     }
 
+    /**
+     * @param id
+     * @return
+     */
     public boolean isVolunteer(Long id) {
         logger.info("Method isVolunteer was start for to check if the chat with id = {} is a volunteer", id);
         Chat chat = findChat(id);
@@ -62,6 +91,9 @@ public class ChatService {
         return true;
     }
 
+    /**
+     * @return
+     */
     public Chat getChatOfVolunteer() {
         return chatRepository.getChatOfVolunteer();
     }
