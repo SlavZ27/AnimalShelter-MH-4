@@ -14,6 +14,10 @@ import pro.sky.animalshelter4.exception.UserNotFoundException;
 import pro.sky.animalshelter4.repository.ChatRepository;
 import pro.sky.animalshelter4.repository.UserRepository;
 
+/**
+ *This class is required for distilling data back and forth.
+ * Which are necessary for a more convenient implementation of the project architecture.
+ */
 @Service
 public class DtoMapperService {
     private final Logger logger = LoggerFactory.getLogger(DtoMapperService.class);
@@ -26,6 +30,7 @@ public class DtoMapperService {
         this.chatRepository = chatRepository;
     }
 
+
     public Chat toEntity(ChatDto chatDto) {
         Chat chat = new Chat();
         chat.setId(chatDto.getId());
@@ -36,6 +41,7 @@ public class DtoMapperService {
         return chat;
     }
 
+
     public ChatDto toDto(Chat chat) {
         ChatDto chatDto = new ChatDto();
         chatDto.setId(chat.getId());
@@ -45,6 +51,7 @@ public class DtoMapperService {
         chatDto.setLast_activity(chat.getLast_activity());
         return chatDto;
     }
+
 
     public CallRequest toEntity(CallRequestDto callRequestDto) {
         CallRequest callRequest = new CallRequest();
@@ -67,6 +74,7 @@ public class DtoMapperService {
         return callRequest;
     }
 
+
     public CallRequestDto toDto(CallRequest callRequest) {
         CallRequestDto callRequestDto = new CallRequestDto();
         callRequestDto.setId(callRequest.getId());
@@ -81,6 +89,7 @@ public class DtoMapperService {
         callRequestDto.setLocalDateTimeClose(callRequest.getLocalDateTimeClose());
         return callRequestDto;
     }
+
 
     public User toEntity(UserDto userDto) {
         User user = new User();
@@ -97,6 +106,7 @@ public class DtoMapperService {
         user.setVolunteer(userDto.isVolunteer());
         return user;
     }
+
 
     public UserDto toDto(User user) {
         UserDto userDto = new UserDto();

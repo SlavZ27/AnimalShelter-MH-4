@@ -1,8 +1,16 @@
 package pro.sky.animalshelter4.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.service.ChatService;
 
@@ -19,26 +27,95 @@ public class ChatController {
         this.chatService = chatService;
     }
 
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "We record the following data from the client 's chat from the bot 's Telegrams ." +
+                            "  ChatId\"" +
+                            " \"userNameTelegram\" " +
+                            "  \"firstNameUser\"" +
+                            "  \"lastNameUser\":" +
+                            "  \"last_activity\"",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ChatDto.class)
+                    )}
+            )
+    })
     @PostMapping                //POST http://localhost:8080/chat
     public ResponseEntity<ChatDto> createChat(@RequestBody @Valid ChatDto chatDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(chatService.createChat(chatDto));
     }
 
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Retrieves the following data from the client's chat by chatId." +
+                            "  userNameTelegram\"+\n" +
+                            "\"  firstNameUser\"+\n" +
+                            "\"  lastNameUser\"+\n" +
+                            "\"  last_activity\",",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ChatDto.class)
+                    )}
+            )
+    })
     @GetMapping("{id}")  //GET http://localhost:8080/chat/1
-    public ResponseEntity<ChatDto> readChat(@PathVariable Long id) {
+    public ResponseEntity<ChatDto> readChat(@Parameter(description = "chat id") @PathVariable Long id) {
         return ResponseEntity.ok(chatService.readChat(id));
     }
 
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Changing customer data." +
+                            "  ChatId\"" +
+                            " \"userNameTelegram\" " +
+                            "  \"firstNameUser\"" +
+                            "  \"lastNameUser\":" +
+                            "  \"last_activity\"",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ChatDto.class)
+                    )}
+            )
+    })
     @PutMapping()               //PUT http://localhost:8080/chat/
     public ResponseEntity<ChatDto> updateChat(@RequestBody @Valid ChatDto chatDto) {
         return ResponseEntity.ok(chatService.updateChat(chatDto));
     }
 
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Delete customer chats by chatId.",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ChatDto.class)
+                    )}
+            )
+    })
     @DeleteMapping("{id}")    //DELETE http://localhost:8080/chat/1
-    public ResponseEntity<ChatDto> deleteChat(@PathVariable Long id) {
+    public ResponseEntity<ChatDto> deleteChat(@Parameter(description = "chat id") @PathVariable Long id) {
         return ResponseEntity.ok(chatService.deleteChat(id));
     }
 
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Receives the following customer data." +
+                            "  ChatId\"" +
+                            " \"userNameTelegram\" " +
+                            "  \"firstNameUser\"" +
+                            "  \"lastNameUser\":" +
+                            "  \"last_activity\"",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ChatDto[].class)
+                    )}
+            )
+    })
     @GetMapping()  //GET http://localhost:8080/chat/
     public ResponseEntity<Collection<ChatDto>> getAllChats() {
         return ResponseEntity.ok(chatService.getAll());
