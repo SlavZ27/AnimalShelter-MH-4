@@ -61,6 +61,14 @@ public class UserService {
         logger.info("Method updateUser was start for update User");
         User newUser = dtoMapperService.toEntity(userDto);
         User oldUser = findUser(newUser.getId());
+        if (oldUser == null) {
+            throw new UserNotFoundException(String.valueOf(newUser.getId()));
+        }
+        oldUser.setNameUser(newUser.getNameUser());
+        oldUser.setVolunteer(newUser.isVolunteer());
+        oldUser.setChatTelegram(newUser.getChatTelegram());
+        oldUser.setAddress(newUser.getAddress());
+        oldUser.setPhone(newUser.getPhone());
         return dtoMapperService.toDto(userRepository.save(oldUser));
     }
 
@@ -78,7 +86,7 @@ public class UserService {
         }
         User userFound = userRepository.findById(user.getId()).
                 orElseThrow(() -> new UserNotFoundException(String.valueOf(user.getId())));
-        userRepository.delete(user);
+        userRepository.delete(userFound);
         return userFound;
     }
 

@@ -20,7 +20,7 @@ import pro.sky.animalshelter4.repository.UserRepository;
  */
 @Service
 public class DtoMapperService {
-    private final Logger logger = LoggerFactory.getLogger(Logger.class);
+    private final Logger logger = LoggerFactory.getLogger(DtoMapperService.class);
     public final UserRepository userRepository;
     private final ChatRepository chatRepository;
 
@@ -66,7 +66,7 @@ public class DtoMapperService {
             User user = userRepository.
                     findById(callRequestDto.getIdVolunteer()).
                     orElseThrow(() -> new UserNotFoundException(String.valueOf(callRequestDto.getIdVolunteer())));
-            callRequest.setClient(user);
+            callRequest.setVolunteer(user);
         }
         callRequest.setOpen(callRequestDto.isOpen());
         callRequest.setLocalDateTimeOpen(callRequestDto.getLocalDateTimeOpen());
