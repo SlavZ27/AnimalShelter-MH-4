@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.service.ChatService;
 
+import java.util.List;
+
 /**
  * This class was created to use the database to create methods used in the class ChatService
  * They are used in methods{@link ChatService#findChat(Long)#getChatOfVolunteer()}
@@ -14,9 +16,5 @@ import pro.sky.animalshelter4.service.ChatService;
 public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     Chat getChatById(Long id);
-
-    @Query(value = "select * from chat where is_volunteer=true limit 1"
-            , nativeQuery = true)
-    Chat getChatOfVolunteer();
 
 }

@@ -21,25 +21,25 @@ import static pro.sky.animalshelter4.model.Command.*;
 @Service
 public class CommandService {
 
-    ChatService chatService;
+    UserService userService;
     private final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
-    public CommandService(ChatService chatService) {
-        this.chatService = chatService;
+    public CommandService(UserService userService) {
+        this.userService = userService;
     }
 
     /**
      * The method checks whether the command is available to the {@link pro.sky.animalshelter4.entity.Chat}
      * for execution. The data for the solution is taken from {@link Command}.
      * The method must be executed after receiving and parsing the necessary data and before executing commands
-     * using {@link ChatService#isVolunteer(Long)}
+     * using {@link UserService#isUserWithTelegramChatIdVolunteer(Long)} (Long)}
      *
      * @param command must be not null
      * @param idChat  must be not null
      * @return true if the command is available to the user, else false
      */
     public boolean approveLaunchCommand(Command command, Long idChat) {
-        if (chatService.isVolunteer(idChat)) {
+        if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
             return command.isVolunteer();
         } else {
             return command.isClient();
@@ -51,13 +51,13 @@ public class CommandService {
      * depending on the user's rights <br>
      * if the id of the volunteer using {@link CommandService#getAllTextCommandAsListForVolunteerExcludeHide()}  <br>
      * if else using {@link CommandService#getAllTextCommandAsListForClientExcludeHide()}  <br>
-     * using {@link ChatService#isVolunteer(Long)}
+     * using {@link UserService#isUserWithTelegramChatIdVolunteer(Long)}
      *
      * @param idChat must be not null
      * @return String as list of {@link Command#getTextCommand()}
      */
     public String getAllTitlesAsListExcludeHide(Long idChat) {
-        if (chatService.isVolunteer(idChat)) {
+        if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
             return getAllTextCommandAsListForVolunteerExcludeHide();
         } else {
             return getAllTextCommandAsListForClientExcludeHide();
@@ -72,13 +72,13 @@ public class CommandService {
      * if the id of the volunteer using
      * {@link CommandService#getListsNameButtonAndListsDataButtonForVolunteerExcludeHide()}  <br>
      * if else using {@link CommandService#getListsNameButtonAndListsDataButtonForClientExcludeHide()}  <br>
-     * using {@link ChatService#isVolunteer(Long)}
+     * using {@link UserService#isUserWithTelegramChatIdVolunteer(Long)}
      *
      * @param idChat must be not null
      * @return Pair<List < nameButtons>, List<dataButtons>>
      */
     public Pair<List<String>, List<String>> getPairListsForButtonExcludeHide(Long idChat) {
-        if (chatService.isVolunteer(idChat)) {
+        if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
             return getListsNameButtonAndListsDataButtonForVolunteerExcludeHide();
         } else {
             return getListsNameButtonAndListsDataButtonForClientExcludeHide();
@@ -88,6 +88,7 @@ public class CommandService {
 
     /**
      * using {@link Command#getOnlyShowCommandForClient()}
+     *
      * @return The method outputs String consisting of {@link Command#getTextCommand()} as a list available to
      * not volunteer
      */
@@ -103,6 +104,7 @@ public class CommandService {
 
     /**
      * using {@link Command#getOnlyShowCommandForVolunteer()}
+     *
      * @return The method outputs String consisting of {@link Command#getTextCommand()} as a list available to volunteer
      */
     private String getAllTextCommandAsListForVolunteerExcludeHide() {
@@ -118,6 +120,7 @@ public class CommandService {
 
     /**
      * using {@link Command#getOnlyShowCommandForClient()}
+     *
      * @return List of String consisting of {@link Command#getTextCommand()} from the list available to a non-volunteer
      */
     private List<String> getAllTextCommandForClientExcludeHide() {
@@ -128,6 +131,7 @@ public class CommandService {
 
     /**
      * using {@link Command#getOnlyShowCommandForVolunteer()}
+     *
      * @return List of String consisting of {@link Command#getTextCommand()} from the list available to a volunteer
      */
     private List<String> getAllTextCommandForVolunteerExcludeHide() {

@@ -84,48 +84,67 @@ public class Generator {
         Chat chat = new Chat();
         if (update.message() != null) {
             chat.setId(update.message().chat().id());
-            chat.setName(generateNameIfEmpty(update.message().chat().firstName()));
+            chat.setFirstNameUser(generateNameIfEmpty(update.message().from().firstName()));
+            chat.setLastNameUser(generateNameIfEmpty(update.message().from().lastName()));
+            chat.setUserNameTelegram(generateNameIfEmpty(update.message().from().username()));
         } else if (update.callbackQuery() != null) {
             chat.setId(update.callbackQuery().from().id());
-            chat.setName(update.callbackQuery().from().firstName() + " " + update.callbackQuery().from().lastName());
+            chat.setFirstNameUser(generateNameIfEmpty(update.callbackQuery().from().firstName()));
+            chat.setLastNameUser(generateNameIfEmpty(update.callbackQuery().from().lastName()));
+            chat.setUserNameTelegram(generateNameIfEmpty(update.callbackQuery().from().username()));
         }
-        chat.setUserName(update.callbackQuery().from().username());
-        chat.setVolunteer(false);
-        chat.setPhone(generatePhoneIfEmpty(""));
         return chat;
+    }
+
+    public pro.sky.animalshelter4.entity.User generateUser(Long idUser, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer, boolean needGenerate) {
+        if (needGenerate) {
+            idUser = generateIdIfEmpty(idUser);
+            nameUser = generateNameIfEmpty(nameUser);
+            if (chatTelegram == null) {
+                chatTelegram = generateChat(null, nameUser, nameUser, null, null, true);
+            }
+            phone = generatePhoneIfEmpty(phone);
+            address = generateAddressIfEmpty(address);
+        }
+        return new pro.sky.animalshelter4.entity.User(
+                idUser,
+                nameUser,
+                chatTelegram,
+                phone,
+                address,
+                isVolunteer);
     }
 
     /**
      * The method generates a {@link Chat} object. there is an automatic field filling function.
      * If you want to generate values, then specify needGenerate=true and leave the fields equal to "" or -1
-     * Using {@link Generator#generateIdIfEmpty(Long)} 
-     * Using {@link Generator#generateNameIfEmpty(String)} 
-     * Using {@link Generator#generateAddressIfEmpty(String)} 
-     * Using {@link Generator#generatePhoneIfEmpty(String)} 
+     * Using {@link Generator#generateIdIfEmpty(Long)}
+     * Using {@link Generator#generateNameIfEmpty(String)}
+     * Using {@link Generator#generateAddressIfEmpty(String)}
+     * Using {@link Generator#generatePhoneIfEmpty(String)}
      *
      * @param idChat
-     * @param name
-     * @param userName
-     * @param address
-     * @param phone
-     * @param isVolunteer
+     * @param userNameTelegram
+     * @param firstNameUser
+     * @param lastNameUser
+     * @param last_activity
      * @param needGenerate
      * @return
      */
-    public Chat generateChat(Long idChat, String name, String userName, String address, String phone, boolean isVolunteer, boolean needGenerate) {
+    public Chat generateChat(Long idChat, String userNameTelegram, String firstNameUser, String lastNameUser, LocalDateTime last_activity, boolean needGenerate) {
         if (needGenerate) {
             idChat = generateIdIfEmpty(idChat);
-            name = generateNameIfEmpty(name);
-            address = generateAddressIfEmpty(address);
-            phone = generatePhoneIfEmpty(phone);
+            userNameTelegram = generateNameIfEmpty(userNameTelegram);
+            firstNameUser = generateNameIfEmpty(firstNameUser);
+            lastNameUser = generateNameIfEmpty(lastNameUser);
+            last_activity = generateDateTime(true, LocalDateTime.now());
         }
         return new Chat(
                 idChat,
-                name,
-                userName,
-                phone,
-                address,
-                isVolunteer);
+                userNameTelegram,
+                firstNameUser,
+                lastNameUser,
+                last_activity);
     }
 
 

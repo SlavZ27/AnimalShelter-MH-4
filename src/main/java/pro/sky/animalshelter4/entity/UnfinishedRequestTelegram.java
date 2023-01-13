@@ -8,26 +8,19 @@ import javax.persistence.*;
  * The class must have constructor, getters, setters.
  * Since other classes need them for their functioning and for better data protection.
  */
-@Entity(name = "unfinished_request")
-public class UnfinishedRequest {
+@Entity(name = "unfinished_request_telegram")
+public class UnfinishedRequestTelegram {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "id_chat")
+    @OneToOne
+    @JoinColumn(name = "id_chat_telegram")
     private Chat chat;
+
     private String command;
 
-    public UnfinishedRequest() {
+    public UnfinishedRequestTelegram() {
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public Chat getChat() {
         return chat;

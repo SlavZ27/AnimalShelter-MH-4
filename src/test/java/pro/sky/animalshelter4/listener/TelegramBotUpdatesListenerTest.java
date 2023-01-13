@@ -15,17 +15,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.CallRequest;
+import pro.sky.animalshelter4.entity.User;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.info.InfoAboutShelter;
 import pro.sky.animalshelter4.info.InfoTakeADog;
 import pro.sky.animalshelter4.repository.CallRequestRepository;
 import pro.sky.animalshelter4.repository.ChatRepository;
+import pro.sky.animalshelter4.repository.UserRepository;
 import pro.sky.animalshelter4.service.*;
 
 import java.time.LocalDateTime;
@@ -51,11 +51,15 @@ class TelegramBotUpdatesListenerTest {
     @Autowired
     private ChatService chatService;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
     private CallRequestRepository callRequestRepository;
     @Autowired
     private CallRequestService callRequestService;
     @Autowired
-    private MapperService mapperService;
+    private TelegramMapperService telegramMapperService;
     @Autowired
     private TelegramBotSenderService telegramBotSenderService;
     private TelegramBotContentSaver telegramBotContentSaver = new TelegramBotContentSaver("./materials", telegramBotSenderService, telegramBot);
@@ -73,17 +77,22 @@ class TelegramBotUpdatesListenerTest {
     @BeforeEach
     public void generateData() {
         callRequestRepository.deleteAll();
+        userRepository.deleteAll();
         chatRepository.deleteAll();
 
-        for (int i = 0; i < 1; i++) {
-            Chat chatVolunteer = generator.generateChat(-1L, "", "", "", "", true, true);
-            chatRepository.save(chatVolunteer);
+        for (int i = 0; i < 2; i++) {
+            Chat chatVolunteer = generator.generateChat(-1L, "", "", "", null, true);
+            chatVolunteer = chatRepository.save(chatVolunteer);
+            User userVolunteer = generator.generateUser(null, null, chatVolunteer, null, null, true, true);
+            userVolunteer = userRepository.save(userVolunteer);
             for (int j = 0; j < 10; j++) {
-                Chat chatClient = generator.generateChat(-1L, "", "", "", "", false, true);
-                chatRepository.save(chatClient);
+                Chat chatClient = generator.generateChat(-1L, "", "", "", null, true);
+                chatClient = chatRepository.save(chatClient);
+                User userClient = generator.generateUser(null, null, chatClient, null, null, false, true);
+                userClient = userRepository.save(userClient);
                 CallRequest callRequest = new CallRequest();
-                callRequest.setChatVolunteer(chatVolunteer);
-                callRequest.setChatClient(chatClient);
+                callRequest.setVolunteer(userVolunteer);
+                callRequest.setClient(userClient);
                 callRequest.setOpen(false);
                 callRequest.setLocalDateTimeClose(generator.generateDateTime(true, LocalDateTime.now()));
                 callRequest.setLocalDateTimeOpen(generator.generateDateTime(true, callRequest.getLocalDateTimeClose()));
@@ -95,6 +104,7 @@ class TelegramBotUpdatesListenerTest {
     @AfterEach
     public void clearData() {
         callRequestRepository.deleteAll();
+        userRepository.deleteAll();
         chatRepository.deleteAll();
     }
 
@@ -105,7 +115,9 @@ class TelegramBotUpdatesListenerTest {
         assertThat(chatService).isNotNull();
         assertThat(callRequestRepository).isNotNull();
         assertThat(callRequestService).isNotNull();
-        assertThat(mapperService).isNotNull();
+        assertThat(userRepository).isNotNull();
+        assertThat(userService).isNotNull();
+        assertThat(telegramMapperService).isNotNull();
         assertThat(telegramBotSenderService).isNotNull();
         assertThat(telegramBotContentSaver).isNotNull();
         assertThat(telegramBotUpdatesService).isNotNull();
@@ -263,24 +275,34 @@ class TelegramBotUpdatesListenerTest {
      */
     @Test
     public void CALL_REQUESTTest() {
-        int countCallRequestRepository = callRequestRepository.findAll().size();
         Long id1 = 50L;
-        String name1 = generator.generateNameIfEmpty("");
+        String firstName1 = generator.generateNameIfEmpty("");
+        String lastName1 = generator.generateNameIfEmpty("");
         String userName1 = generator.generateNameIfEmpty("");
+        String phone1 = generator.generatePhoneIfEmpty("3456787654");
         boolean isVolunteer1 = false;
+
         Long id2 = 51L;
-        String name2 = generator.generateNameIfEmpty("");
         String userName2 = generator.generateNameIfEmpty("");
+        String firstName2 = generator.generateNameIfEmpty("");
+        String lastName2 = generator.generateNameIfEmpty("");
+        String phone2 = generator.generatePhoneIfEmpty("484.673.2029");
+        boolean isVolunteer2 = false;
+
         String command = Command.CALL_REQUEST.getTextCommand();
 
         List<Update> updateList = new ArrayList<>(List.of(
-                generator.generateUpdateCallbackQueryWithReflection(userName1, name1, "", id1, command, false),
-                generator.generateUpdateCallbackQueryWithReflection(userName2, name2, "", id2, command, false)));
-        Chat chatExist = generator.generateChat(id1, name1, userName1, null, null, isVolunteer1, false);
-        chatRepository.save(chatExist);
-        Chat chatVolunteer = chatService.getChatOfVolunteer();
+                generator.generateUpdateCallbackQueryWithReflection(userName1, firstName1, lastName1, id1, command, false),
+                generator.generateUpdateCallbackQueryWithReflection(userName2, firstName2, lastName2, id2, command, false)));
 
-        countCallRequestRepository = callRequestRepository.findAll().size();
+        Chat chatExist = generator.generateChat(id1, userName1, firstName1, lastName1, null, false);
+        chatExist = chatRepository.save(chatExist);
+        User userExist = generator.generateUser(null, firstName1 + " " + lastName1, chatExist, phone1, null, isVolunteer1, true);
+        userExist = userRepository.save(userExist);
+
+        Chat chatVolunteer = userService.getRandomVolunteer().getChatTelegram();
+
+        int countCallRequestRepository = callRequestRepository.findAll().size();
         //Volunteer is present
         telegramBotUpdatesListener.process(updateList);
         assertThat(callRequestRepository.findAll().size()).isEqualTo(countCallRequestRepository + 2);
@@ -298,9 +320,8 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(id1);
         Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(CallRequestService.MESSAGE_OK_VOLUNTEERS_FOUND);
 
-        Assertions.assertThat(actual1.getParameters().get("chat_id")).isEqualTo(chatVolunteer.getId());
         Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(
-                CallRequestService.MESSAGE_ABOUT_CALL_REQUEST + name1 + " @" + userName1 + "\n");
+                CallRequestService.MESSAGE_ABOUT_CALL_REQUEST + firstName1 + " " + lastName1 + " @" + userName1 + " " + phone1 + "\n");
 
         Assertions.assertThat(actual2.getParameters().get("chat_id")).isEqualTo(id1);
         Assertions.assertThat(actual2.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
@@ -308,22 +329,18 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual3.getParameters().get("chat_id")).isEqualTo(id2);
         Assertions.assertThat(actual3.getParameters().get("text")).isEqualTo(CallRequestService.MESSAGE_OK_VOLUNTEERS_FOUND);
 
-        Assertions.assertThat(actual4.getParameters().get("chat_id")).isEqualTo(chatVolunteer.getId());
-        Assertions.assertThat(actual4.getParameters().get("text")).isEqualTo(
-                CallRequestService.MESSAGE_ABOUT_CALL_REQUEST + name1 + " @" + userName1 + "\n" +
-                        CallRequestService.MESSAGE_ABOUT_CALL_REQUEST + name2 + " @" + userName2 + "\n");
-
         Assertions.assertThat(actual5.getParameters().get("chat_id")).isEqualTo(id2);
         Assertions.assertThat(actual5.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
 
         updateList = new ArrayList<>(List.of(
-                generator.generateUpdateCallbackQueryWithReflection("", name2, "", id2, command, false)));
+                generator.generateUpdateCallbackQueryWithReflection(userName2, firstName2, lastName2, id2, command, false)));
 
         callRequestRepository.deleteAll();
-        chatRepository.delete(chatVolunteer);
+        userRepository.deleteAll();
+        chatRepository.deleteAll();
 
         countCallRequestRepository = callRequestRepository.findAll().size();
-        //Volunteer is present
+        //Volunteer is absent
         telegramBotUpdatesListener.process(updateList);
         assertThat(callRequestRepository.findAll().size()).isEqualTo(countCallRequestRepository);
 
@@ -347,25 +364,33 @@ class TelegramBotUpdatesListenerTest {
     @Test
     public void permissionTest() {
         Long id1 = 50L;
-        String name1 = generator.generateNameIfEmpty("");
+        String firstName1 = generator.generateNameIfEmpty("");
+        String lastName1 = generator.generateNameIfEmpty("");
         String userName1 = generator.generateNameIfEmpty("");
+        String phone1 = generator.generatePhoneIfEmpty("3456787654");
         boolean isVolunteer1 = true;
 
         Long id2 = 51L;
-        String name2 = generator.generateNameIfEmpty("");
         String userName2 = generator.generateNameIfEmpty("");
+        String firstName2 = generator.generateNameIfEmpty("");
+        String lastName2 = generator.generateNameIfEmpty("");
+        String phone2 = generator.generatePhoneIfEmpty("484.673.2029");
         boolean isVolunteer2 = false;
 
         //Command.CALL_REQUEST is not available to the volunteer
         String command = Command.CALL_REQUEST.getTextCommand();
 
         List<Update> updateList = new ArrayList<>(List.of(
-                generator.generateUpdateCallbackQueryWithReflection(userName1, name1, "", id1, command, false),
-                generator.generateUpdateCallbackQueryWithReflection(userName2, name2, "", id2, command, false)));
-        Chat chatVolunteer = generator.generateChat(id1, name1, userName1, null, null, isVolunteer1, false);
-        Chat chatClient = generator.generateChat(id2, name2, userName2, null, null, isVolunteer2, false);
-        chatRepository.save(chatVolunteer);
-        chatRepository.save(chatClient);
+                generator.generateUpdateCallbackQueryWithReflection(userName1, firstName1, lastName1, id1, command, false),
+                generator.generateUpdateCallbackQueryWithReflection(userName2, firstName2, lastName2, id2, command, false)));
+        Chat chatVolunteer = generator.generateChat(id1, userName1, firstName1, lastName1, null, false);
+        chatVolunteer = chatRepository.save(chatVolunteer);
+        User userVolunteer = generator.generateUser(null, firstName1 + " " + lastName1, chatVolunteer, null, null, isVolunteer1, true);
+        userVolunteer = userRepository.save(userVolunteer);
+        Chat chatClient = generator.generateChat(id2, userName2, firstName2, lastName2, null, false);
+        chatClient = chatRepository.save(chatClient);
+        User userClient = generator.generateUser(null, firstName2 + " " + lastName2, chatClient, phone2, null, isVolunteer2, true);
+        userClient = userRepository.save(userClient);
 
         telegramBotUpdatesListener.process(updateList);
         ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
@@ -386,8 +411,7 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual2.getParameters().get("chat_id")).isEqualTo(id2);
         Assertions.assertThat(actual2.getParameters().get("text")).isEqualTo(CallRequestService.MESSAGE_OK_VOLUNTEERS_FOUND);
 
-        Assertions.assertThat(actual3.getParameters().get("chat_id")).isEqualTo(id1);
-        Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+        Assertions.assertThat(actual3.getParameters().get("text")).isEqualTo(CallRequestService.MESSAGE_ABOUT_CALL_REQUEST + firstName2 + " " + lastName2 + " @" + userName2 + " " + phone2 + "\n");
 
         Assertions.assertThat(actual4.getParameters().get("chat_id")).isEqualTo(id2);
         Assertions.assertThat(actual4.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
