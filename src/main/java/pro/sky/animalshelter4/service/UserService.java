@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+/**
+ * A class that handles user management.
+ * Contains methods according to the res architecture.
+ * And additional methods to simplify data management.
+ */
 @Service
 public class UserService {
 

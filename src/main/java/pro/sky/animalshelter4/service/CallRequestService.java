@@ -46,7 +46,7 @@ public class CallRequestService {
      * This method handles requests received from TelegrammBotSenderServes.
      * They will determine which response to the command to send if the volunteer is on site or not.
      * In addition, the method outputs a message {@link TelegramBotSenderService#sendMessage }
-     * As well as methods from the following classes {@link CallRequestService#sendNotificationAboutAllCallRequestToTelegram(Long)}
+     * As well as methods from the following classes {@link CallRequestService#sendNotificationAboutAllCallRequestToTelegram(User)}
      * And {@link ChatService#getChatByIdOrNew(Long)}
      * Method from repository {@link CallRequestRepository#getFirstOpenByUserIdForClient(Long)}
      *
