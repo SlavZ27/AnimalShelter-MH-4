@@ -13,11 +13,11 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
 
-    @Query(value = "select users.* from users,telegram_chat where users.id_telegram_chat=telegram_chat.id and telegram_chat.id=:idChat and users.is_volunteer=true"
+    @Query(value = "select users.* from users where users.id_telegram_chat=:idChat and users.is_volunteer=true"
             , nativeQuery = true)
     User getByIdTelegramChatAndVolunteer(Long idChat);
 
-    @Query(value = "select users.* from users,telegram_chat where users.id_telegram_chat=telegram_chat.id and telegram_chat.id=:idChat"
+    @Query(value = "select users.* from users,telegram_chat where users.id_telegram_chat=:idChat"
             , nativeQuery = true)
     User getByIdTelegramChat(Long idChat);
 

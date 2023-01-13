@@ -367,8 +367,10 @@
       <point x="26.250841750841687" y="14.0" />
     </edge>
   </edges>
-  <settings layout="Hierarchic" zoom="0.9416666666666667" showDependencies="true" x="930.0" y="499.50000000000006" />
-  <SelectedNodes />
+  <settings layout="Hierarchic" zoom="0.4821333333333336" showDependencies="true" x="863.910398230088" y="650.64767699115" />
+  <SelectedNodes>
+    <node>pro.sky.animalshelter4.configuration.TelegramBotConfiguration</node>
+  </SelectedNodes>
   <Categories />
   <SCOPE>All</SCOPE>
   <VISIBILITY>private</VISIBILITY>

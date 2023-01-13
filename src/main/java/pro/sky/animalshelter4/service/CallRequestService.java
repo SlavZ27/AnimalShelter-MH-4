@@ -8,6 +8,7 @@ import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.entity.User;
 import pro.sky.animalshelter4.entityDto.CallRequestDto;
 import pro.sky.animalshelter4.exception.CallRequestNotFoundException;
+import pro.sky.animalshelter4.exception.ChatNotFoundException;
 import pro.sky.animalshelter4.model.UpdateDPO;
 import pro.sky.animalshelter4.repository.CallRequestRepository;
 
@@ -46,7 +47,7 @@ public class CallRequestService {
      * This method handles requests received from TelegrammBotSenderServes.
      * They will determine which response to the command to send if the volunteer is on site or not.
      * In addition, the method outputs a message {@link TelegramBotSenderService#sendMessage }
-     * As well as methods from the following classes {@link CallRequestService#sendNotificationAboutAllCallRequestToTelegram(Long)}
+     * As well as methods from the following classes {@link CallRequestService#sendNotificationAboutAllCallRequestToTelegram}
      * And {@link ChatService#getChatByIdOrNew(Long)}
      * Method from repository {@link CallRequestRepository#getFirstOpenByUserIdForClient(Long)}
      *
@@ -166,7 +167,12 @@ public class CallRequestService {
         logger.info("Method updateCallRequest was start for update callRequest");
         CallRequest newCallRequest = dtoMapperService.toEntity(callRequestDto);
         CallRequest oldCallRequest = findCallRequest(newCallRequest.getId());
+        if (oldCallRequest == null) {
+            throw new CallRequestNotFoundException(String.valueOf(newCallRequest.getId()));
+        }
         oldCallRequest.setOpen(newCallRequest.isOpen());
+        oldCallRequest.setVolunteer(newCallRequest.getVolunteer());
+        oldCallRequest.setClient(newCallRequest.getClient());
         oldCallRequest.setLocalDateTimeOpen(newCallRequest.getLocalDateTimeOpen());
         oldCallRequest.setLocalDateTimeClose(newCallRequest.getLocalDateTimeClose());
         return dtoMapperService.toDto(callRequestRepository.save(oldCallRequest));
@@ -185,7 +191,7 @@ public class CallRequestService {
         }
         CallRequest callRequestFound = callRequestRepository.findById(callRequest.getId()).
                 orElseThrow(() -> new CallRequestNotFoundException(String.valueOf(callRequest.getId())));
-        callRequestRepository.delete(callRequest);
+        callRequestRepository.delete(callRequestFound);
         return callRequestFound;
     }
 

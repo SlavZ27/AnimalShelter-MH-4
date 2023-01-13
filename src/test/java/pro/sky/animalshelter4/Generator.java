@@ -54,17 +54,18 @@ public class Generator {
      */
     public LocalDateTime generateDateTime(boolean isPast, LocalDateTime localDateTime) {
         LocalDateTime tldt = LocalDateTime.now();
+        int year = tldt.getYear();
         if (isPast) {
             tldt = localDateTime.plusYears(1L);
             while (tldt.isBefore(localDateTime)) {
-                LocalDate localDate = LocalDate.of(genInt(2020, 2022), genInt(12), genInt(25));
+                LocalDate localDate = LocalDate.of(genInt(year-2, year), genInt(12), genInt(25));
                 LocalTime localTime = LocalTime.of(genInt(23), genInt(59));
                 tldt = LocalDateTime.of(localDate, localTime);
             }
         } else {
             tldt = localDateTime.minusYears(1L);
             while (tldt.isAfter(localDateTime)) {
-                LocalDate localDate = LocalDate.of(genInt(2020, 2022), genInt(12), genInt(25));
+                LocalDate localDate = LocalDate.of(genInt(year-2, year), genInt(12), genInt(25));
                 LocalTime localTime = LocalTime.of(genInt(23), genInt(59));
                 tldt = LocalDateTime.of(localDate, localTime);
             }
@@ -395,5 +396,9 @@ public class Generator {
             return faker.lordOfTheRings().character();
         }
         return message;
+    }
+
+    public boolean generateBool() {
+        return faker.bool().bool();
     }
 }

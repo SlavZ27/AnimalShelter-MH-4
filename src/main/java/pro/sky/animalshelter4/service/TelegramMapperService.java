@@ -186,46 +186,4 @@ public class TelegramMapperService {
         return sMas[indexWord];
     }
 
-    /**
-     * The method finds idChat in {@link Update} in {@link Update#message()} or {@link Update#callbackQuery()}
-     *
-     * @param update
-     * @return idChat or null
-     */
-    public Long toChatId(Update update) {
-        if (update.message() != null &&
-                update.message().from() != null &&
-                update.message().from().id() != null) {
-            return update.message().from().id();
-        } else if (update.callbackQuery() != null &&
-                update.callbackQuery().from() != null &&
-                update.callbackQuery().from().id() != null) {
-            return update.callbackQuery().from().id();
-        }
-        return null;
-    }
-
-    /**
-     * The method makes a string from {@link User}
-     * consisting of {@link User#firstName()} and {@link User#lastName()} <br>
-     * if firstName==null or firstName=="" <br> and <br> lastName==null or lastName=="" <br> then return {@link User#username()}
-     *
-     * @param {@link User}
-     * @return String of {@link User#firstName()} + " " + {@link User#lastName()} or {@link User#username()}
-     */
-    public String toUserName(User user) {
-        StringBuilder name = new StringBuilder();
-        if (isNotNullOrEmpty(user.firstName())) {
-            name.append(user.firstName());
-        }
-        if (isNotNullOrEmpty(user.lastName())) {
-            name.append(" ");
-            name.append(user.lastName());
-        }
-        if (name.length() == 0) {
-            return user.username();
-        }
-        return name.toString();
-    }
-
 }
