@@ -1,5 +1,6 @@
 package pro.sky.animalshelter4.service;
 
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -87,7 +88,13 @@ public class ChatService {
         logger.info("Method updateChat was start for update Chat");
         Chat newChat = dtoMapperService.toEntity(chatDto);
         Chat oldChat = findChat(newChat.getId());
-
+        if (oldChat == null) {
+            throw new ChatNotFoundException(String.valueOf(newChat.getId()));
+        }
+        oldChat.setFirstNameUser(newChat.getFirstNameUser());
+        oldChat.setLastNameUser(newChat.getLastNameUser());
+        oldChat.setUserNameTelegram(newChat.getUserNameTelegram());
+        oldChat.setLast_activity(newChat.getLast_activity());
         return dtoMapperService.toDto(chatRepository.save(oldChat));
     }
 
@@ -112,11 +119,11 @@ public class ChatService {
     public Chat deleteChat(Chat chat) {
         logger.info("Method deleteChat was start for delete Chat");
         if (chat.getId() == null) {
-            throw new IllegalArgumentException("Incorrect id user");
+            throw new IllegalArgumentException("Incorrect id chat");
         }
         Chat chatFound = chatRepository.findById(chat.getId()).
                 orElseThrow(() -> new ChatNotFoundException(String.valueOf(chat.getId())));
-        chatRepository.delete(chat);
+        chatRepository.delete(chatFound);
         return chatFound;
     }
 

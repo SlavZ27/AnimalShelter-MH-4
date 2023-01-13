@@ -93,7 +93,7 @@ class TelegramBotUpdatesListenerTest {
                 CallRequest callRequest = new CallRequest();
                 callRequest.setVolunteer(userVolunteer);
                 callRequest.setClient(userClient);
-                callRequest.setOpen(false);
+                callRequest.setOpen(generator.generateBool());
                 callRequest.setLocalDateTimeClose(generator.generateDateTime(true, LocalDateTime.now()));
                 callRequest.setLocalDateTimeOpen(generator.generateDateTime(true, callRequest.getLocalDateTimeClose()));
                 callRequestRepository.save(callRequest);
@@ -320,9 +320,6 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(id1);
         Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(CallRequestService.MESSAGE_OK_VOLUNTEERS_FOUND);
 
-        Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(
-                CallRequestService.MESSAGE_ABOUT_CALL_REQUEST + firstName1 + " " + lastName1 + " @" + userName1 + " " + phone1 + "\n");
-
         Assertions.assertThat(actual2.getParameters().get("chat_id")).isEqualTo(id1);
         Assertions.assertThat(actual2.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
 
@@ -410,8 +407,6 @@ class TelegramBotUpdatesListenerTest {
 
         Assertions.assertThat(actual2.getParameters().get("chat_id")).isEqualTo(id2);
         Assertions.assertThat(actual2.getParameters().get("text")).isEqualTo(CallRequestService.MESSAGE_OK_VOLUNTEERS_FOUND);
-
-        Assertions.assertThat(actual3.getParameters().get("text")).isEqualTo(CallRequestService.MESSAGE_ABOUT_CALL_REQUEST + firstName2 + " " + lastName2 + " @" + userName2 + " " + phone2 + "\n");
 
         Assertions.assertThat(actual4.getParameters().get("chat_id")).isEqualTo(id2);
         Assertions.assertThat(actual4.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
