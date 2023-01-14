@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.User;
-import pro.sky.animalshelter4.entity.User;
-import pro.sky.animalshelter4.entityDto.UserDto;
 import pro.sky.animalshelter4.entityDto.UserDto;
 import pro.sky.animalshelter4.exception.UserNotFoundException;
 import pro.sky.animalshelter4.repository.UserRepository;
@@ -22,16 +20,19 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
+    public final static String MESSAGE_BAD_PHONE = "Bad phone. Try again, please";
+
     private final UserRepository userRepository;
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final DtoMapperService dtoMapperService;
+    private final TelegramUnfinishedRequestService telegramUnfinishedRequestService;
     private final Random random = new Random();
 
-    public UserService(UserRepository userRepository, DtoMapperService dtoMapperService) {
+    public UserService(UserRepository userRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService) {
         this.userRepository = userRepository;
         this.dtoMapperService = dtoMapperService;
+        this.telegramUnfinishedRequestService = telegramUnfinishedRequestService;
     }
-
 
     public UserDto createUser(UserDto userDto) {
         logger.info("Method createUser was start for create new User");
@@ -108,16 +109,23 @@ public class UserService {
         return userRepository.getAllClients().stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
-    
+
     public boolean isUserWithTelegramChatIdVolunteer(Long idChatTelegram) {
         logger.info("Method isUserOfVolunteer was start for to check if the User with id = {} is a volunteer", idChatTelegram);
         User user = userRepository.getByIdTelegramChatAndVolunteer(idChatTelegram);
-        if (user!=null) {
+        if (user != null) {
             logger.debug("Method isVolunteer don't detected volunteer by idUser = {}", idChatTelegram);
             return true;
         }
         logger.debug("Method isVolunteer detected volunteer by idUser = {}", idChatTelegram);
         return false;
+    }
+
+    public void changePhone(User user, String phone) {
+        logger.info("Method changePhone was start for change phone by User id = {}",
+                user.getId());
+        user.setPhone(phone);
+        addUser(user);
     }
 
     public User getUserWithTelegramUserId(Long idUser) {
@@ -135,6 +143,5 @@ public class UserService {
         }
         return null;
     }
-    
-    
+
 }

@@ -4,8 +4,11 @@ import com.pengrad.telegrambot.model.Update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import pro.sky.animalshelter4.entity.Chat;
+import pro.sky.animalshelter4.entity.UnfinishedRequestTelegram;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.model.Command;
+import pro.sky.animalshelter4.model.InteractionUnit;
 import pro.sky.animalshelter4.model.UpdateDPO;
 
 import java.io.IOException;
@@ -19,18 +22,24 @@ import java.util.List;
 @Service
 public class TelegramBotUpdatesService {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesService.class);
+    private final TelegramUnfinishedRequestService telegramUnfinishedRequestService;
     private final TelegramBotSenderService telegramBotSenderService;
     private final TelegramMapperService telegramMapperService;
     private final TelegramBotContentSaver telegramBotContentSaver;
     private final CallRequestService callRequestService;
     private final CommandService commandService;
+    private final ChatService chatService;
+    private final UserService userService;
 
-    public TelegramBotUpdatesService(TelegramBotSenderService telegramBotSenderService, TelegramMapperService telegramMapperService, TelegramBotContentSaver telegramBotContentSaver, CallRequestService callRequestService, CommandService commandService) {
+    public TelegramBotUpdatesService(TelegramBotSenderService telegramBotSenderService, TelegramMapperService telegramMapperService, TelegramBotContentSaver telegramBotContentSaver, CallRequestService callRequestService, CommandService commandService, UserService userService, TelegramUnfinishedRequestService telegramUnfinishedRequestService, ChatService chatService) {
+        this.telegramUnfinishedRequestService = telegramUnfinishedRequestService;
         this.telegramBotSenderService = telegramBotSenderService;
         this.telegramMapperService = telegramMapperService;
         this.telegramBotContentSaver = telegramBotContentSaver;
         this.callRequestService = callRequestService;
         this.commandService = commandService;
+        this.userService = userService;
+        this.chatService = chatService;
     }
 
 
@@ -72,45 +81,79 @@ public class TelegramBotUpdatesService {
                 }
                 return;
             case MESSAGE:
-                telegramBotSenderService.sendSorryIKnowThis(updateDpo.getIdChat());
+                Command command = telegramUnfinishedRequestService.
+                        findUnfinishedRequestForChat(chatService.getChatByIdOrNew(updateDpo));
+                if (command == null) {
+                    telegramBotSenderService.sendSorryIKnowThis(updateDpo.getIdChat());
+                    return;
+                } else {
+                    updateDpo.setInteractionUnit(InteractionUnit.COMMAND);
+                    updateDpo.setCommand(command);
+                    processUpdateDpoWithCommand(updateDpo);
+                }
                 return;
             case COMMAND:
                 logger.info("ChatId={}; Method processUpdate launch process command = {}",
                         updateDpo.getIdChat(), updateDpo.getCommand());
-                if (updateDpo.getCommand() == null) {
-                    telegramBotSenderService.sendUnknownProcess(updateDpo.getIdChat());
-                    telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                } else {
-                    if (!commandService.approveLaunchCommand(updateDpo.getCommand(), updateDpo.getIdChat())) {
-                        logger.debug("ChatId={}; Method processUpdate detected no rights to execute command = {} ",
-                                updateDpo.getIdChat(), updateDpo.getCommand());
-                        telegramBotSenderService.sendSorryIKnowThis(updateDpo.getIdChat());
-                        return;
-                    }
-                    switch (updateDpo.getCommand()) {
-                        case START:
-                            System.out.println("Detected enter : " +
-                                    updateDpo.getIdChat() + " / " + updateDpo.getUserName());
-                            telegramBotSenderService.sendHello(updateDpo.getIdChat(),
-                                    updateDpo.getFirstName() + " " + updateDpo.getLastName());
-                            break;
-                        case INFO:
-                            telegramBotSenderService.sendInfoAboutShelter(updateDpo.getIdChat());
-                            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                            break;
-                        case HOW:
-                            telegramBotSenderService.sendHowTakeDog(updateDpo.getIdChat());
-                            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                            break;
-                        case CALL_REQUEST:
-                            callRequestService.process(updateDpo);
-                            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                            break;
-                        case EMPTY_CALLBACK_DATA_FOR_BUTTON:
-                            return;
-                    }
-                }
+                processUpdateDpoWithCommand(updateDpo);
+                return;
         }
+    }
+
+    public void processUpdateDpoWithCommand(UpdateDPO updateDpo) {
+        if (updateDpo.getCommand() == null) {
+            telegramBotSenderService.sendUnknownProcess(updateDpo.getIdChat());
+            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+        } else {
+            if (!commandService.approveLaunchCommand(updateDpo.getCommand(), updateDpo.getIdChat())) {
+                logger.debug("ChatId={}; Method processUpdate detected no rights to execute command = {} ",
+                        updateDpo.getIdChat(), updateDpo.getCommand());
+                telegramBotSenderService.sendSorryIKnowThis(updateDpo.getIdChat());
+                return;
+            }
+            switch (updateDpo.getCommand()) {
+                case START:
+                    System.out.println("Detected enter : " +
+                            updateDpo.getIdChat() + " / " + updateDpo.getUserName());
+                    telegramBotSenderService.sendHello(updateDpo.getIdChat(),
+                            updateDpo.getFirstName() + " " + updateDpo.getLastName());
+                    break;
+                case INFO:
+                    telegramBotSenderService.sendInfoAboutShelter(updateDpo.getIdChat());
+                    telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+                    break;
+                case HOW:
+                    telegramBotSenderService.sendHowTakeDog(updateDpo.getIdChat());
+                    telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+                    break;
+                case CALL_REQUEST:
+                    callRequestService.process(updateDpo);
+                    break;
+                case CALL_CLIENT:
+                    callRequestService.sendNotificationAboutCallRequestsToTelegram(
+                            userService.getUserWithTelegramUserId(updateDpo.getIdChat()), true);
+                    telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+                    break;
+                case CLOSE_CALL_REQUEST:
+                    callRequestService.closeCallRequest(
+                            userService.getUserWithTelegramUserId(updateDpo.getIdChat()),
+                            telegramMapperService.mapStringToLong(updateDpo.getMessage()));
+                    telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+                    break;
+                case CHANGE_PHONE:
+                    chatService.changePhoneUser(
+                            chatService.getChatByIdOrNew(updateDpo.getIdChat()),
+                            updateDpo.getMessage());
+                    break;
+                case CLOSE_UNFINISHED_REQUEST:
+                    telegramUnfinishedRequestService.delUnfinishedRequestForChat(
+                            chatService.getChatByIdOrNew(updateDpo));
+                    telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
+                case EMPTY_CALLBACK_DATA_FOR_BUTTON:
+                    return;
+            }
+        }
+
     }
 
     /**

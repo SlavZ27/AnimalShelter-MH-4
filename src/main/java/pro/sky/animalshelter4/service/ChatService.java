@@ -1,14 +1,17 @@
 package pro.sky.animalshelter4.service;
 
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.exception.ChatNotFoundException;
+import pro.sky.animalshelter4.exception.BadPhoneNumber;
+import pro.sky.animalshelter4.model.Command;
+import pro.sky.animalshelter4.model.UpdateDPO;
 import pro.sky.animalshelter4.repository.ChatRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,11 +24,28 @@ public class ChatService {
 
     private final ChatRepository chatRepository;
     private final DtoMapperService dtoMapperService;
+    private final TelegramUnfinishedRequestService telegramUnfinishedRequestService;
     private final Logger logger = LoggerFactory.getLogger(ChatService.class);
+    private final TelegramBotSenderService telegramBotSenderService;
+    private final UserService userService;
 
-    public ChatService(ChatRepository chatRepository, DtoMapperService dtoMapperService) {
+    public ChatService(ChatRepository chatRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService, TelegramBotSenderService telegramBotSenderService, UserService userService) {
         this.chatRepository = chatRepository;
         this.dtoMapperService = dtoMapperService;
+        this.telegramUnfinishedRequestService = telegramUnfinishedRequestService;
+        this.telegramBotSenderService = telegramBotSenderService;
+        this.userService = userService;
+    }
+
+    public Chat getChatByIdOrNew(UpdateDPO updateDPO) {
+        logger.info("Method getChatByIdOrNew was start for find Chat by id = {}, or return new Chat",
+                updateDPO.getIdChat());
+        Chat chat = getChatByIdOrNew(updateDPO.getIdChat());
+        chat.setUserNameTelegram(updateDPO.getUserName());
+        chat.setFirstNameUser(updateDPO.getFirstName());
+        chat.setLastNameUser(updateDPO.getLastName());
+        chat.setLast_activity(LocalDateTime.now());
+        return addChat(chat);
     }
 
     /**
@@ -131,6 +151,27 @@ public class ChatService {
         logger.info("Method getAll was start for return all Chats");
         return chatRepository.findAll().stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
+    }
+
+    public void startChangePhoneByUserFromTelegram(Chat chat) {
+        telegramUnfinishedRequestService.addUnfinishedRequestForChat(chat, Command.CHANGE_PHONE);
+        telegramBotSenderService.sendIDontKnowYourPhoneWriteIt(chat.getId());
+    }
+
+    public void changePhoneUser(Chat chat, String phone) {
+        logger.info("Method tryChangePhoneFromTelegram was start for change phone by User with chat id = {}",
+                chat.getId());
+        try {
+            userService.changePhone(userService.getUserWithTelegramUserId(chat.getId()), phone);
+        } catch (BadPhoneNumber e) {
+            telegramBotSenderService.sendMessageWithButtonCancel(
+                    chat.getId(),
+                    UserService.MESSAGE_BAD_PHONE,
+                    TelegramBotSenderService.NAME_BUTTON_FOR_CANCEL);
+            return;
+        }
+        telegramUnfinishedRequestService.delUnfinishedRequestForChat(chat);
+        telegramBotSenderService.sendButtonsCommandForChat(chat.getId());
     }
 
 }

@@ -2,6 +2,7 @@ package pro.sky.animalshelter4.service;
 
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -184,6 +185,13 @@ public class TelegramMapperService {
         }
         logger.debug("Method toWord return {}", sMas[indexWord]);
         return sMas[indexWord];
+    }
+
+    public Long mapStringToLong(String message) {
+        if (!StringUtils.isNumeric(message)) {
+            throw new IllegalArgumentException(message);
+        }
+        return Long.parseLong(message, 10);
     }
 
 }

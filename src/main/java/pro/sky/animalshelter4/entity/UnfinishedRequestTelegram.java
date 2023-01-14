@@ -11,6 +11,7 @@ import javax.persistence.*;
 @Entity(name = "unfinished_request_telegram")
 public class UnfinishedRequestTelegram {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne
     @JoinColumn(name = "id_chat_telegram")

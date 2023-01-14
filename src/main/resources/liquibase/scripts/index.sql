@@ -155,3 +155,8 @@ CREATE TABLE unfinished_request_telegram
     id_chat_telegram BIGINT REFERENCES telegram_chat (id),
     command          TEXT NOT NULL
 );
+--changeset zaytsev:19
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='unfinished_request_telegram'
+--onFail=MARK_RAN
+alter TABLE unfinished_request_telegram
+    alter column id add generated always as identity;

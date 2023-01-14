@@ -33,11 +33,11 @@ public enum Command {
     /**
      * The command is used to call information about the shelter
      */
-    INFO(1, "/info", "About shelter", true, true, true),
+    INFO(1, "/info", "About", true, true, true),
     /**
      * The command is used to call information about how to take an animal from a shelter
      */
-    HOW(2, "/HOW", "Take a dog?", true, true, true),
+    HOW(2, "/HOW", "Dog?", true, true, true),
     /**
      * The command is used by the client to create a callback request
      */
@@ -46,6 +46,9 @@ public enum Command {
      * The command is used by a volunteer to call up a list of users who created a callback request
      */
     CALL_CLIENT(4, "/CALL_CLIENT", "Call client", true, false, true),
+    CLOSE_CALL_REQUEST(5, "/CLOSE_CALL_REQUEST", "Close req", false, false, true),
+    CHANGE_PHONE(6, "/CHANGE_PHONE", "phone", false, true, false),
+    CLOSE_UNFINISHED_REQUEST(6, "/CLOSE_UNFINISHED_REQUEST", "Cancel", false, true, false),
     /**
      * The command is used to add it to dummy buttons. Clicking on such buttons does nothing
      */
@@ -114,6 +117,7 @@ public enum Command {
     /**
      * The method uses brute-force String-parsing on the {@link Command#values()#textCommand}.
      * using {@link String#equalsIgnoreCase(String)}
+     *
      * @param textCommand must be not null
      * @return outputs instance of the class or null
      */
@@ -130,6 +134,7 @@ public enum Command {
      * The method uses the native {@link Command#valueOf(String)} of returning an instance of the class.
      * For the normal operation of {@link Command#fromStringUpperCase(String)}, {@link Command#name()}
      * and {@link Command#textCommand} must meet the requirements <b>textCommand.substring(1).toUpperCase() = name
+     *
      * @param textCommand must be not null
      * @return outputs instance of the class or null
      */
