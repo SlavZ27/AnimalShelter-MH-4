@@ -97,7 +97,6 @@ public class CallRequestService {
      * The method from telegrammBotSendlerServes {@link TelegramBotSenderService#sendMessage(Long, String)}
      * The request list must be greater than 0.
      * Also, the method outputs a message from{@link CallRequestService#MESSAGE_ABOUT_CALL_REQUEST}
-     *
      * @param user must be not null
      */
     public void sendNotificationAboutAllCallRequestToTelegram(User user) {
@@ -125,7 +124,6 @@ public class CallRequestService {
     /**
      * This method outputs all the Hat_ids to the volunteer.
      * Using the repository method {@link CallRequestRepository#getAllOpenByUserIdForClient(Long)}
-     *
      * @param idUser must be not null
      * @return
      */

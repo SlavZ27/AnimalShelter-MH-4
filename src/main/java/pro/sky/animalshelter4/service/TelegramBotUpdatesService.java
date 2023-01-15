@@ -43,7 +43,6 @@ public class TelegramBotUpdatesService {
      * and command {@link Command} and other parameters, the next action is selected.
      * The method terminates if it detects an {@link Command#EMPTY_CALLBACK_DATA_FOR_BUTTON} in {@link Update},
      * or when receiving an unexpected {@link Update}, when null comes from {@link TelegramMapperService#toDPO(Update)}.
-     *
      * @param update
      */
     public void processUpdate(Update update) {
