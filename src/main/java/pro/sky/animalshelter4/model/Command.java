@@ -48,7 +48,11 @@ public enum Command {
     CALL_CLIENT(4, "/CALL_CLIENT", "Call client", true, false, false, true),
     CLOSE_CALL_REQUEST(5, "/CLOSE_CALL_REQUEST", "Close req", false, false, false, true),
     CHANGE_PHONE(6, "/CHANGE_PHONE", "phone", false, true, true, false),
-    CREATE_OWNERSHIP(7, "/CREATE_OWNERSHIP", "Own", false, false, false, true),
+    ADD_ANIMAL(7, "/ADD_ANIMAL", "Add animal", true, false, false, true),
+    COMPLEMENT_ANIMAL(7, "/COMPLEMENT_ANIMAL", "Complement animal", true, false, false, true),
+    CREATE_OWNERSHIP(8, "/CREATE_OWNERSHIP", "Own", true, false, false, true),
+    REPORT(9, "/REPORT", "Report", true, false, true, false),
+    CALENDAR(79, "/CALENDAR", "Calendar", false, true, true, true),
     CLOSE_UNFINISHED_REQUEST(80, "/CLOSE_UNFINISHED_REQUEST", "Cancel", false, true, true, true),
     /**
      * The command is used to add it to dummy buttons. Clicking on such buttons does nothing

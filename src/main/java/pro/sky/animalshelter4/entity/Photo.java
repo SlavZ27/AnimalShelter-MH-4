@@ -8,7 +8,7 @@ public class Photo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @JoinColumn(name = "id_media")
-    private Long idMedia;
+    private String idMedia;
 
     public Photo() {
     }
@@ -21,11 +21,11 @@ public class Photo {
         this.id = id;
     }
 
-    public Long getIdMedia() {
+    public String getIdMedia() {
         return idMedia;
     }
 
-    public void setIdMedia(Long idMedia) {
+    public void setIdMedia(String idMedia) {
         this.idMedia = idMedia;
     }
 }

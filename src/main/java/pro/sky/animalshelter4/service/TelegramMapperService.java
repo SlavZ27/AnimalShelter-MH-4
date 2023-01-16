@@ -1,20 +1,13 @@
 package pro.sky.animalshelter4.service;
 
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.User;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import pro.sky.animalshelter4.entity.CallRequest;
-import pro.sky.animalshelter4.entity.Chat;
-import pro.sky.animalshelter4.entityDto.CallRequestDto;
-import pro.sky.animalshelter4.entityDto.ChatDto;
-import pro.sky.animalshelter4.exception.ChatNotFoundException;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.InteractionUnit;
 import pro.sky.animalshelter4.model.UpdateDPO;
-import pro.sky.animalshelter4.repository.ChatRepository;
 
 
 /**

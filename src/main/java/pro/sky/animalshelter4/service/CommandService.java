@@ -15,7 +15,7 @@ import static pro.sky.animalshelter4.model.Command.*;
 
 /**
  * The class contains methods for working with {@link Command}.
- * The logic of executing and issuing only commands available to {@link pro.sky.animalshelter4.entity.Chat}.
+ * The logic of executing and issuing only commands available to {@link Chat}.
  * Depending on the {@link Chat#getId()} ()}
  */
 @Service
@@ -29,7 +29,7 @@ public class CommandService {
     }
 
     /**
-     * The method checks whether the command is available to the {@link pro.sky.animalshelter4.entity.Chat}
+     * The method checks whether the command is available to the {@link Chat}
      * for execution. The data for the solution is taken from {@link Command}.
      * The method must be executed after receiving and parsing the necessary data and before executing commands
      * using {@link UserService#isUserWithTelegramChatIdVolunteer(Long)} (Long)}
@@ -39,14 +39,13 @@ public class CommandService {
      * @return true if the command is available to the user, else false
      */
     public boolean approveLaunchCommand(Command command, Long idChat) {
-        if (command.isVolunteer()) {
-            return userService.isUserWithTelegramChatIdVolunteer(idChat);
-        } else if (command.isOwner()) {
-            return userService.isUserWithTelegramChatIdVolunteer(idChat);
-        } else if (command.isClient()) {
-            return true;
+        if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
+            return command.isVolunteer();
+        } else if (userService.isUserWithTelegramChatIdOwner(idChat)) {
+            return command.isOwner();
+        } else {
+            return command.isClient();
         }
-        return false;
     }
 
     /**

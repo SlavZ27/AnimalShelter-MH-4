@@ -49,4 +49,19 @@ public class Animal {
     public void setNameAnimal(String nameAnimal) {
         this.nameAnimal = nameAnimal;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("Animal ");
+        if (animalType != null) {
+            sb.append(animalType.getTypeAnimal());
+            sb.append(" ");
+        }
+        sb.append(nameAnimal);
+        sb.append(" ");
+        if (born != null) {
+            sb.append(born.toString());
+        }
+        return sb.toString();
+    }
 }

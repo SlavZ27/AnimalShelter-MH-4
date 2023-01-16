@@ -55,13 +55,25 @@ public class TelegramBotUpdatesService {
             logger.debug("Method processUpdate detected null updateDpo");
             return;
         }
+        if (updateDpo.getInteractionUnit() == null) {
+            logger.debug("Method processUpdate detected null updateDpo.getInteractionUnit()");
+            return;
+        }
         switch (updateDpo.getInteractionUnit()) {
             case PHOTO:
                 logger.debug("ChatId={}; Method processUpdate detected photo in message()", updateDpo.getIdChat());
-                chatService.savePhoto(update);
+                Command command = chatService.getUnfinishedRequestForChat(updateDpo);
+                if (command == null) {
+                    chatService.sendSorryIKnowThis(updateDpo.getIdChat());
+                    return;
+                } else {
+                    updateDpo.setInteractionUnit(InteractionUnit.COMMAND);
+                    updateDpo.setCommand(command);
+                    processUpdateDpoWithCommand(updateDpo);
+                }
                 return;
             case MESSAGE:
-                Command command = chatService.getUnfinishedRequestForChat(updateDpo);
+                command = chatService.getUnfinishedRequestForChat(updateDpo);
                 if (command == null) {
                     chatService.sendSorryIKnowThis(updateDpo.getIdChat());
                     return;
@@ -118,6 +130,15 @@ public class TelegramBotUpdatesService {
                     break;
                 case CREATE_OWNERSHIP:
                     chatService.createOwn(updateDpo);
+                    break;
+                case ADD_ANIMAL:
+                    chatService.addAnimal(updateDpo);
+                    break;
+                case COMPLEMENT_ANIMAL:
+                    chatService.complementAnimal(updateDpo);
+                    break;
+                case REPORT:
+                    chatService.report(updateDpo);
                     break;
                 case CLOSE_UNFINISHED_REQUEST:
                     chatService.closeUnfinishedRequest(updateDpo);

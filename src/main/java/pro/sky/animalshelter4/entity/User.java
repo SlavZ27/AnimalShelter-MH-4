@@ -16,7 +16,6 @@ public class User {
     private Chat chatTelegram;
     private String phone;
     private String address;
-    boolean isOwner;
     boolean isVolunteer;
 
     public User() {
@@ -28,17 +27,9 @@ public class User {
         this.chatTelegram = chatTelegram;
         this.phone = phone;
         this.address = address;
-        this.isOwner = isOwner;
         this.isVolunteer = isVolunteer;
     }
 
-    public boolean isOwner() {
-        return isOwner;
-    }
-
-    public void setOwner(boolean owner) {
-        isOwner = owner;
-    }
 
     public Long getId() {
         return id;

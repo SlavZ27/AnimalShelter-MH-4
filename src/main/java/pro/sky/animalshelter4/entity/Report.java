@@ -1,17 +1,12 @@
 package pro.sky.animalshelter4.entity;
 
-import net.bytebuddy.description.modifier.Ownership;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 public class Report {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToOne
     @JoinColumn(name = "id_animal_ownership")
@@ -25,5 +20,62 @@ public class Report {
     @JoinColumn(name = "id_photo")
     private Photo photo;
 
+    public Report() {
+    }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public AnimalOwnership getAnimalOwnership() {
+        return animalOwnership;
+    }
+
+    public void setAnimalOwnership(AnimalOwnership animalOwnership) {
+        this.animalOwnership = animalOwnership;
+    }
+
+    public LocalDate getReportDate() {
+        return reportDate;
+    }
+
+    public void setReportDate(LocalDate reportDate) {
+        this.reportDate = reportDate;
+    }
+
+    public String getDiet() {
+        return diet;
+    }
+
+    public void setDiet(String diet) {
+        this.diet = diet;
+    }
+
+    public String getFeeling() {
+        return feeling;
+    }
+
+    public void setFeeling(String feeling) {
+        this.feeling = feeling;
+    }
+
+    public String getBehavior() {
+        return behavior;
+    }
+
+    public void setBehavior(String behavior) {
+        this.behavior = behavior;
+    }
+
+    public Photo getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Photo photo) {
+        this.photo = photo;
+    }
 }

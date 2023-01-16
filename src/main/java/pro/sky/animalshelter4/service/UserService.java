@@ -3,14 +3,15 @@ package pro.sky.animalshelter4.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import pro.sky.animalshelter4.entity.CallRequest;
-import pro.sky.animalshelter4.entity.Chat;
-import pro.sky.animalshelter4.entity.User;
+import pro.sky.animalshelter4.entity.*;
 import pro.sky.animalshelter4.entityDto.UserDto;
+import pro.sky.animalshelter4.exception.AnimalOwnershipNotFoundException;
 import pro.sky.animalshelter4.exception.UserNotFoundException;
 import pro.sky.animalshelter4.exception.VolunteersIsAbsentException;
 import pro.sky.animalshelter4.repository.UserRepository;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -24,20 +25,29 @@ import java.util.stream.Collectors;
 public class UserService {
 
     public final static String MESSAGE_BAD_PHONE = "Bad phone. Try again, please";
-    public final static String MESSAGE_VOLUNTEERS_IS_ABSENT = "Sorry. All volunteers is absent";
+    public final static String CAPTION_SELECT_USER = "Select user";
+    public final static String MESSAGE_VOLUNTEERS_IS_ABSENT = "Sorry. All volunteers are absent";
+    public final static String MESSAGE_CLIENTS_IS_ABSENT = "Sorry. Clients are absent";
+    public final static String MESSAGE_CLIENT_NOT_FOUND = "Sorry. Client not found";
 
 
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
     private final DtoMapperService dtoMapperService;
     private final CallRequestService callRequestService;
-    private final Random random = new Random();
+    private final AnimalService animalService;
+    private final AnimalOwnershipService animalOwnershipService;
 
-    public UserService(UserRepository userRepository, DtoMapperService dtoMapperService, CallRequestService callRequestService) {
+    public UserService(UserRepository userRepository, DtoMapperService dtoMapperService, CallRequestService callRequestService, AnimalService animalService, AnimalOwnershipService animalOwnershipService) {
         this.userRepository = userRepository;
         this.dtoMapperService = dtoMapperService;
         this.callRequestService = callRequestService;
+        this.animalService = animalService;
+        this.animalOwnershipService = animalOwnershipService;
     }
+
+    private final Random random = new Random();
+
 
     public UserDto createUser(UserDto userDto) {
         logger.info("Method createUser was start for create new User");
@@ -109,10 +119,15 @@ public class UserService {
                 collect(Collectors.toList());
     }
 
-    public List<UserDto> getAllClients() {
-        logger.info("Method getAllClients was start for return all Users of Clients");
+    public List<UserDto> getAllClientsDto() {
+        logger.info("Method getAllClientsDto was start for return all Users of Clients");
         return userRepository.getAllClients().stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
+    }
+
+    public List<User> getAllClientsEntity() {
+        logger.info("Method getAllClientsEntity was start for return all Users of Clients");
+        return new ArrayList<>(userRepository.getAllClients());
     }
 
     public boolean isUserWithTelegramChatIdVolunteer(Long idChatTelegram) {
@@ -194,6 +209,29 @@ public class UserService {
     public void closeCallRequest(Chat chatVolunteer, Long idCallRequest) {
         User userVolunteer = getUserFromChat(chatVolunteer);
         callRequestService.closeCallRequest(userVolunteer, idCallRequest);
+    }
+
+    public AnimalOwnership createOwnershipAnimal(Long idUserClient, Long idAnimal) {
+        User userClient = userRepository.findById(idUserClient).orElseThrow(() ->
+                new UserNotFoundException(String.valueOf(idUserClient)));
+        Animal animal = animalService.findAnimal(idAnimal);
+
+        AnimalOwnership animalOwnership = new AnimalOwnership();
+        animalOwnership.setOwner(userClient);
+        animalOwnership.setAnimal(animal);
+        animalOwnership.setDateStartOwn(LocalDate.now());
+        animalOwnership.setDateEndTrial(LocalDate.now().plusDays(30));
+        return animalOwnershipService.addAnimalOwnership(animalOwnership);
+    }
+
+    public Report findOrCreateActualReport(Chat chatUserOwner) {
+        User userOwner = getUserFromChat(chatUserOwner);
+        return animalOwnershipService.findOrCreateActualReport(userOwner);
+    }
+
+    public Report createUpdateReport(Chat chatUserOwner, String diet, String feeling, String behavior, String idMedia) {
+        User userOwner = getUserFromChat(chatUserOwner);
+        return animalOwnershipService.createReport(userOwner, diet, feeling, behavior, idMedia);
     }
 
 

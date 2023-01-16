@@ -2,18 +2,13 @@ package pro.sky.animalshelter4.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.CallRequest;
-import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.entity.User;
 import pro.sky.animalshelter4.entityDto.CallRequestDto;
 import pro.sky.animalshelter4.exception.CallRequestNotFoundException;
 import pro.sky.animalshelter4.exception.CantCloseCallRequestException;
-import pro.sky.animalshelter4.model.Command;
-import pro.sky.animalshelter4.model.UpdateDPO;
 import pro.sky.animalshelter4.repository.CallRequestRepository;
-import pro.sky.animalshelter4.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

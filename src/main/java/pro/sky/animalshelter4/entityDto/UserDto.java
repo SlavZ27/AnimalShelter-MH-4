@@ -1,10 +1,5 @@
 package pro.sky.animalshelter4.entityDto;
 
-import pro.sky.animalshelter4.entity.Chat;
-
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-
 public class UserDto {
     private Long id;
     private String nameUser;

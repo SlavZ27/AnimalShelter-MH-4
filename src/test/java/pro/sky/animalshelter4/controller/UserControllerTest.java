@@ -17,8 +17,6 @@ import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.CallRequest;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.entity.User;
-import pro.sky.animalshelter4.entityDto.CallRequestDto;
-import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.entityDto.UserDto;
 import pro.sky.animalshelter4.repository.CallRequestRepository;
 import pro.sky.animalshelter4.repository.ChatRepository;

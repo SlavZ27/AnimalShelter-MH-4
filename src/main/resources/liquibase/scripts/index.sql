@@ -224,3 +224,12 @@ CREATE TABLE report
     behavior            text,
     id_photo            BIGINT REFERENCES photo (id)
 );
+--changeset zaytsev:28
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='users'
+--onFail=MARK_RAN
+alter table users
+    drop column is_owner;
+--changeset zaytsev:29
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='photo'
+--onFail=MARK_RAN
+alter TABLE photo alter column id_media type text;

@@ -3,7 +3,6 @@ package pro.sky.animalshelter4.exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pro.sky.animalshelter4.entity.Chat;
-import pro.sky.animalshelter4.service.CallRequestService;
 
 public class CantDeleteChatException extends RuntimeException{
     public CantDeleteChatException(String message) {
