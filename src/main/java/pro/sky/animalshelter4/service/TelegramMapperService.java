@@ -148,7 +148,6 @@ public class TelegramMapperService {
 
     /**
      * The method checks the string so that it is not null, or empty
-     *
      * @param s
      * @return true or false
      */
@@ -158,7 +157,6 @@ public class TelegramMapperService {
 
     /**
      * The method makes a single word from a string with many words
-     *
      * @param s,
      * @param indexWord
      * @return word with indexWord <br>
