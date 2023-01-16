@@ -29,30 +29,31 @@ public enum Command {
     /**
      * A command to greet the user and familiarize them with the available functions
      */
-    START(0, "/start", "START", false, true, true),
+    START(0, "/start", "START", false, true, true, true),
     /**
      * The command is used to call information about the shelter
      */
-    INFO(1, "/info", "About", true, true, true),
+    INFO(1, "/info", "About", true, true, true, true),
     /**
      * The command is used to call information about how to take an animal from a shelter
      */
-    HOW(2, "/HOW", "Dog?", true, true, true),
+    HOW(2, "/HOW", "Dog?", true, true, true, true),
     /**
      * The command is used by the client to create a callback request
      */
-    CALL_REQUEST(3, "/CALL_REQUEST", "Ask to call back", true, true, false),
+    CALL_REQUEST(3, "/CALL_REQUEST", "Ask to call back", true, true, true, false),
     /**
      * The command is used by a volunteer to call up a list of users who created a callback request
      */
-    CALL_CLIENT(4, "/CALL_CLIENT", "Call client", true, false, true),
-    CLOSE_CALL_REQUEST(5, "/CLOSE_CALL_REQUEST", "Close req", false, false, true),
-    CHANGE_PHONE(6, "/CHANGE_PHONE", "phone", false, true, false),
-    CLOSE_UNFINISHED_REQUEST(6, "/CLOSE_UNFINISHED_REQUEST", "Cancel", false, true, false),
+    CALL_CLIENT(4, "/CALL_CLIENT", "Call client", true, false, false, true),
+    CLOSE_CALL_REQUEST(5, "/CLOSE_CALL_REQUEST", "Close req", false, false, false, true),
+    CHANGE_PHONE(6, "/CHANGE_PHONE", "phone", false, true, true, false),
+    SET_OWNER(7, "/SET_OWN", "Set owner", false, false, false, true),
+    CLOSE_UNFINISHED_REQUEST(80, "/CLOSE_UNFINISHED_REQUEST", "Cancel", false, true, true, true),
     /**
      * The command is used to add it to dummy buttons. Clicking on such buttons does nothing
      */
-    EMPTY_CALLBACK_DATA_FOR_BUTTON(-1, "...", "", false, true, true);
+    EMPTY_CALLBACK_DATA_FOR_BUTTON(-1, "...", "", false, true, true, true);
 
 
     /**
@@ -75,18 +76,20 @@ public enum Command {
      * Responsible for the availability of the team from the client
      */
     private final boolean isClient;
+    private final boolean isOwner;
     /**
      * Responsible for the availability of the team from the volunteer
      */
     private final boolean isVolunteer;
 
-    Command(int order, String textCommand, String nameButton, boolean isShow, boolean isClient, boolean isVolunteer) {
+    Command(int order, String textCommand, String nameButton, boolean isShow, boolean isClient, boolean isOwner, boolean isVolunteer) {
         this.order = order;
         this.textCommand = textCommand;
         this.nameButton = nameButton;
         this.isShow = isShow;
         this.isClient = isClient;
         this.isVolunteer = isVolunteer;
+        this.isOwner = isOwner;
     }
 
     public int getOrder() {
@@ -113,6 +116,9 @@ public enum Command {
         return nameButton;
     }
 
+    public boolean isOwner() {
+        return isOwner;
+    }
 
     /**
      * The method uses brute-force String-parsing on the {@link Command#values()#textCommand}.
@@ -168,6 +174,12 @@ public enum Command {
     public static List<Command> getOnlyShowCommandForClient() {
         return getOnlyShowCommand().stream().
                 filter(command -> command.isClient).
+                collect(Collectors.toList());
+    }
+
+    public static List<Command> getOnlyShowCommandForOwner() {
+        return getOnlyShowCommand().stream().
+                filter(command -> command.isOwner).
                 collect(Collectors.toList());
     }
 

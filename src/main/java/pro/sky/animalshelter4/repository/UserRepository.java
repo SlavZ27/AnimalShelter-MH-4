@@ -17,6 +17,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
             , nativeQuery = true)
     User getByIdTelegramChatAndVolunteer(Long idChat);
 
+    @Query(value = "select users.* from users where users.id_telegram_chat=:idChat and users.is_owner=true"
+            , nativeQuery = true)
+    User getByIdTelegramChatAndOwner(Long idChat);
+
     @Query(value = "select users.* from users,telegram_chat where users.id_telegram_chat=:idChat"
             , nativeQuery = true)
     User getByIdTelegramChat(Long idChat);

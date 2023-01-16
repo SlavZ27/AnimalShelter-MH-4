@@ -160,3 +160,67 @@ CREATE TABLE unfinished_request_telegram
 --onFail=MARK_RAN
 alter TABLE unfinished_request_telegram
     alter column id add generated always as identity;
+--changeset zaytsev:20
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='unfinished_request_telegram'
+--onFail=MARK_RAN
+alter TABLE unfinished_request_telegram
+    add unique (id_chat_telegram);
+--changeset zaytsev:21
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='request_volunteer'
+--onFail=MARK_RAN
+drop table request_volunteer;
+--changeset zaytsev:22
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='users'
+--onFail=MARK_RAN
+alter table users
+    add column is_owner boolean default false;
+--changeset zaytsev:23
+--precondition-sql-check expectedResult:0 SELECT count(*) FROM pg_tables WHERE tablename='animal_type'
+--onFail=MARK_RAN
+CREATE TABLE animal_type
+(
+    id          BIGINT PRIMARY KEY generated always as identity,
+    type_animal TEXT NOT NULL
+);
+--changeset zaytsev:24
+--precondition-sql-check expectedResult:0 SELECT count(*) FROM pg_tables WHERE tablename='animal'
+--onFail=MARK_RAN
+CREATE TABLE animal
+(
+    id             BIGINT PRIMARY KEY generated always as identity,
+    name_animal    TEXT not null,
+    born           DATE,
+    id_animal_type BIGINT REFERENCES animal_type (id)
+);
+--changeset zaytsev:25
+--precondition-sql-check expectedResult:0 SELECT count(*) FROM pg_tables WHERE tablename='animal_ownership'
+--onFail=MARK_RAN
+CREATE TABLE animal_ownership
+(
+    id             BIGINT PRIMARY KEY generated always as identity,
+    id_user        BIGINT REFERENCES users (id),
+    id_animal      BIGINT REFERENCES animal (id),
+    date_start_own DATE,
+    date_end_trial DATE
+);
+--changeset zaytsev:26
+--precondition-sql-check expectedResult:0 SELECT count(*) FROM pg_tables WHERE tablename='photo'
+--onFail=MARK_RAN
+CREATE TABLE photo
+(
+    id       BIGINT PRIMARY KEY generated always as identity,
+    id_media BIGINT
+);
+--changeset zaytsev:27
+--precondition-sql-check expectedResult:0 SELECT count(*) FROM pg_tables WHERE tablename='report'
+--onFail=MARK_RAN
+CREATE TABLE report
+(
+    id                  BIGINT PRIMARY KEY generated always as identity,
+    id_animal_ownership BIGINT REFERENCES animal_ownership (id),
+    report_date         DATE,
+    diet                text,
+    feeling             text,
+    behavior            text,
+    id_photo            BIGINT REFERENCES photo (id)
+);

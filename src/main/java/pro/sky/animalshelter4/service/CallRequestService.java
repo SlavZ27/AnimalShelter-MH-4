@@ -13,6 +13,7 @@ import pro.sky.animalshelter4.exception.CantCloseCallRequestException;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.UpdateDPO;
 import pro.sky.animalshelter4.repository.CallRequestRepository;
+import pro.sky.animalshelter4.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,136 +30,41 @@ import java.util.stream.Collectors;
 public class CallRequestService {
     public final static String MESSAGE_YOU_HAVE_CALL_REQUEST = "You have call request by ";
     public final static String MESSAGE_YOU_DONT_HAVE_CALL_REQUEST = "You don't have any call request by ";
-    public final static String MESSAGE_VOLUNTEERS_IS_ABSENT = "Sorry. All volunteers is absent";
-    public final static String MESSAGE_OK_VOLUNTEERS_FOUND = "OK. Volunteer will call you";
+    public final static String MESSAGE_SUCCESSFUL_CREATION = "OK. Volunteer will call you";
     public final static String MESSAGE_YOU_CAN_CLOSE_CALL_REQUEST = "Press button with ID for close";
     public final static String MESSAGE_CALL_REQUEST_IS_CLOSE = "Call request closed";
-    private final UserService userService;
-    private final ChatService chatService;
+    public final static String MESSAGE_YOU_CANT_CLOSE_CALL_REQUEST = "You can't close call request";
+    public final static String MESSAGE_CALL_REQUEST_NOT_FOUND = "Call request not found";
     private final CallRequestRepository callRequestRepository;
-    private final TelegramBotSenderService telegramBotSenderService;
     private final DtoMapperService dtoMapperService;
-    private final TelegramUnfinishedRequestService telegramUnfinishedRequestService;
 
     private final Logger logger = LoggerFactory.getLogger(CallRequestService.class);
 
-
-    public CallRequestService(UserService userService, ChatService chatService, CallRequestRepository callRequestRepository, TelegramBotSenderService telegramBotSenderService, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService) {
-        this.userService = userService;
-        this.chatService = chatService;
+    public CallRequestService(CallRequestRepository callRequestRepository, DtoMapperService dtoMapperService) {
         this.callRequestRepository = callRequestRepository;
-        this.telegramBotSenderService = telegramBotSenderService;
         this.dtoMapperService = dtoMapperService;
-        this.telegramUnfinishedRequestService = telegramUnfinishedRequestService;
     }
 
     /**
      * This method handles requests received from TelegrammBotSenderServes.
      * They will determine which response to the command to send if the volunteer is on site or not.
      * In addition, the method outputs a message {@link TelegramBotSenderService#sendMessage }
-     * As well as methods from the following classes {@link CallRequestService#sendNotificationAboutCallRequestsToTelegram(User, boolean)}
      * And {@link ChatService#getChatByIdOrNew(Long)}
      * Method from repository {@link CallRequestRepository#getFirstOpenByUserIdForClient(Long)}
      *
-     * @param updateDpo
+     * @param
      */
-    public void process(UpdateDPO updateDpo) {
-        Chat chatClient = chatService.getChatByIdOrNew(updateDpo);
-
-        User userClient = userService.getUserWithTelegramUserId(updateDpo.getIdChat());
-        if (userClient == null) {
-            userClient = new User();
-            userClient.setNameUser(updateDpo.getFirstName() + " " + updateDpo.getLastName());
-            userClient.setChatTelegram(chatClient);
-            userClient.setVolunteer(false);
-            userClient = userService.addUser(userClient);
-        }
-
-
-        User userVolunteer = userService.getRandomVolunteer();
-        if (userVolunteer == null) {
-            telegramBotSenderService.sendMessage(chatClient.getId(), MESSAGE_VOLUNTEERS_IS_ABSENT);
-            return;
-        }
-
-        User chatUser = userService.getUserWithTelegramUserId(chatClient.getId());
-        if (chatUser != null &&
-                chatUser.getId() != null &&
-                callRequestRepository.getFirstOpenByUserIdForClient(chatUser.getId()) != null) {
-            telegramBotSenderService.sendMessage(chatClient.getId(), MESSAGE_OK_VOLUNTEERS_FOUND);
-            if (userClient.getPhone() == null || userClient.getPhone().length() == 0) {
-                chatService.startChangePhoneByUserFromTelegram(userClient.getChatTelegram());
-            }
-            return;
-        }
-
-        CallRequest callRequest = new CallRequest();
-        callRequest.setOpen(true);
-        callRequest.setLocalDateTimeOpen(LocalDateTime.now());
-        callRequest.setClient(userClient);
-        callRequest.setVolunteer(userVolunteer);
-        addCallRequest(callRequest);
-
-        sendNotificationAboutCallRequestsToTelegram(userVolunteer, false);
-        telegramBotSenderService.sendMessage(chatClient.getId(), MESSAGE_OK_VOLUNTEERS_FOUND);
-
-        if (userClient.getPhone() == null || userClient.getPhone().length() == 0) {
-            chatService.startChangePhoneByUserFromTelegram(userClient.getChatTelegram());
+    public CallRequest createCallRequest(User userClient, User userVolunteer) {
+        CallRequest callRequest = callRequestRepository.getFirstOpenByUserIdForClient(userClient.getId());
+        if (callRequest != null) {
+            return callRequest;
         } else {
-            telegramBotSenderService.sendButtonsCommandForChat(chatClient.getId());
-        }
-
-
-    }
-
-    /**
-     * This method sends all the call requests that are available to the volunteer.
-     * The method from telegrammBotSendlerServes {@link TelegramBotSenderService#sendMessage(Long, String)}
-     * The request list must be greater than 0.
-     * Also, the method outputs a message from{@link CallRequestService#MESSAGE_YOU_HAVE_CALL_REQUEST}
-     *
-     * @param user must be not null
-     */
-    public void sendNotificationAboutCallRequestsToTelegram(User user, boolean requiredResponse) {
-        List<CallRequest> callRequestList = callRequestRepository.getAllOpenByUserIdForVolunteer(user.getId());
-
-        List<String> nameButtons = new ArrayList<>();
-        List<String> dataButtons = new ArrayList<>();
-
-        if (callRequestList.size() > 0) {
-            StringBuilder sb = new StringBuilder();
-            callRequestList.forEach(callRequest -> {
-                nameButtons.add("Close " + callRequest.getId());
-                dataButtons.add(callRequest.getId().toString());
-                sb.append(MESSAGE_YOU_HAVE_CALL_REQUEST);
-                sb.append("\n");
-                sb.append(callRequest.getId());
-                sb.append(" ");
-                sb.append(callRequest.getClient().getChatTelegram().getFirstNameUser());
-                sb.append(" ");
-                sb.append(callRequest.getClient().getChatTelegram().getLastNameUser());
-                sb.append(" @");
-                sb.append(callRequest.getClient().getChatTelegram().getUserNameTelegram());
-                if (callRequest.getClient().getPhone() != null &&
-                        callRequest.getClient().getPhone().length() > 0) {
-                    sb.append(" ");
-                    sb.append(callRequest.getClient().getPhone());
-                }
-                sb.append("\n");
-            });
-            Pair<Integer, Integer> widthAndHeight = telegramBotSenderService.getTableSize(nameButtons.size());
-            telegramBotSenderService.sendMessage(user.getChatTelegram().getId(), sb.toString());
-            telegramBotSenderService.sendButtonsWithOneData(
-                    user.getChatTelegram().getId(),
-                    MESSAGE_YOU_CAN_CLOSE_CALL_REQUEST,
-                    Command.CLOSE_CALL_REQUEST.getTextCommand(),
-                    nameButtons,
-                    dataButtons,
-                    widthAndHeight.getFirst(),
-                    widthAndHeight.getSecond()
-            );
-        } else if (requiredResponse) {
-            telegramBotSenderService.sendMessage(user.getChatTelegram().getId(), MESSAGE_YOU_DONT_HAVE_CALL_REQUEST);
+            callRequest = new CallRequest();
+            callRequest.setOpen(true);
+            callRequest.setLocalDateTimeOpen(LocalDateTime.now());
+            callRequest.setClient(userClient);
+            callRequest.setVolunteer(userVolunteer);
+            return addCallRequest(callRequest);
         }
     }
 
@@ -171,8 +77,8 @@ public class CallRequestService {
             throw new CantCloseCallRequestException(idCallRequest.toString());
         }
         callRequest.setOpen(false);
+        callRequest.setLocalDateTimeClose(LocalDateTime.now());
         callRequestRepository.save(callRequest);
-        telegramBotSenderService.sendMessage(user.getChatTelegram().getId(), MESSAGE_CALL_REQUEST_IS_CLOSE);
     }
 
     /**
@@ -260,6 +166,13 @@ public class CallRequestService {
                 , id);
         return callRequestRepository.getAllOpenByUserIdForVolunteer(id).stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
+    }
+
+    public List<CallRequest> getAllOpenCallRequestVolunteer(User userVolunteer) {
+        logger.info(
+                "Method getAllOpenCallRequestVolunteer was start for return all CallRequest Volunteer with id = {}"
+                , userVolunteer.getId());
+        return new ArrayList<>(callRequestRepository.getAllOpenByUserIdForVolunteer(userVolunteer.getId()));
     }
 
     public List<CallRequestDto> getAllOpenCallRequestClient(Long id) {

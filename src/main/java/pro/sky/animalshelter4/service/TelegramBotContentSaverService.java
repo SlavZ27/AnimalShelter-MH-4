@@ -21,15 +21,13 @@ import java.time.LocalDateTime;
  * The class contains methods for saving various content that comes from telegram chat
  */
 @Service
-public class TelegramBotContentSaver {
+public class TelegramBotContentSaverService {
     private final String materialsDir;
-    private final Logger logger = LoggerFactory.getLogger(TelegramBotContentSaver.class);
-    private final TelegramBotSenderService telegramBotSenderService;
+    private final Logger logger = LoggerFactory.getLogger(TelegramBotContentSaverService.class);
     private final TelegramBot telegramBot;
 
-    public TelegramBotContentSaver(@Value("${path.to.materials.folder}") String materialsDir, TelegramBotSenderService telegramBotSenderService, TelegramBot telegramBot) {
+    public TelegramBotContentSaverService(@Value("${path.to.materials.folder}") String materialsDir, TelegramBot telegramBot) {
         this.materialsDir = materialsDir;
-        this.telegramBotSenderService = telegramBotSenderService;
         this.telegramBot = telegramBot;
     }
 
@@ -38,16 +36,17 @@ public class TelegramBotContentSaver {
      * From several copies of one photo, the method selects the last one,
      * because it is expected that it will have a higher quality than the others.
      * The photo from {@link Update#message()#photo()} is saved in the file system.
-     * The file is saved in {@link TelegramBotContentSaver#materialsDir}.
+     * The file is saved in {@link TelegramBotContentSaverService#materialsDir}.
      * The constant takes the value from the file using constructor.
      * using {@link GetFile}
      * using {@link GetFileResponse}
      * using {@link TelegramBot#execute(BaseRequest)}
-     * using {@link TelegramBotContentSaver#getAndCreatePath(Long, String, String)}
+     * using {@link TelegramBotContentSaverService#getAndCreatePath(Long, String, String)}
      * using {@link Files#write(Path, byte[], OpenOption...)}
-     *
+     * <p>
      * {@link Update#message()#chat()#id()} must be not null
      * {@link Update#message()#photo()} must be not null
+     *
      * @param update
      * @throws IOException
      */
@@ -83,22 +82,28 @@ public class TelegramBotContentSaver {
     /**
      * The method checks folder exists in the file system and creates if necessary
      * using {@link java.io.File#mkdir()}
+     *
      * @param path must be not null
      * @return true if folder was created, else false
      */
-    private boolean checkOrCreateFolder(String path) {
+    private void checkAndCreateFolder(String path) {
         java.io.File folder = new java.io.File(path);
         if (!folder.exists()) {
-            return folder.mkdir();
+            folder.mkdir();
         }
-        return false;
+    }
+
+    private boolean checkFileExist(String path) {
+        java.io.File file = new java.io.File(path);
+        return !file.exists();
     }
 
     /**
      * The method checks and, if necessary, creates the full path to the file.
      * The data is taken from the input data. <br>
-     * Example of a path: <br> {@link TelegramBotContentSaver#materialsDir} + / + idChat + / +  folderName + / + YYYY.MM.DD_HH.MM. + fileFormat
-     * using {@link TelegramBotContentSaver#checkOrCreateFolder(String)}
+     * Example of a path: <br> {@link TelegramBotContentSaverService#materialsDir} + / + idChat + / +  folderName + / + YYYY.MM.DD_HH.MM. + fileFormat
+     * using {@link TelegramBotContentSaverService#checkAndCreateFolder(String)}
+     *
      * @param idChat
      * @param folderName
      * @param fileFormat
@@ -106,28 +111,28 @@ public class TelegramBotContentSaver {
      */
     private Path getAndCreatePath(Long idChat, String folderName, String fileFormat) {
         StringBuilder pathFolder = new StringBuilder(materialsDir + "/");
-        if (checkOrCreateFolder(pathFolder.toString())) {
-            pathFolder.append(idChat);
-            pathFolder.append("/");
-            if (checkOrCreateFolder(pathFolder.toString())) {
-                pathFolder.append(folderName);
-                pathFolder.append("/");
-                if (checkOrCreateFolder(pathFolder.toString())) {
-                    LocalDateTime ldt = LocalDateTime.now();
-                    String fileName =
-                            ldt.getYear() + "." + ldt.getMonthValue() + "." + ldt.getDayOfMonth() + "_"
-                                    + ldt.getHour() + "." + ldt.getMinute()
-                                    + "." + fileFormat;
-                    return Path.of(pathFolder + fileName);
-                }
-            }
+        checkAndCreateFolder(pathFolder.toString());
+        pathFolder.append(idChat);
+        pathFolder.append("/");
+        checkAndCreateFolder(pathFolder.toString());
+        pathFolder.append(folderName);
+        pathFolder.append("/");
+        checkAndCreateFolder(pathFolder.toString());
+        LocalDateTime ldt = LocalDateTime.now();
+        String fileName =
+                ldt.getYear() + "." + ldt.getMonthValue() + "." + ldt.getDayOfMonth() + "_"
+                        + ldt.getHour() + "." + ldt.getMinute() + "." + ldt.getSecond() + "_";
+        int count = 1;
+        while (!checkFileExist(pathFolder + fileName + count + "." + fileFormat)) {
+            count++;
         }
-        return null;
+        return Path.of(pathFolder + fileName + count + "." + fileFormat);
     }
 
 
     /**
      * The method gets the path to the file and outputs characters after the last dot
+     *
      * @param filePath must be not null
      * @return file format without dot, if string don't contain dot then return null
      */

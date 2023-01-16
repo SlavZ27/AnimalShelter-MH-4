@@ -3,9 +3,12 @@ package pro.sky.animalshelter4.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import pro.sky.animalshelter4.entity.CallRequest;
+import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.entity.User;
 import pro.sky.animalshelter4.entityDto.UserDto;
 import pro.sky.animalshelter4.exception.UserNotFoundException;
+import pro.sky.animalshelter4.exception.VolunteersIsAbsentException;
 import pro.sky.animalshelter4.repository.UserRepository;
 
 import java.util.List;
@@ -21,17 +24,19 @@ import java.util.stream.Collectors;
 public class UserService {
 
     public final static String MESSAGE_BAD_PHONE = "Bad phone. Try again, please";
+    public final static String MESSAGE_VOLUNTEERS_IS_ABSENT = "Sorry. All volunteers is absent";
 
-    private final UserRepository userRepository;
+
     private final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private final UserRepository userRepository;
     private final DtoMapperService dtoMapperService;
-    private final TelegramUnfinishedRequestService telegramUnfinishedRequestService;
+    private final CallRequestService callRequestService;
     private final Random random = new Random();
 
-    public UserService(UserRepository userRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService) {
+    public UserService(UserRepository userRepository, DtoMapperService dtoMapperService, CallRequestService callRequestService) {
         this.userRepository = userRepository;
         this.dtoMapperService = dtoMapperService;
-        this.telegramUnfinishedRequestService = telegramUnfinishedRequestService;
+        this.callRequestService = callRequestService;
     }
 
     public UserDto createUser(UserDto userDto) {
@@ -114,10 +119,22 @@ public class UserService {
         logger.info("Method isUserOfVolunteer was start for to check if the User with id = {} is a volunteer", idChatTelegram);
         User user = userRepository.getByIdTelegramChatAndVolunteer(idChatTelegram);
         if (user != null) {
-            logger.debug("Method isVolunteer don't detected volunteer by idUser = {}", idChatTelegram);
+            logger.debug("Method isUserWithTelegramChatIdVolunteer don't detected volunteer by idUser = {}", idChatTelegram);
             return true;
         }
-        logger.debug("Method isVolunteer detected volunteer by idUser = {}", idChatTelegram);
+        logger.debug("Method isUserWithTelegramChatIdVolunteer detected volunteer by idUser = {}", idChatTelegram);
+        return false;
+    }
+
+    public boolean isUserWithTelegramChatIdOwner(Long idChatTelegram) {
+        logger.info("Method isUserWithTelegramChatIdOwner was start for to check if the User with id = {} is a Owner",
+                idChatTelegram);
+        User user = userRepository.getByIdTelegramChatAndOwner(idChatTelegram);
+        if (user != null) {
+            logger.debug("Method isUserWithTelegramChatIdOwner don't detected Owner by idUser = {}", idChatTelegram);
+            return true;
+        }
+        logger.debug("Method isUserWithTelegramChatIdOwner detected Owner by idUser = {}", idChatTelegram);
         return false;
     }
 
@@ -143,5 +160,41 @@ public class UserService {
         }
         return null;
     }
+
+    public User mapChatToUser(Chat chat) {
+        User user = new User();
+        user.setNameUser(chat.getFirstNameUser() + " " + chat.getLastNameUser());
+        user.setChatTelegram(chat);
+        user.setVolunteer(false);
+        return addUser(user);
+    }
+
+    public User getUserFromChat(Chat chat) {
+        User user = getUserWithTelegramUserId(chat.getId());
+        if (user == null) {
+            return mapChatToUser(chat);
+        }
+        return user;
+    }
+
+    public CallRequest createCallRequest(Chat chatClient) {
+        User userClient = getUserFromChat(chatClient);
+        User userVolunteer = getRandomVolunteer();
+        if (userVolunteer == null) {
+            throw new VolunteersIsAbsentException();
+        }
+        return callRequestService.createCallRequest(userClient, userVolunteer);
+    }
+
+    public List<CallRequest> getListOpenCallRequests(Chat chatVolunteer) {
+        User userVolunteer = getUserFromChat(chatVolunteer);
+        return callRequestService.getAllOpenCallRequestVolunteer(userVolunteer);
+    }
+
+    public void closeCallRequest(Chat chatVolunteer, Long idCallRequest) {
+        User userVolunteer = getUserFromChat(chatVolunteer);
+        callRequestService.closeCallRequest(userVolunteer, idCallRequest);
+    }
+
 
 }

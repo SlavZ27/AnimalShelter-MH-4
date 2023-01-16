@@ -39,11 +39,14 @@ public class CommandService {
      * @return true if the command is available to the user, else false
      */
     public boolean approveLaunchCommand(Command command, Long idChat) {
-        if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
-            return command.isVolunteer();
-        } else {
-            return command.isClient();
+        if (command.isVolunteer()) {
+            return userService.isUserWithTelegramChatIdVolunteer(idChat);
+        } else if (command.isOwner()) {
+            return userService.isUserWithTelegramChatIdVolunteer(idChat);
+        } else if (command.isClient()) {
+            return true;
         }
+        return false;
     }
 
     /**
@@ -59,6 +62,8 @@ public class CommandService {
     public String getAllTitlesAsListExcludeHide(Long idChat) {
         if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
             return getAllTextCommandAsListForVolunteerExcludeHide();
+        } else if (userService.isUserWithTelegramChatIdOwner(idChat)) {
+            return getAllTextCommandAsListForOwnerExcludeHide();
         } else {
             return getAllTextCommandAsListForClientExcludeHide();
         }
@@ -80,6 +85,8 @@ public class CommandService {
     public Pair<List<String>, List<String>> getPairListsForButtonExcludeHide(Long idChat) {
         if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
             return getListsNameButtonAndListsDataButtonForVolunteerExcludeHide();
+        } else if (userService.isUserWithTelegramChatIdOwner(idChat)) {
+            return getListsNameButtonAndListsDataButtonForOwnerExcludeHide();
         } else {
             return getListsNameButtonAndListsDataButtonForClientExcludeHide();
         }
@@ -95,6 +102,16 @@ public class CommandService {
     private String getAllTextCommandAsListForClientExcludeHide() {
         StringBuilder sb = new StringBuilder();
         getOnlyShowCommandForClient().
+                forEach(command -> {
+                    sb.append(command.getTextCommand());
+                    sb.append("\n");
+                });
+        return sb.toString();
+    }
+
+    private String getAllTextCommandAsListForOwnerExcludeHide() {
+        StringBuilder sb = new StringBuilder();
+        getOnlyShowCommandForOwner().
                 forEach(command -> {
                     sb.append(command.getTextCommand());
                     sb.append("\n");
@@ -129,6 +146,12 @@ public class CommandService {
                 collect(Collectors.toList());
     }
 
+    private List<String> getAllTextCommandForOwnerExcludeHide() {
+        return getOnlyShowCommandForOwner().stream().
+                map(Command::getTextCommand).
+                collect(Collectors.toList());
+    }
+
     /**
      * using {@link Command#getOnlyShowCommandForVolunteer()}
      *
@@ -158,6 +181,17 @@ public class CommandService {
         return Pair.of(nameButton, dataButton);
     }
 
+    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForOwnerExcludeHide() {
+        List<String> nameButton = new ArrayList<>();
+        List<String> dataButton = new ArrayList<>();
+        List<Command> commandList = getOnlyShowCommandForOwner();
+        for (int i = 0; i < commandList.size(); i++) {
+            Command tCom = commandList.get(i);
+            nameButton.add(tCom.getNameButton());
+            dataButton.add(tCom.getTextCommand());
+        }
+        return Pair.of(nameButton, dataButton);
+    }
 
     /**
      * @return Pair<List < String>, List<String>> for the volunteer.

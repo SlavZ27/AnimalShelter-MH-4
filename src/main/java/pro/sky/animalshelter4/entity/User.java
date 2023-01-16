@@ -16,18 +16,28 @@ public class User {
     private Chat chatTelegram;
     private String phone;
     private String address;
+    boolean isOwner;
     boolean isVolunteer;
 
     public User() {
     }
 
-    public User(Long id, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer) {
+    public User(Long id, String nameUser, Chat chatTelegram, String phone, String address, boolean isOwner, boolean isVolunteer) {
         this.id = id;
         this.nameUser = nameUser;
         this.chatTelegram = chatTelegram;
         this.phone = phone;
         this.address = address;
+        this.isOwner = isOwner;
         this.isVolunteer = isVolunteer;
+    }
+
+    public boolean isOwner() {
+        return isOwner;
+    }
+
+    public void setOwner(boolean owner) {
+        isOwner = owner;
     }
 
     public Long getId() {

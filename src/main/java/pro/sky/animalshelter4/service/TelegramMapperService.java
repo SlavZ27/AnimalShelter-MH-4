@@ -85,6 +85,9 @@ public class TelegramMapperService {
                 int maxPhotoIndex = update.message().photo().length - 1;
                 if (update.message().photo()[maxPhotoIndex].fileId() != null) {
                     updateDpo.setIdMedia(update.message().photo()[maxPhotoIndex].fileId());
+                    if (update.message().caption() != null) {
+                        updateDpo.setMessage(update.message().caption());
+                    }
                 } else {
                     logger.debug("ChatId={}; Method toDPO detected null fileId in photo", updateDpo.getIdChat());
                 }
@@ -148,6 +151,7 @@ public class TelegramMapperService {
 
     /**
      * The method checks the string so that it is not null, or empty
+     *
      * @param s
      * @return true or false
      */
@@ -157,6 +161,7 @@ public class TelegramMapperService {
 
     /**
      * The method makes a single word from a string with many words
+     *
      * @param s,
      * @param indexWord
      * @return word with indexWord <br>
