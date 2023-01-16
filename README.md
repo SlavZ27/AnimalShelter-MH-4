@@ -1,89 +1,40 @@
-# AnimalShelter-MH-4
-![AnimalShelter-MH-4](https://i.pinimg.com/736x/2e/ad/20/2ead20915045117b6c15b34572f3d0e1.jpg)
 
-## [1.1] The main description.
+![Logo](https://cdn.discordapp.com/attachments/972486304510148648/1057030634809348195/010cc167400543.5b38baad6f.png)
 
-This project implements the use of bot telegrams
-for the needs of the Shelter. 
-The fundamental idea is that due to the fact that 
-the Telegram service itself is widespread everywhere.
-This allows any user to conveniently and quickly
-find out information about the animal shelter and how 
-to take a pet. Also, be able to quickly and easily 
-contact a volunteer working at the shelter and 
-qualitatively monitor the conditions in which the 
-animals that the users have taken live.
+# AnimalShelter4
 
-## [1.2] The content of the project and its purpose.
-The main goal of the project is to
-simplify the work of volunteers as much as possible, to help
-potential clients
-find a pet and shelter as easily and quickly as possible. Using at
-the same time an accessible and very popular application.
+Project created to manage communication with the clients of the animal shelter
 
-This project at the moment of development, the project
-contains these classes in working order.
+The main task is to give the most complete information about how a person has to prepare for a meeting with a new family member.
+## Table of Contents
 
-1. service 
-   1. [CallRequestService](./documentation/CallRequestService.md)
-   2. [ChatService](./documentation/ChatService.md)
-   3. [CommandService](./documentation/CommandService.md)
-   4. [DtoMapperService](./documentation/DtoMapperService.md)
-   5. [TelegramBotContentSaver](./documentation/TelegramBotContentSaver.md)
-   6. [TelegramBotSenderService](./documentation/TelegramBotSenderService.md)
-   7. [TelegramBotUpdatesService](./documentation/TelegramBotUpdatesService)
-   8. [TelegramMapperService](./documentation/TelegramMapperService.md)
-   9. [UserService](./documentation/UserService.md)
-2. repository
-   1. CallRequestRepository
-   2. ChatRepository
-   3. RequestVolunteerRepository
-   4. UnfinishedRequestRepository
-   5. UserRepository
-3. listener
-   1. [TelegramBotUpdatesListener](./documentation/Listener.md)
-4. model
-   1. Command 
-5. info
-   1. InfoAboutShelter
-   2. InfoTakeADog
-6. exception
-   1. CallRequestNotFoundException
-   2. ChatNotFoundException
-   3. UserNotFoundException
-7. entityDto
-   1. CallRequestDto
-   2. ChatDto
-   3. UserDto
-8. entity
-   1. CallRequest
-   2. Chat
-   3. RequestVolunteer
-   4. UnfinishedRequestTelegram
-   5. User
-9. controller
-   1. [CallRequestController]
-   2. [ChatController]
-   3. [UserController]
-10. configuration
-    1. [TelegramBotConfiguration](./documentation/Configuration.md) 
-11. AnimalShelter4Application
-    
+[Features](https://github.com/SlavZ27/AnimalShelter-MH-4/tree/master#features)
 
-## [1.2.1] The principle of the project.
+[Authors](https://github.com/SlavZ27/AnimalShelter-MH-4/tree/master#authors)
 
-The basic principle of the project w.e can see
-on. ![diagram](./diagram.png)
+[Contribute](https://github.com/SlavZ27/AnimalShelter-MH-4/tree/master#contribute)
+
+[License](https://github.com/SlavZ27/AnimalShelter-MH-4/tree/master#-license)
+## Features
+
+- The bot can answer popular questions from people about what you need to know and be able to take an animal from a shelter
+- If the question is not standard, the bot can call a volunteer
+- daily report about the animal (photo, diet, well-being, change in behavior)
+- Cross platform (telegram bot)
 
 
-## [2.1] Listener
-### [TelegramBotUpdatesListener]
+## Authors
 
- <a name="z"></a>
+- [@SlavZ27](https://github.com/SlavZ27)
 
-* The class implementing the UpdateListener interface of the Pengrad library
-* Class engaged in communicating with Telegram services
-* and sending the received list of {@link Update} objects
-* to the {@link TelegramBotUpdatesService#processUpdate(Update)} class for processing.
-* At the end of the method {@link TelegramBotUpdatesListener#process(List)}, objects are marked as processed, despite possible errors.
-  
+- [@Exesebaf](https://github.com/Exesebaf)
+
+## Contribute
+
+Contributions are always welcome! Please create a PR to add Github Profile.
+## 📝 License
+
+This project is distributed under some kind of license.
+## 👨‍🚀 Show your support
+
+Give a ⭐️ if this project helped you!

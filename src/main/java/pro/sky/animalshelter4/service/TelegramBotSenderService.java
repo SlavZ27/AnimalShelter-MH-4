@@ -20,6 +20,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -39,8 +40,10 @@ public class TelegramBotSenderService {
     public static final String REQUEST_SPLIT_SYMBOL = " ";
     public static final String MESSAGE_SELECT_COMMAND = "Select action";
     public static final String MESSAGE_SORRY_I_DONT_KNOW_COMMAND = "Sorry, I don't know this command";
+    public static final String MESSAGE_SORRY_I_DONT_KNOW_YOUR_PHONE = "I do not know your phone number. Please write";
     public static final String MESSAGE_SORRY_I_KNOW_THIS = "Sorry.\nI know only this command:\n";
     public static final String MESSAGE_HELLO = "Hello ";
+    public static final String NAME_BUTTON_FOR_CANCEL = "Cancel";
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotSenderService.class);
     private final TelegramBot telegramBot;
@@ -54,7 +57,8 @@ public class TelegramBotSenderService {
     /**
      * A universal method for sending messages to telegram chats
      * using {@link TelegramBot#execute(BaseRequest)}
-     * @param idChat must be not null
+     *
+     * @param idChat      must be not null
      * @param textMessage must be not null
      */
     public void sendMessage(Long idChat, String textMessage) {
@@ -74,6 +78,7 @@ public class TelegramBotSenderService {
      * A method with a prepared message to send a message about receiving an unknown command
      * using {@link TelegramBotSenderService#MESSAGE_SORRY_I_DONT_KNOW_COMMAND}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendUnknownProcess(Long idChat) {
@@ -86,8 +91,9 @@ public class TelegramBotSenderService {
      * A method with a prepared message for sending a welcome message
      * using {@link TelegramBotSenderService#MESSAGE_HELLO} + name + ".\n"
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
-     * @param name must be not null
+     * @param name   must be not null
      */
     public void sendHello(Long idChat, String name) {
         logger.info("ChatId={}; Method sendStartButtons was started for send a welcome message", idChat);
@@ -99,6 +105,7 @@ public class TelegramBotSenderService {
      * A method with a prepared message to send an alert about an unknown action
      * using {@link TelegramBotSenderService#MESSAGE_SORRY_I_KNOW_THIS}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendSorryIKnowThis(Long idChat) {
@@ -111,6 +118,7 @@ public class TelegramBotSenderService {
      * A method with a prepared message for sending a message with information about the shelter
      * using {@link InfoAboutShelter#getInfoEn()}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendInfoAboutShelter(Long idChat) {
@@ -122,6 +130,7 @@ public class TelegramBotSenderService {
      * A method with a prepared message for sending a message with information about how to take a dog from a shelter
      * using {@link InfoTakeADog#getInfoEn()}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendHowTakeDog(Long idChat) {
@@ -140,13 +149,14 @@ public class TelegramBotSenderService {
      * /start 3 <br>
      * The size of the common rectangle of buttons is set by {@param width} and {@param height}
      * using {@link TelegramBot#execute(BaseRequest)}
-     * @param idChat must be not null
-     * @param caption must be not null
-     * @param command must be not null
+     *
+     * @param idChat      must be not null
+     * @param caption     must be not null
+     * @param command     must be not null
      * @param nameButtons must be not null
      * @param dataButtons must be not null
-     * @param width must be adequate
-     * @param height must be adequate
+     * @param width       must be adequate
+     * @param height      must be adequate
      */
     public void sendButtonsWithOneData(
             Long idChat,
@@ -192,12 +202,13 @@ public class TelegramBotSenderService {
      * Each button will contain a value from the {@param dataButtons}. <br>
      * The size of the common rectangle of buttons is set by {@param width} and {@param height}
      * using {@link TelegramBot#execute(BaseRequest)}
-     * @param idChat must be not null
-     * @param caption must be not null
+     *
+     * @param idChat      must be not null
+     * @param caption     must be not null
      * @param nameButtons must be not null
      * @param dataButtons must be not null
-     * @param width must be adequate
-     * @param height must be adequate
+     * @param width       must be adequate
+     * @param height      must be adequate
      */
     public void sendButtonsWithDifferentData(
             Long idChat,
@@ -243,6 +254,7 @@ public class TelegramBotSenderService {
      * The method sends the string value of all available commands to idChat as a list.
      * The provision of the list, using idChat, is handled by {@link CommandService#getAllTitlesAsListExcludeHide(Long)}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendListCommandForChat(Long idChat) {
@@ -253,6 +265,7 @@ public class TelegramBotSenderService {
 
     /**
      * Method calculates the optimal width and height values depending on the number of objects
+     *
      * @param countElements
      * @return Pair of width and height
      */
@@ -262,19 +275,19 @@ public class TelegramBotSenderService {
         if (countElements == 1) {
             width = 1;
             height = 1;
-        } else if (countElements % 19== 0) {
+        } else if (countElements % 19 == 0) {
             width = 19;
             height = countElements / 19;
-        }else if (countElements % 17== 0) {
+        } else if (countElements % 17 == 0) {
             width = 17;
             height = countElements / 17;
-        }else if (countElements % 13== 0) {
+        } else if (countElements % 13 == 0) {
             width = 13;
             height = countElements / 13;
-        }else if (countElements % 11== 0) {
+        } else if (countElements % 11 == 0) {
             width = 11;
             height = countElements / 11;
-        }else if (countElements % 7 == 0) {
+        } else if (countElements % 7 == 0) {
             width = 7;
             height = countElements / 7;
         } else if (countElements % 5 == 0) {
@@ -300,6 +313,7 @@ public class TelegramBotSenderService {
      * receives a pair of values width and height from {@link TelegramBotSenderService#getTableSize(int)},
      * forms a request and starts sending buttons to the chat
      * using {@link TelegramBotSenderService#sendButtonsWithDifferentData(Long, String, List, List, int, int)}
+     *
      * @param idChat must be not null
      */
     public void sendButtonsCommandForChat(Long idChat) {
@@ -330,7 +344,8 @@ public class TelegramBotSenderService {
      * Using {@link Paths#get(URI)}
      * Using {@link Files#readAllBytes(Path)}
      * Using {@link TelegramBot#execute(BaseRequest)}
-     * @param idChat must be not null
+     *
+     * @param idChat   must be not null
      * @param pathFile must be not null
      * @throws IOException
      */
@@ -339,6 +354,21 @@ public class TelegramBotSenderService {
         byte[] file = Files.readAllBytes(path);
         SendPhoto sendPhoto = new SendPhoto(idChat, file);
         telegramBot.execute(sendPhoto).message();
+    }
+
+    public void sendMessageWithButtonCancel(Long idChat, String message, String nameButton) {
+        sendButtonsWithDifferentData(
+                idChat,
+                message,
+                Collections.singletonList(nameButton),
+                Collections.singletonList(Command.CLOSE_UNFINISHED_REQUEST.getTextCommand()),
+                1, 1
+        );
+    }
+
+    public void sendIDontKnowYourPhoneWriteIt(Long idChat) {
+        logger.info("ChatId={}; Method sendIDontKnowYourPhone was started for send offer to enter a phone number", idChat);
+        sendMessageWithButtonCancel(idChat, MESSAGE_SORRY_I_DONT_KNOW_YOUR_PHONE, NAME_BUTTON_FOR_CANCEL);
     }
 
 }

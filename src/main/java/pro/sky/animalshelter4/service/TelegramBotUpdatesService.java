@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.model.Command;
+import pro.sky.animalshelter4.model.InteractionUnit;
 import pro.sky.animalshelter4.model.UpdateDPO;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -19,20 +19,15 @@ import java.util.List;
 @Service
 public class TelegramBotUpdatesService {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesService.class);
-    private final TelegramBotSenderService telegramBotSenderService;
     private final TelegramMapperService telegramMapperService;
-    private final TelegramBotContentSaver telegramBotContentSaver;
-    private final CallRequestService callRequestService;
     private final CommandService commandService;
+    private final ChatService chatService;
 
-    public TelegramBotUpdatesService(TelegramBotSenderService telegramBotSenderService, TelegramMapperService telegramMapperService, TelegramBotContentSaver telegramBotContentSaver, CallRequestService callRequestService, CommandService commandService) {
-        this.telegramBotSenderService = telegramBotSenderService;
+    public TelegramBotUpdatesService(TelegramMapperService telegramMapperService, CommandService commandService, ChatService chatService) {
         this.telegramMapperService = telegramMapperService;
-        this.telegramBotContentSaver = telegramBotContentSaver;
-        this.callRequestService = callRequestService;
         this.commandService = commandService;
+        this.chatService = chatService;
     }
-
 
     /**
      * The method deals with the choice of actions depending
@@ -43,6 +38,7 @@ public class TelegramBotUpdatesService {
      * and command {@link Command} and other parameters, the next action is selected.
      * The method terminates if it detects an {@link Command#EMPTY_CALLBACK_DATA_FOR_BUTTON} in {@link Update},
      * or when receiving an unexpected {@link Update}, when null comes from {@link TelegramMapperService#toDPO(Update)}.
+     *
      * @param update
      */
     public void processUpdate(Update update) {
@@ -54,62 +50,103 @@ public class TelegramBotUpdatesService {
             logger.debug("Method processUpdate detected empty command");
             return;
         }
-
         UpdateDPO updateDpo = telegramMapperService.toDPO(update);
         if (updateDpo == null) {
             logger.debug("Method processUpdate detected null updateDpo");
             return;
         }
-
+        if (updateDpo.getInteractionUnit() == null) {
+            logger.debug("Method processUpdate detected null updateDpo.getInteractionUnit()");
+            return;
+        }
         switch (updateDpo.getInteractionUnit()) {
             case PHOTO:
                 logger.debug("ChatId={}; Method processUpdate detected photo in message()", updateDpo.getIdChat());
-                try {
-                    telegramBotContentSaver.savePhoto(update);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                Command command = chatService.getUnfinishedRequestForChat(updateDpo);
+                if (command == null) {
+                    chatService.sendSorryIKnowThis(updateDpo.getIdChat());
+                    return;
+                } else {
+                    updateDpo.setInteractionUnit(InteractionUnit.COMMAND);
+                    updateDpo.setCommand(command);
+                    processUpdateDpoWithCommand(updateDpo);
                 }
                 return;
             case MESSAGE:
-                telegramBotSenderService.sendSorryIKnowThis(updateDpo.getIdChat());
+                command = chatService.getUnfinishedRequestForChat(updateDpo);
+                if (command == null) {
+                    chatService.sendSorryIKnowThis(updateDpo.getIdChat());
+                    return;
+                } else {
+                    updateDpo.setInteractionUnit(InteractionUnit.COMMAND);
+                    updateDpo.setCommand(command);
+                    processUpdateDpoWithCommand(updateDpo);
+                }
                 return;
             case COMMAND:
                 logger.info("ChatId={}; Method processUpdate launch process command = {}",
                         updateDpo.getIdChat(), updateDpo.getCommand());
-                if (updateDpo.getCommand() == null) {
-                    telegramBotSenderService.sendUnknownProcess(updateDpo.getIdChat());
-                    telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                } else {
-                    if (!commandService.approveLaunchCommand(updateDpo.getCommand(), updateDpo.getIdChat())) {
-                        logger.debug("ChatId={}; Method processUpdate detected no rights to execute command = {} ",
-                                updateDpo.getIdChat(), updateDpo.getCommand());
-                        telegramBotSenderService.sendSorryIKnowThis(updateDpo.getIdChat());
-                        return;
-                    }
-                    switch (updateDpo.getCommand()) {
-                        case START:
-                            System.out.println("Detected enter : " +
-                                    updateDpo.getIdChat() + " / " + updateDpo.getUserName());
-                            telegramBotSenderService.sendHello(updateDpo.getIdChat(),
-                                    updateDpo.getFirstName() + " " + updateDpo.getLastName());
-                            break;
-                        case INFO:
-                            telegramBotSenderService.sendInfoAboutShelter(updateDpo.getIdChat());
-                            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                            break;
-                        case HOW:
-                            telegramBotSenderService.sendHowTakeDog(updateDpo.getIdChat());
-                            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                            break;
-                        case CALL_REQUEST:
-                            callRequestService.process(updateDpo);
-                            telegramBotSenderService.sendButtonsCommandForChat(updateDpo.getIdChat());
-                            break;
-                        case EMPTY_CALLBACK_DATA_FOR_BUTTON:
-                            return;
-                    }
-                }
+                processUpdateDpoWithCommand(updateDpo);
+                return;
         }
+    }
+
+    public void processUpdateDpoWithCommand(UpdateDPO updateDpo) {
+        if (updateDpo.getCommand() == null) {
+            chatService.sendUnknownProcess(updateDpo.getIdChat());
+        } else {
+            if (!commandService.approveLaunchCommand(updateDpo.getCommand(), updateDpo.getIdChat())) {
+                logger.debug("ChatId={}; Method processUpdate detected no rights to execute command = {} ",
+                        updateDpo.getIdChat(), updateDpo.getCommand());
+                chatService.sendSorryIKnowThis(updateDpo.getIdChat());
+                return;
+            }
+            switch (updateDpo.getCommand()) {
+                case START:
+                    System.out.println("Detected enter : " +
+                            updateDpo.getIdChat() + " / " + updateDpo.getUserName());
+                    chatService.sendHello(updateDpo.getIdChat(),
+                            updateDpo.getFirstName() + " " + updateDpo.getLastName());
+                    break;
+                case INFO:
+                    chatService.sendInfoAboutShelter(updateDpo.getIdChat());
+                    break;
+                case HOW:
+                    chatService.sendHowTakeDog(updateDpo.getIdChat());
+                    break;
+                case CALL_REQUEST:
+                    chatService.createCallRequest(updateDpo);
+                    break;
+                case CALL_CLIENT:
+                    chatService.sendNotificationAboutCallRequestsToTelegramVolunteer(updateDpo);
+                    break;
+                case CLOSE_CALL_REQUEST:
+                    chatService.closeCallRequest(updateDpo);
+                    break;
+                case CHANGE_PHONE:
+                    chatService.changePhoneUser(
+                            chatService.getChatByIdOrNew(updateDpo.getIdChat()),
+                            updateDpo.getMessage());
+                    break;
+                case CREATE_OWNERSHIP:
+                    chatService.createOwn(updateDpo);
+                    break;
+                case ADD_ANIMAL:
+                    chatService.addAnimal(updateDpo);
+                    break;
+                case COMPLEMENT_ANIMAL:
+                    chatService.complementAnimal(updateDpo);
+                    break;
+                case REPORT:
+                    chatService.report(updateDpo);
+                    break;
+                case CLOSE_UNFINISHED_REQUEST:
+                    chatService.closeUnfinishedRequest(updateDpo);
+                case EMPTY_CALLBACK_DATA_FOR_BUTTON:
+                    return;
+            }
+        }
+
     }
 
     /**

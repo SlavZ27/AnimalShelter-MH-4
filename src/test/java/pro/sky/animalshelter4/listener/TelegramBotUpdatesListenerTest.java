@@ -62,7 +62,7 @@ class TelegramBotUpdatesListenerTest {
     private TelegramMapperService telegramMapperService;
     @Autowired
     private TelegramBotSenderService telegramBotSenderService;
-    private TelegramBotContentSaver telegramBotContentSaver = new TelegramBotContentSaver("./materials", telegramBotSenderService, telegramBot);
+    private TelegramBotContentSaverService telegramBotContentSaverService = new TelegramBotContentSaverService("./materials", telegramBotSenderService, telegramBot);
     @Autowired
     private TelegramBotUpdatesService telegramBotUpdatesService;
     @Autowired
@@ -119,7 +119,7 @@ class TelegramBotUpdatesListenerTest {
         assertThat(userService).isNotNull();
         assertThat(telegramMapperService).isNotNull();
         assertThat(telegramBotSenderService).isNotNull();
-        assertThat(telegramBotContentSaver).isNotNull();
+        assertThat(telegramBotContentSaverService).isNotNull();
         assertThat(telegramBotUpdatesService).isNotNull();
         assertThat(telegramBotUpdatesListener).isNotNull();
     }

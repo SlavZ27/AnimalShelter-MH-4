@@ -1,5 +1,7 @@
 package pro.sky.animalshelter4.entity;
 
+import pro.sky.animalshelter4.exception.BadPhoneNumber;
+
 import javax.persistence.*;
 
 
@@ -19,7 +21,7 @@ public class User {
     public User() {
     }
 
-    public User(Long id, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer) {
+    public User(Long id, String nameUser, Chat chatTelegram, String phone, String address, boolean isOwner, boolean isVolunteer) {
         this.id = id;
         this.nameUser = nameUser;
         this.chatTelegram = chatTelegram;
@@ -27,6 +29,7 @@ public class User {
         this.address = address;
         this.isVolunteer = isVolunteer;
     }
+
 
     public Long getId() {
         return id;
@@ -57,7 +60,18 @@ public class User {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        char[] chars = phone.toCharArray();
+        StringBuilder validatePhone = new StringBuilder();
+        for (int i = 0; i < chars.length; i++) {
+            if (Character.isDigit(chars[i])) {
+                validatePhone.append(chars[i]);
+            }
+        }
+        if (5 > validatePhone.toString().length() || validatePhone.toString().length() > 15) {
+            throw new BadPhoneNumber(phone);
+        } else {
+            this.phone = validatePhone.toString();
+        }
     }
 
     public String getAddress() {

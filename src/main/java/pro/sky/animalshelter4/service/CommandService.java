@@ -15,7 +15,7 @@ import static pro.sky.animalshelter4.model.Command.*;
 
 /**
  * The class contains methods for working with {@link Command}.
- * The logic of executing and issuing only commands available to {@link pro.sky.animalshelter4.entity.Chat}.
+ * The logic of executing and issuing only commands available to {@link Chat}.
  * Depending on the {@link Chat#getId()} ()}
  */
 @Service
@@ -29,7 +29,7 @@ public class CommandService {
     }
 
     /**
-     * The method checks whether the command is available to the {@link pro.sky.animalshelter4.entity.Chat}
+     * The method checks whether the command is available to the {@link Chat}
      * for execution. The data for the solution is taken from {@link Command}.
      * The method must be executed after receiving and parsing the necessary data and before executing commands
      * using {@link UserService#isUserWithTelegramChatIdVolunteer(Long)} (Long)}
@@ -41,6 +41,8 @@ public class CommandService {
     public boolean approveLaunchCommand(Command command, Long idChat) {
         if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
             return command.isVolunteer();
+        } else if (userService.isUserWithTelegramChatIdOwner(idChat)) {
+            return command.isOwner();
         } else {
             return command.isClient();
         }
@@ -59,6 +61,8 @@ public class CommandService {
     public String getAllTitlesAsListExcludeHide(Long idChat) {
         if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
             return getAllTextCommandAsListForVolunteerExcludeHide();
+        } else if (userService.isUserWithTelegramChatIdOwner(idChat)) {
+            return getAllTextCommandAsListForOwnerExcludeHide();
         } else {
             return getAllTextCommandAsListForClientExcludeHide();
         }
@@ -80,6 +84,8 @@ public class CommandService {
     public Pair<List<String>, List<String>> getPairListsForButtonExcludeHide(Long idChat) {
         if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
             return getListsNameButtonAndListsDataButtonForVolunteerExcludeHide();
+        } else if (userService.isUserWithTelegramChatIdOwner(idChat)) {
+            return getListsNameButtonAndListsDataButtonForOwnerExcludeHide();
         } else {
             return getListsNameButtonAndListsDataButtonForClientExcludeHide();
         }
@@ -95,6 +101,16 @@ public class CommandService {
     private String getAllTextCommandAsListForClientExcludeHide() {
         StringBuilder sb = new StringBuilder();
         getOnlyShowCommandForClient().
+                forEach(command -> {
+                    sb.append(command.getTextCommand());
+                    sb.append("\n");
+                });
+        return sb.toString();
+    }
+
+    private String getAllTextCommandAsListForOwnerExcludeHide() {
+        StringBuilder sb = new StringBuilder();
+        getOnlyShowCommandForOwner().
                 forEach(command -> {
                     sb.append(command.getTextCommand());
                     sb.append("\n");
@@ -129,6 +145,12 @@ public class CommandService {
                 collect(Collectors.toList());
     }
 
+    private List<String> getAllTextCommandForOwnerExcludeHide() {
+        return getOnlyShowCommandForOwner().stream().
+                map(Command::getTextCommand).
+                collect(Collectors.toList());
+    }
+
     /**
      * using {@link Command#getOnlyShowCommandForVolunteer()}
      *
@@ -158,6 +180,17 @@ public class CommandService {
         return Pair.of(nameButton, dataButton);
     }
 
+    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForOwnerExcludeHide() {
+        List<String> nameButton = new ArrayList<>();
+        List<String> dataButton = new ArrayList<>();
+        List<Command> commandList = getOnlyShowCommandForOwner();
+        for (int i = 0; i < commandList.size(); i++) {
+            Command tCom = commandList.get(i);
+            nameButton.add(tCom.getNameButton());
+            dataButton.add(tCom.getTextCommand());
+        }
+        return Pair.of(nameButton, dataButton);
+    }
 
     /**
      * @return Pair<List < String>, List<String>> for the volunteer.

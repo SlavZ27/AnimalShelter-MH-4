@@ -125,7 +125,7 @@ public class UserController {
     })
     @GetMapping("clients")  //GET http://localhost:8080/user/clients
     public ResponseEntity<Collection<UserDto>> getAllClients() {
-        return ResponseEntity.ok(userService.getAllClients());
+        return ResponseEntity.ok(userService.getAllClientsDto());
     }
 
 }

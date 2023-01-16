@@ -3,13 +3,15 @@ package pro.sky.animalshelter4.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import pro.sky.animalshelter4.entity.User;
-import pro.sky.animalshelter4.entity.User;
+import pro.sky.animalshelter4.entity.*;
 import pro.sky.animalshelter4.entityDto.UserDto;
-import pro.sky.animalshelter4.entityDto.UserDto;
+import pro.sky.animalshelter4.exception.AnimalOwnershipNotFoundException;
 import pro.sky.animalshelter4.exception.UserNotFoundException;
+import pro.sky.animalshelter4.exception.VolunteersIsAbsentException;
 import pro.sky.animalshelter4.repository.UserRepository;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -22,15 +24,29 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
-    private final Logger logger = LoggerFactory.getLogger(UserService.class);
-    private final DtoMapperService dtoMapperService;
-    private final Random random = new Random();
+    public final static String MESSAGE_BAD_PHONE = "Bad phone. Try again, please";
+    public final static String CAPTION_SELECT_USER = "Select user";
+    public final static String MESSAGE_VOLUNTEERS_IS_ABSENT = "Sorry. All volunteers are absent";
+    public final static String MESSAGE_CLIENTS_IS_ABSENT = "Sorry. Clients are absent";
+    public final static String MESSAGE_CLIENT_NOT_FOUND = "Sorry. Client not found";
 
-    public UserService(UserRepository userRepository, DtoMapperService dtoMapperService) {
+
+    private final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private final UserRepository userRepository;
+    private final DtoMapperService dtoMapperService;
+    private final CallRequestService callRequestService;
+    private final AnimalService animalService;
+    private final AnimalOwnershipService animalOwnershipService;
+
+    public UserService(UserRepository userRepository, DtoMapperService dtoMapperService, CallRequestService callRequestService, AnimalService animalService, AnimalOwnershipService animalOwnershipService) {
         this.userRepository = userRepository;
         this.dtoMapperService = dtoMapperService;
+        this.callRequestService = callRequestService;
+        this.animalService = animalService;
+        this.animalOwnershipService = animalOwnershipService;
     }
+
+    private final Random random = new Random();
 
 
     public UserDto createUser(UserDto userDto) {
@@ -103,21 +119,45 @@ public class UserService {
                 collect(Collectors.toList());
     }
 
-    public List<UserDto> getAllClients() {
-        logger.info("Method getAllClients was start for return all Users of Clients");
+    public List<UserDto> getAllClientsDto() {
+        logger.info("Method getAllClientsDto was start for return all Users of Clients");
         return userRepository.getAllClients().stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
-    
+
+    public List<User> getAllClientsEntity() {
+        logger.info("Method getAllClientsEntity was start for return all Users of Clients");
+        return new ArrayList<>(userRepository.getAllClients());
+    }
+
     public boolean isUserWithTelegramChatIdVolunteer(Long idChatTelegram) {
         logger.info("Method isUserOfVolunteer was start for to check if the User with id = {} is a volunteer", idChatTelegram);
         User user = userRepository.getByIdTelegramChatAndVolunteer(idChatTelegram);
-        if (user!=null) {
-            logger.debug("Method isVolunteer don't detected volunteer by idUser = {}", idChatTelegram);
+        if (user != null) {
+            logger.debug("Method isUserWithTelegramChatIdVolunteer don't detected volunteer by idUser = {}", idChatTelegram);
             return true;
         }
-        logger.debug("Method isVolunteer detected volunteer by idUser = {}", idChatTelegram);
+        logger.debug("Method isUserWithTelegramChatIdVolunteer detected volunteer by idUser = {}", idChatTelegram);
         return false;
+    }
+
+    public boolean isUserWithTelegramChatIdOwner(Long idChatTelegram) {
+        logger.info("Method isUserWithTelegramChatIdOwner was start for to check if the User with id = {} is a Owner",
+                idChatTelegram);
+        User user = userRepository.getByIdTelegramChatAndOwner(idChatTelegram);
+        if (user != null) {
+            logger.debug("Method isUserWithTelegramChatIdOwner don't detected Owner by idUser = {}", idChatTelegram);
+            return true;
+        }
+        logger.debug("Method isUserWithTelegramChatIdOwner detected Owner by idUser = {}", idChatTelegram);
+        return false;
+    }
+
+    public void changePhone(User user, String phone) {
+        logger.info("Method changePhone was start for change phone by User id = {}",
+                user.getId());
+        user.setPhone(phone);
+        addUser(user);
     }
 
     public User getUserWithTelegramUserId(Long idUser) {
@@ -135,6 +175,64 @@ public class UserService {
         }
         return null;
     }
-    
-    
+
+    public User mapChatToUser(Chat chat) {
+        User user = new User();
+        user.setNameUser(chat.getFirstNameUser() + " " + chat.getLastNameUser());
+        user.setChatTelegram(chat);
+        user.setVolunteer(false);
+        return addUser(user);
+    }
+
+    public User getUserFromChat(Chat chat) {
+        User user = getUserWithTelegramUserId(chat.getId());
+        if (user == null) {
+            return mapChatToUser(chat);
+        }
+        return user;
+    }
+
+    public CallRequest createCallRequest(Chat chatClient) {
+        User userClient = getUserFromChat(chatClient);
+        User userVolunteer = getRandomVolunteer();
+        if (userVolunteer == null) {
+            throw new VolunteersIsAbsentException();
+        }
+        return callRequestService.createCallRequest(userClient, userVolunteer);
+    }
+
+    public List<CallRequest> getListOpenCallRequests(Chat chatVolunteer) {
+        User userVolunteer = getUserFromChat(chatVolunteer);
+        return callRequestService.getAllOpenCallRequestVolunteer(userVolunteer);
+    }
+
+    public void closeCallRequest(Chat chatVolunteer, Long idCallRequest) {
+        User userVolunteer = getUserFromChat(chatVolunteer);
+        callRequestService.closeCallRequest(userVolunteer, idCallRequest);
+    }
+
+    public AnimalOwnership createOwnershipAnimal(Long idUserClient, Long idAnimal) {
+        User userClient = userRepository.findById(idUserClient).orElseThrow(() ->
+                new UserNotFoundException(String.valueOf(idUserClient)));
+        Animal animal = animalService.findAnimal(idAnimal);
+
+        AnimalOwnership animalOwnership = new AnimalOwnership();
+        animalOwnership.setOwner(userClient);
+        animalOwnership.setAnimal(animal);
+        animalOwnership.setDateStartOwn(LocalDate.now());
+        animalOwnership.setDateEndTrial(LocalDate.now().plusDays(30));
+        return animalOwnershipService.addAnimalOwnership(animalOwnership);
+    }
+
+    public Report findOrCreateActualReport(Chat chatUserOwner) {
+        User userOwner = getUserFromChat(chatUserOwner);
+        return animalOwnershipService.findOrCreateActualReport(userOwner);
+    }
+
+    public Report createUpdateReport(Chat chatUserOwner, String diet, String feeling, String behavior, String idMedia) {
+        User userOwner = getUserFromChat(chatUserOwner);
+        return animalOwnershipService.createReport(userOwner, diet, feeling, behavior, idMedia);
+    }
+
+
 }

@@ -1,19 +1,13 @@
 package pro.sky.animalshelter4.service;
 
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.User;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import pro.sky.animalshelter4.entity.CallRequest;
-import pro.sky.animalshelter4.entity.Chat;
-import pro.sky.animalshelter4.entityDto.CallRequestDto;
-import pro.sky.animalshelter4.entityDto.ChatDto;
-import pro.sky.animalshelter4.exception.ChatNotFoundException;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.InteractionUnit;
 import pro.sky.animalshelter4.model.UpdateDPO;
-import pro.sky.animalshelter4.repository.ChatRepository;
 
 
 /**
@@ -84,6 +78,9 @@ public class TelegramMapperService {
                 int maxPhotoIndex = update.message().photo().length - 1;
                 if (update.message().photo()[maxPhotoIndex].fileId() != null) {
                     updateDpo.setIdMedia(update.message().photo()[maxPhotoIndex].fileId());
+                    if (update.message().caption() != null) {
+                        updateDpo.setMessage(update.message().caption());
+                    }
                 } else {
                     logger.debug("ChatId={}; Method toDPO detected null fileId in photo", updateDpo.getIdChat());
                 }
@@ -147,6 +144,7 @@ public class TelegramMapperService {
 
     /**
      * The method checks the string so that it is not null, or empty
+     *
      * @param s
      * @return true or false
      */
@@ -156,6 +154,7 @@ public class TelegramMapperService {
 
     /**
      * The method makes a single word from a string with many words
+     *
      * @param s,
      * @param indexWord
      * @return word with indexWord <br>
@@ -182,6 +181,13 @@ public class TelegramMapperService {
         }
         logger.debug("Method toWord return {}", sMas[indexWord]);
         return sMas[indexWord];
+    }
+
+    public Long mapStringToLong(String message) {
+        if (!StringUtils.isNumeric(message)) {
+            throw new IllegalArgumentException(message);
+        }
+        return Long.parseLong(message, 10);
     }
 
 }
