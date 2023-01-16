@@ -116,6 +116,9 @@ public class TelegramBotUpdatesService {
                             chatService.getChatByIdOrNew(updateDpo.getIdChat()),
                             updateDpo.getMessage());
                     break;
+                case CREATE_OWNERSHIP:
+                    chatService.createOwn(updateDpo);
+                    break;
                 case CLOSE_UNFINISHED_REQUEST:
                     chatService.closeUnfinishedRequest(updateDpo);
                 case EMPTY_CALLBACK_DATA_FOR_BUTTON:

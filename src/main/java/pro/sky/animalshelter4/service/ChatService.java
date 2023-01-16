@@ -319,5 +319,10 @@ public class ChatService {
     }
 
 
+    public void createOwn(UpdateDPO updateDPO) {
+        Chat chat = getChatByIdOrNew(updateDPO.getIdChat());
+        String message = updateDPO.getMessage();
 
+
+    }
 }
