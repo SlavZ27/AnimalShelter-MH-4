@@ -153,7 +153,8 @@ public class UserService {
         return false;
     }
 
-    public void changePhone(User user, String phone) {
+    public void changePhone(Chat chat, String phone) {
+        User user = getUserWithTelegramUserId(chat.getId());
         logger.info("Method changePhone was start for change phone by User id = {}",
                 user.getId());
         user.setPhone(phone);

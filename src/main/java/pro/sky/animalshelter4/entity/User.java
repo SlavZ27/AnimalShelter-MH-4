@@ -1,6 +1,6 @@
 package pro.sky.animalshelter4.entity;
 
-import pro.sky.animalshelter4.exception.BadPhoneNumber;
+import pro.sky.animalshelter4.exception.BadPhoneNumberException;
 
 import javax.persistence.*;
 
@@ -29,7 +29,6 @@ public class User {
         this.address = address;
         this.isVolunteer = isVolunteer;
     }
-
 
     public Long getId() {
         return id;
@@ -68,7 +67,7 @@ public class User {
             }
         }
         if (5 > validatePhone.toString().length() || validatePhone.toString().length() > 15) {
-            throw new BadPhoneNumber(phone);
+            throw new BadPhoneNumberException(phone);
         } else {
             this.phone = validatePhone.toString();
         }

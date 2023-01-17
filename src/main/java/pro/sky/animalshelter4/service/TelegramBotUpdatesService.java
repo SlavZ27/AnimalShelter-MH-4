@@ -124,9 +124,7 @@ public class TelegramBotUpdatesService {
                     chatService.closeCallRequest(updateDpo);
                     break;
                 case CHANGE_PHONE:
-                    chatService.changePhoneUser(
-                            chatService.getChatByIdOrNew(updateDpo.getIdChat()),
-                            updateDpo.getMessage());
+                    chatService.changePhoneUser(updateDpo);
                     break;
                 case CREATE_OWNERSHIP:
                     chatService.createOwn(updateDpo);
