@@ -12,6 +12,7 @@ import pro.sky.animalshelter4.model.AnimalUnit;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.OwnershipUnit;
 import pro.sky.animalshelter4.model.UpdateDPO;
+import pro.sky.animalshelter4.repository.CallRequestRepository;
 import pro.sky.animalshelter4.repository.ChatRepository;
 import pro.sky.animalshelter4.repository.ReportRepository;
 
@@ -41,9 +42,11 @@ public class ChatService {
     private final AnimalService animalService;
     private final UserService userService;
     private final ReportRepository reportRepository;
+    private final CallRequestRepository callRequestRepository;
 
     public ChatService(ChatRepository chatRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService, TelegramBotSenderService telegramBotSenderService, TelegramBotContentSaverService telegramBotContentSaverService, TelegramMapperService telegramMapperService, AnimalService animalService, UserService userService,
-                       ReportRepository reportRepository) {
+                       ReportRepository reportRepository,
+                       CallRequestRepository callRequestRepository) {
         this.chatRepository = chatRepository;
         this.dtoMapperService = dtoMapperService;
         this.telegramUnfinishedRequestService = telegramUnfinishedRequestService;
@@ -53,6 +56,7 @@ public class ChatService {
         this.animalService = animalService;
         this.userService = userService;
         this.reportRepository = reportRepository;
+        this.callRequestRepository = callRequestRepository;
     }
 
     public Chat getChatByIdOrNew(UpdateDPO updateDPO) {
@@ -176,12 +180,15 @@ public class ChatService {
         telegramBotSenderService.sendIDontKnowYourPhoneWriteIt(chat.getId());
     }
 
-    public void changePhoneUser(Chat chat, String phone) {
+
+    public void changePhoneUser(UpdateDPO updateDPO) {
+        Chat chat = getChatByIdOrNew(updateDPO.getIdChat());
+        String phone = updateDPO.getMessage();
         logger.info("Method tryChangePhoneFromTelegram was start for change phone by User with chat id = {}",
                 chat.getId());
         try {
-            userService.changePhone(userService.getUserWithTelegramUserId(chat.getId()), phone);
-        } catch (BadPhoneNumber e) {
+            userService.changePhone(chat, phone);
+        } catch (BadPhoneNumberException e) {
             telegramBotSenderService.sendMessageWithButtonCancel(
                     chat.getId(),
                     UserService.MESSAGE_BAD_PHONE,
@@ -397,10 +404,11 @@ public class ChatService {
             }
         }
 
-        if (ownershipUnit == null || messageMas == null) {
+        if (ownershipUnit == null && messageMas == null) {
             //badRequest
             return;
         }
+
         switch (ownershipUnit) {
             case START:
                 //send List of Users
@@ -545,7 +553,7 @@ public class ChatService {
     private void startCreateReport(Chat chatOwner) {
         telegramBotSenderService.sendMessageWithButtonCancel(
                 chatOwner.getId(),
-                ReportService.MESSAGE_SEND_PHOTO + " and/or " + ReportService.MESSAGE_WRITE_DIET,
+                ReportService.MESSAGE_WRITE_DIET + " and/or " + ReportService.MESSAGE_SEND_PHOTO,
                 TelegramBotSenderService.NAME_BUTTON_FOR_CANCEL
         );
     }
