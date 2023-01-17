@@ -19,8 +19,28 @@ public class Report {
     @OneToOne
     @JoinColumn(name = "id_photo")
     private Photo photo;
+    @JoinColumn(name = "is_approve")
+    private boolean isApprove;
+    @JoinColumn(name = "is_open")
+    private boolean isOpen;
 
     public Report() {
+    }
+
+    public boolean isApprove() {
+        return isApprove;
+    }
+
+    public void setApprove(boolean approve) {
+        isApprove = approve;
+    }
+
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    public void setOpen(boolean open) {
+        isOpen = open;
     }
 
     public Long getId() {

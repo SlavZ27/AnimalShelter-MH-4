@@ -236,4 +236,11 @@ public class UserService {
     }
 
 
+    public Report getOpenAndNotApproveReport() {
+        return animalOwnershipService.getOpenAndNotApproveReport();
+    }
+
+    public Report approveReport(Long idReport, boolean approve) {
+        return animalOwnershipService.approveReport(idReport, approve);
+    }
 }

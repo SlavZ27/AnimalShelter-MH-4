@@ -138,6 +138,12 @@ public class TelegramBotUpdatesService {
                 case REPORT:
                     chatService.report(updateDpo);
                     break;
+                case VIEW_REPORT:
+                    chatService.viewReport(updateDpo);
+                    break;
+                case APPROVE_REPORT:
+                    chatService.approveReport(updateDpo);
+                    break;
                 case CLOSE_UNFINISHED_REQUEST:
                     chatService.closeUnfinishedRequest(updateDpo);
                 case EMPTY_CALLBACK_DATA_FOR_BUTTON:

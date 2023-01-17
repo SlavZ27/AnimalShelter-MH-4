@@ -52,7 +52,8 @@ public enum Command {
     COMPLEMENT_ANIMAL(7, "/COMPLEMENT_ANIMAL", "Complement animal", true, false, false, true),
     CREATE_OWNERSHIP(8, "/CREATE_OWNERSHIP", "Own", true, false, false, true),
     REPORT(9, "/REPORT", "Report", true, false, true, false),
-    CALENDAR(79, "/CALENDAR", "Calendar", false, true, true, true),
+    VIEW_REPORT(9, "/VIEW_REPORT", "Reports", true, false, false, true),
+    APPROVE_REPORT(10, "/APPROVE_REPORT", "Approve reports", false, false, false, true),
     CLOSE_UNFINISHED_REQUEST(80, "/CLOSE_UNFINISHED_REQUEST", "Cancel", false, true, true, true),
     /**
      * The command is used to add it to dummy buttons. Clicking on such buttons does nothing

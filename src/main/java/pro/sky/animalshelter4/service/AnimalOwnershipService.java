@@ -100,4 +100,12 @@ public class AnimalOwnershipService {
         }
         return reportService.createUpdateReport(animalOwnership, diet, feeling, behavior, idMedia);
     }
+
+    public Report getOpenAndNotApproveReport() {
+        return reportService.getOpenAndNotApproveReport();
+    }
+
+    public Report approveReport(Long idReport, boolean approve) {
+        return reportService.approveReport(idReport, approve);
+    }
 }

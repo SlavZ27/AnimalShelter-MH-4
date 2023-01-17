@@ -41,12 +41,8 @@ public class ChatService {
     private final TelegramMapperService telegramMapperService;
     private final AnimalService animalService;
     private final UserService userService;
-    private final ReportRepository reportRepository;
-    private final CallRequestRepository callRequestRepository;
 
-    public ChatService(ChatRepository chatRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService, TelegramBotSenderService telegramBotSenderService, TelegramBotContentSaverService telegramBotContentSaverService, TelegramMapperService telegramMapperService, AnimalService animalService, UserService userService,
-                       ReportRepository reportRepository,
-                       CallRequestRepository callRequestRepository) {
+    public ChatService(ChatRepository chatRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService, TelegramBotSenderService telegramBotSenderService, TelegramBotContentSaverService telegramBotContentSaverService, TelegramMapperService telegramMapperService, AnimalService animalService, UserService userService) {
         this.chatRepository = chatRepository;
         this.dtoMapperService = dtoMapperService;
         this.telegramUnfinishedRequestService = telegramUnfinishedRequestService;
@@ -55,8 +51,6 @@ public class ChatService {
         this.telegramMapperService = telegramMapperService;
         this.animalService = animalService;
         this.userService = userService;
-        this.reportRepository = reportRepository;
-        this.callRequestRepository = callRequestRepository;
     }
 
     public Chat getChatByIdOrNew(UpdateDPO updateDPO) {
@@ -635,5 +629,57 @@ public class ChatService {
 
         report = userService.createUpdateReport(chatOwner, diet, feeling, behavior, idMedia);
         continueCreateReport(chatOwner, report);
+    }
+
+    public void approveReport(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        String message = updateDpo.getMessage();
+        if (message != null && message.length() > 0 && message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
+            String[] messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
+            if (message.length() == 2) {
+                Long idReport = telegramMapperService.mapStringToLong(messageMas[0]);
+                boolean approve = Boolean.parseBoolean(messageMas[1]);
+                Report report = userService.approveReport(idReport, approve);
+                if (report != null) {
+                    if (approve) {
+                        telegramBotSenderService.sendMessage(chatVolunteer.getId(),
+                                ReportService.MESSAGE_REPORT_IS_PLACED_GOOD);
+                        telegramBotSenderService.sendMessage(report.getAnimalOwnership().getOwner().getId(),
+                                ReportService.MESSAGE_REPORT_IS_PLACED_GOOD);
+                    } else {
+                        telegramBotSenderService.sendMessage(chatVolunteer.getId(),
+                                ReportService.MESSAGE_REPORT_IS_PLACED_BAD);
+                        telegramBotSenderService.sendMessage(report.getAnimalOwnership().getOwner().getId(),
+                                ReportService.MESSAGE_REPORT_IS_PLACED_BAD);
+                    }
+                }
+            }
+        }
+    }
+
+    public void viewReport(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        String message = updateDpo.getMessage();
+        if (message == null || message.length() == 0) {
+            Report report = userService.getOpenAndNotApproveReport();
+            if (report == null) {
+                telegramBotSenderService.sendMessage(chatVolunteer.getId(), ReportService.MESSAGE_ALL_REPORT_ARE_APPROVE);
+            } else {
+                List<String> nameButtons = new ArrayList<>();
+                List<String> dataButtons = new ArrayList<>();
+                nameButtons.add(ReportService.BUTTON_GOOD);
+                dataButtons.add(report.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL + true);
+                nameButtons.add(ReportService.BUTTON_BAD);
+                dataButtons.add(report.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL + false);
+                telegramBotSenderService.sendMessage(chatVolunteer.getId(), report.toString());
+                telegramBotSenderService.sendButtonsWithOneData(
+                        chatVolunteer.getId(),
+                        ReportService.MESSAGE_APPROVE_OR_NOT,
+                        Command.APPROVE_REPORT.getTextCommand(),
+                        nameButtons,
+                        dataButtons,
+                        2, 1);
+            }
+        }
     }
 }

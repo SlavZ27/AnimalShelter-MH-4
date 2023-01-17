@@ -19,6 +19,12 @@ public class ReportService {
     public final static String MESSAGE_WRITE_DIET = "Write diet";
     public final static String MESSAGE_WRITE_FEELING = "Write feeling";
     public final static String MESSAGE_WRITE_BEHAVIOR = "Write behavior";
+    public final static String MESSAGE_REPORT_IS_PLACED_GOOD = "Report is placed good";
+    public final static String MESSAGE_REPORT_IS_PLACED_BAD = "Report is placed bad";
+    public final static String MESSAGE_ALL_REPORT_ARE_APPROVE = "All report are approve";
+    public final static String MESSAGE_APPROVE_OR_NOT = "Good or bad?";
+    public final static String BUTTON_GOOD = "good";
+    public final static String BUTTON_BAD = "bad";
     private final ReportRepository reportRepository;
     private final PhotoService photoService;
 
@@ -124,6 +130,17 @@ public class ReportService {
             report.setPhoto(photo);
         }
         report.setReportDate(LocalDate.now());
+        return reportRepository.save(report);
+    }
+
+    public Report getOpenAndNotApproveReport() {
+        return reportRepository.getOpenAndNotApproveReport();
+    }
+
+    public Report approveReport(Long idReport, boolean approve) {
+        Report report = reportRepository.findById(idReport).orElseThrow(()->
+                new ReportNotFoundException(idReport.toString()));
+        report.setApprove(approve);
         return reportRepository.save(report);
     }
 }
