@@ -20,9 +20,7 @@ public class Report {
     @JoinColumn(name = "id_photo")
     private Photo photo;
     @JoinColumn(name = "is_approve")
-    private boolean isApprove;
-    @JoinColumn(name = "is_open")
-    private boolean isOpen;
+    private Boolean isApprove;
 
     public Report() {
     }
@@ -35,13 +33,6 @@ public class Report {
         isApprove = approve;
     }
 
-    public boolean isOpen() {
-        return isOpen;
-    }
-
-    public void setOpen(boolean open) {
-        isOpen = open;
-    }
 
     public Long getId() {
         return id;
@@ -97,5 +88,17 @@ public class Report {
 
     public void setPhoto(Photo photo) {
         this.photo = photo;
+    }
+
+    @Override
+    public String toString() {
+        return "Report{" +
+                ", animalOwnership=" + animalOwnership +
+                ", reportDate=" + reportDate +
+                ", diet='" + diet + '\'' +
+                ", feeling='" + feeling + '\'' +
+                ", behavior='" + behavior + '\'' +
+                ", photo=" + photo+
+                '}';
     }
 }

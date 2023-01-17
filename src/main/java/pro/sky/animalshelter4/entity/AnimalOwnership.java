@@ -19,7 +19,7 @@ public class AnimalOwnership {
     @JoinColumn(name = "date_end_trial")
     private LocalDate dateEndTrial;
     @JoinColumn(name = "is_approve")
-    private boolean isApprove;
+    private Boolean isApprove;
     @JoinColumn(name = "is_open")
     private boolean isOpen;
 
@@ -80,5 +80,15 @@ public class AnimalOwnership {
 
     public void setDateEndTrial(LocalDate dateEndTrial) {
         this.dateEndTrial = dateEndTrial;
+    }
+
+    @Override
+    public String toString() {
+        return "AnimalOwnership{" +
+                ", owner=" + owner +
+                ", animal=" + animal +
+                ", dateStartOwn=" + dateStartOwn +
+                ", dateEndTrial=" + dateEndTrial +
+                '}';
     }
 }

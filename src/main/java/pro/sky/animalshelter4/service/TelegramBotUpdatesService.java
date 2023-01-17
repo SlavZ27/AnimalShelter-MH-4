@@ -144,6 +144,15 @@ public class TelegramBotUpdatesService {
                 case APPROVE_REPORT:
                     chatService.approveReport(updateDpo);
                     break;
+                case VIEW_OWNERSHIP:
+                    chatService.viewAnimalOwnership(updateDpo);
+                    break;
+                case APPROVE_OWNERSHIP:
+                    chatService.approveAnimalOwnership(updateDpo);
+                    break;
+                case EXTEND_TRIAL:
+                    chatService.extendTrial(updateDpo);
+                    break;
                 case CLOSE_UNFINISHED_REQUEST:
                     chatService.closeUnfinishedRequest(updateDpo);
                 case EMPTY_CALLBACK_DATA_FOR_BUTTON:

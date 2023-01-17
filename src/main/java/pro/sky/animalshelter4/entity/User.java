@@ -3,6 +3,7 @@ package pro.sky.animalshelter4.entity;
 import pro.sky.animalshelter4.exception.BadPhoneNumberException;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 
 @Entity(name = "users")
@@ -17,17 +18,28 @@ public class User {
     private String phone;
     private String address;
     boolean isVolunteer;
+    @JoinColumn(name = "date_last_notification")
+    LocalDateTime dateLastNotification;
 
     public User() {
     }
 
-    public User(Long id, String nameUser, Chat chatTelegram, String phone, String address, boolean isOwner, boolean isVolunteer) {
+    public User(Long id, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer, LocalDateTime dateLastNotification) {
         this.id = id;
         this.nameUser = nameUser;
         this.chatTelegram = chatTelegram;
         this.phone = phone;
         this.address = address;
         this.isVolunteer = isVolunteer;
+        this.dateLastNotification = dateLastNotification;
+    }
+
+    public LocalDateTime getDateLastNotification() {
+        return dateLastNotification;
+    }
+
+    public void setDateLastNotification(LocalDateTime dateLastNotification) {
+        this.dateLastNotification = dateLastNotification;
     }
 
     public Long getId() {
@@ -87,5 +99,16 @@ public class User {
 
     public void setVolunteer(boolean volunteer) {
         isVolunteer = volunteer;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                ", nameUser='" + nameUser + '\'' +
+                ", chatTelegram=" + chatTelegram +
+                ", phone='" + phone + '\'' +
+                ", address='" + address + '\'' +
+                ", isVolunteer=" + isVolunteer +
+                '}';
     }
 }

@@ -21,7 +21,10 @@ public class ReportService {
     public final static String MESSAGE_WRITE_BEHAVIOR = "Write behavior";
     public final static String MESSAGE_REPORT_IS_PLACED_GOOD = "Report is placed good";
     public final static String MESSAGE_REPORT_IS_PLACED_BAD = "Report is placed bad";
+    public final static String MESSAGE_REPORT_IS_PLACED_BAD_OWNER = "Дорогой усыновитель, мы заметили, что ты заполняешь отчет не так подробно, как необходимо. Пожалуйста, подойди ответственнее к этому занятию. В противном случае волонтеры приюта будут обязаны самолично проверять условия содержания собаки";
     public final static String MESSAGE_ALL_REPORT_ARE_APPROVE = "All report are approve";
+    public final static String MESSAGE_NOTIFICATION_ABOUT_REPORT = "Don't forget to send pet reports every day";
+    public final static String MESSAGE_NEED_CONTACT_OWNER = "Problem with reports. Need contact with owners by AnimalOwnerships:\n";
     public final static String MESSAGE_APPROVE_OR_NOT = "Good or bad?";
     public final static String BUTTON_GOOD = "good";
     public final static String BUTTON_BAD = "bad";
@@ -138,7 +141,7 @@ public class ReportService {
     }
 
     public Report approveReport(Long idReport, boolean approve) {
-        Report report = reportRepository.findById(idReport).orElseThrow(()->
+        Report report = reportRepository.findById(idReport).orElseThrow(() ->
                 new ReportNotFoundException(idReport.toString()));
         report.setApprove(approve);
         return reportRepository.save(report);

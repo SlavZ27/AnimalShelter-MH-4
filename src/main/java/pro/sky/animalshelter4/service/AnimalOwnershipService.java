@@ -4,16 +4,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.AnimalOwnership;
-import pro.sky.animalshelter4.entity.Photo;
 import pro.sky.animalshelter4.entity.Report;
 import pro.sky.animalshelter4.entity.User;
-import pro.sky.animalshelter4.exception.AnimalNotFoundException;
 import pro.sky.animalshelter4.exception.AnimalOwnershipNotFoundException;
 import pro.sky.animalshelter4.repository.AnimalOwnershipRepository;
+
+import java.time.LocalDate;
 
 @Service
 public class AnimalOwnershipService {
     public final static String MESSAGE_SUCCESSFUL_CREATION = "OK.";
+    public final static String MESSAGE_TRIAL_IS_OVER = "Trial period of animal ownership is over:\n";
+    public final static String MESSAGE_ALL_ANIMAL_OWNERSHIP_ARE_APPROVE = "All AnimalOwnership are approve";
+    public final static String MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_GOOD = "AnimalOwnership is placed good";
+    public final static String MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_BAD = "AnimalOwnership is placed bad";
+    public final static String MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_BAD_OWNER = "Recommendations for the owner";
+
 
     private final AnimalOwnershipRepository animalOwnershipRepository;
     private final ReportService reportService;
@@ -82,7 +88,7 @@ public class AnimalOwnershipService {
     }
 
     public AnimalOwnership getActualAnimalOwnership(User userOwner) {
-        return animalOwnershipRepository.getActualAnimalOwnership(userOwner.getId());
+        return animalOwnershipRepository.getActualAnimalOwnership(userOwner.getId(), LocalDate.now());
     }
 
     public Report findOrCreateActualReport(User userOwner) {
@@ -107,5 +113,28 @@ public class AnimalOwnershipService {
 
     public Report approveReport(Long idReport, boolean approve) {
         return reportService.approveReport(idReport, approve);
+    }
+
+    public AnimalOwnership getOneNotApproveOpenAnimalOwnershipWithNotTrial() {
+        return animalOwnershipRepository.getOneNotApproveOpenAnimalOwnershipWithNotTrial();
+    }
+
+    public AnimalOwnership approveAnimalOwnership(Long idAnimalOwnership, boolean approve) {
+        AnimalOwnership animalOwnership = findAnimalOwnership(idAnimalOwnership);
+        if (animalOwnership == null) {
+            throw new AnimalOwnershipNotFoundException(idAnimalOwnership.toString());
+        }
+        animalOwnership.setApprove(approve);
+        animalOwnership.setOpen(false);
+        return animalOwnershipRepository.save(animalOwnership);
+    }
+
+    public AnimalOwnership extendTrialAnimalOwnershipForAWeek(Long idAnimalOwnership) {
+        AnimalOwnership animalOwnership = findAnimalOwnership(idAnimalOwnership);
+        if (animalOwnership == null) {
+            throw new AnimalOwnershipNotFoundException(idAnimalOwnership.toString());
+        }
+        animalOwnership.setDateEndTrial(animalOwnership.getDateEndTrial().plusDays(7));
+        return animalOwnershipRepository.save(animalOwnership);
     }
 }
