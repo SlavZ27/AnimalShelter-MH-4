@@ -33,17 +33,15 @@ public class ChatService {
     private final TelegramUnfinishedRequestService telegramUnfinishedRequestService;
     private final Logger logger = LoggerFactory.getLogger(ChatService.class);
     private final TelegramBotSenderService telegramBotSenderService;
-    private final TelegramBotContentSaverService telegramBotContentSaverService;
     private final TelegramMapperService telegramMapperService;
     private final AnimalService animalService;
     private final UserService userService;
 
-    public ChatService(ChatRepository chatRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService, TelegramBotSenderService telegramBotSenderService, TelegramBotContentSaverService telegramBotContentSaverService, TelegramMapperService telegramMapperService, AnimalService animalService, UserService userService) {
+    public ChatService(ChatRepository chatRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService, TelegramBotSenderService telegramBotSenderService, TelegramMapperService telegramMapperService, AnimalService animalService, UserService userService) {
         this.chatRepository = chatRepository;
         this.dtoMapperService = dtoMapperService;
         this.telegramUnfinishedRequestService = telegramUnfinishedRequestService;
         this.telegramBotSenderService = telegramBotSenderService;
-        this.telegramBotContentSaverService = telegramBotContentSaverService;
         this.telegramMapperService = telegramMapperService;
         this.animalService = animalService;
         this.userService = userService;
@@ -224,6 +222,7 @@ public class ChatService {
             callRequest = userService.createCallRequest(chatClient);
         } catch (VolunteersIsAbsentException e) {
             telegramBotSenderService.sendMessage(chatClient.getId(), UserService.MESSAGE_VOLUNTEERS_IS_ABSENT);
+            telegramBotSenderService.sendButtonsCommandForChat(chatClient.getId());
             return;
         }
         telegramBotSenderService.sendMessage(chatClient.getId(), CallRequestService.MESSAGE_SUCCESSFUL_CREATION);
@@ -301,14 +300,17 @@ public class ChatService {
             telegramBotSenderService.sendMessage(
                     chatVolunteer.getId(),
                     CallRequestService.MESSAGE_CALL_REQUEST_NOT_FOUND);
+            telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
             return;
         } catch (CantCloseCallRequestException e) {
             telegramBotSenderService.sendMessage(
                     chatVolunteer.getId(),
                     CallRequestService.MESSAGE_YOU_CANT_CLOSE_CALL_REQUEST);
+            telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
             return;
         }
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), CallRequestService.MESSAGE_CALL_REQUEST_IS_CLOSE);
+        telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
     }
 
     public void closeUnfinishedRequest(UpdateDPO updateDPO) {

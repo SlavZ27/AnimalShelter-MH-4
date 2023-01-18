@@ -234,6 +234,7 @@ public class DtoMapperService {
         reportDto.setBehavior(report.getBehavior());
         if (report.getPhoto() != null) {
             reportDto.setIdPhoto(report.getPhoto().getId());
+            reportDto.setLinkPhoto("http://localhost:8080/photo/" + report.getPhoto().getId());
         }
         reportDto.setApprove(report.isApprove());
         return reportDto;

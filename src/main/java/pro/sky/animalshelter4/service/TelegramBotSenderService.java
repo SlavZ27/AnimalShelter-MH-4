@@ -65,12 +65,16 @@ public class TelegramBotSenderService {
         logger.info("ChatId={}; Method sendMessage was started for send a message : {}", idChat, textMessage);
         SendMessage sendMessage = new SendMessage(idChat, textMessage);
         SendResponse response = telegramBot.execute(sendMessage);
-        if (response == null) {
-            logger.debug("ChatId={}; Method sendMessage did not receive a response", idChat);
-        } else if (response.isOk()) {
-            logger.debug("ChatId={}; Method sendMessage has completed sending the message", idChat);
+        if (response != null) {
+            if (response.isOk()) {
+                logger.debug("ChatId={}; Method sendMessage has completed sending the message", idChat);
+            } else {
+                logger.debug("ChatId={}; Method sendMessage received an error : {}",
+                        idChat, response.errorCode());
+            }
         } else {
-            logger.debug("ChatId={}; Method sendMessage received an error : {}", idChat, response.errorCode());
+            logger.debug("ChatId={}; Method sendMessage don't received response",
+                    idChat);
         }
     }
 
@@ -187,12 +191,19 @@ public class TelegramBotSenderService {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(tableButtons);
         SendMessage message = new SendMessage(idChat, caption).replyMarkup(inlineKeyboardMarkup);
         SendResponse response = telegramBot.execute(message);
-        if (response.isOk()) {
-            logger.debug("ChatId={}; Method sendButtonsWithCommonData has completed sending the message", idChat);
+        if (response != null) {
+            if (response.isOk()) {
+                logger.debug("ChatId={}; Method sendButtonsWithCommonData has completed sending the message", idChat);
+            } else {
+                logger.debug("ChatId={}; Method sendButtonsWithCommonData received an error : {}",
+                        idChat, response.errorCode());
+            }
         } else {
-            logger.debug("ChatId={}; Method sendButtonsWithCommonData received an error : {}",
-                    idChat, response.errorCode());
+            logger.debug("ChatId={}; Method sendButtonsWithCommonData don't received response",
+                    idChat);
         }
+
+
     }
 
     /**

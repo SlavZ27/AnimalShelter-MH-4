@@ -25,11 +25,11 @@ public class Report {
     public Report() {
     }
 
-    public boolean isApprove() {
+    public Boolean isApprove() {
         return isApprove;
     }
 
-    public void setApprove(boolean approve) {
+    public void setApprove(Boolean approve) {
         isApprove = approve;
     }
 

@@ -15,7 +15,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             , nativeQuery = true)
     Report findReportByIdAnimalOwnershipAndDate(Long idAnimalOwnership, LocalDate localDate);
 
-    @Query(value = "select * from report where report.is_open = true and report.is_approve is null limit 1"
+    @Query(value = "select * from report where report.is_approve is null limit 1"
             , nativeQuery = true)
     Report getOpenAndNotApproveReport();
 

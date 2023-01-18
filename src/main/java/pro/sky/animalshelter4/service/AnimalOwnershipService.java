@@ -129,7 +129,8 @@ public class AnimalOwnershipService {
     }
 
     public AnimalOwnership getOneNotApproveOpenAnimalOwnershipWithNotTrial() {
-        return animalOwnershipRepository.getOneNotApproveOpenAnimalOwnershipWithNotTrial();
+        LocalDate localDateNow = LocalDate.now();
+        return animalOwnershipRepository.getOneNotApproveOpenAnimalOwnershipWithNotTrial(localDateNow);
     }
 
     public AnimalOwnership approveAnimalOwnership(Long idAnimalOwnership, boolean approve) {

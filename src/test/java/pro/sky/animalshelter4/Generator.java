@@ -5,7 +5,9 @@ import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
+import org.apache.commons.lang3.StringUtils;
 import pro.sky.animalshelter4.entity.Chat;
+import pro.sky.animalshelter4.exception.BadPhoneNumberException;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -58,19 +60,36 @@ public class Generator {
         if (isPast) {
             tldt = localDateTime.plusYears(1L);
             while (tldt.isBefore(localDateTime)) {
-                LocalDate localDate = LocalDate.of(genInt(year-2, year), genInt(12), genInt(25));
-                LocalTime localTime = LocalTime.of(genInt(23), genInt(59));
+                LocalDate localDate = LocalDate.of(genInt(year - 2, year), genInt(12), genInt(25));
+                LocalTime localTime = LocalTime.of(genInt(23), genInt(59), genInt(59));
                 tldt = LocalDateTime.of(localDate, localTime);
             }
         } else {
             tldt = localDateTime.minusYears(1L);
             while (tldt.isAfter(localDateTime)) {
-                LocalDate localDate = LocalDate.of(genInt(year-2, year), genInt(12), genInt(25));
-                LocalTime localTime = LocalTime.of(genInt(23), genInt(59));
+                LocalDate localDate = LocalDate.of(genInt(year - 2, year), genInt(12), genInt(25));
+                LocalTime localTime = LocalTime.of(genInt(23), genInt(59), genInt(59));
                 tldt = LocalDateTime.of(localDate, localTime);
             }
         }
         return tldt;
+    }
+
+    public LocalDate generateDate(boolean isPast, LocalDate localDate) {
+        LocalDate tld = LocalDate.now();
+        int year = tld.getYear();
+        if (isPast) {
+            tld = localDate.plusYears(1L);
+            while (tld.isBefore(localDate)) {
+                tld = LocalDate.of(genInt(year - 2, year), genInt(12), genInt(25));
+            }
+        } else {
+            tld = localDate.minusYears(1L);
+            while (tld.isAfter(localDate)) {
+                tld = LocalDate.of(genInt(year - 2, year), genInt(12), genInt(25));
+            }
+        }
+        return tld;
     }
 
     /**
@@ -97,7 +116,7 @@ public class Generator {
         return chat;
     }
 
-    public pro.sky.animalshelter4.entity.User generateUser(Long idUser, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer, boolean needGenerate) {
+    public pro.sky.animalshelter4.entity.User generateUser(Long idUser, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer, LocalDateTime dateLastNotification, boolean needGenerate) {
         if (needGenerate) {
             idUser = generateIdIfEmpty(idUser);
             nameUser = generateNameIfEmpty(nameUser);
@@ -106,6 +125,7 @@ public class Generator {
             }
             phone = generatePhoneIfEmpty(phone);
             address = generateAddressIfEmpty(address);
+            dateLastNotification = generateDateTime(true, LocalDateTime.now());
         }
         return new pro.sky.animalshelter4.entity.User(
                 idUser,
@@ -113,7 +133,8 @@ public class Generator {
                 chatTelegram,
                 phone,
                 address,
-                isVolunteer);
+                isVolunteer,
+                dateLastNotification);
     }
 
     /**
@@ -341,13 +362,17 @@ public class Generator {
      */
     public String generatePhoneIfEmpty(String phone) {
         if (phone == null || phone.length() == 0) {
-            String tempPhone = faker.phoneNumber().phoneNumber();
-            if (tempPhone.length() > 15) {
-                tempPhone = tempPhone.substring(0, 14);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 10; i++) {
+                sb.append(random.nextInt(10));
             }
-            return tempPhone;
+            return sb.toString();
         }
         return phone;
+    }
+
+    public String generateAnimalType() {
+        return faker.animal().name();
     }
 
     /**
@@ -400,5 +425,14 @@ public class Generator {
 
     public boolean generateBool() {
         return faker.bool().bool();
+    }
+
+    public Boolean generateBoolWithNull() {
+        int i = random.nextInt(50);
+        if (i < 25) {
+            return faker.bool().bool();
+        } else {
+            return null;
+        }
     }
 }

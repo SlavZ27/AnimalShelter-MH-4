@@ -64,12 +64,12 @@ class ChatControllerTest {
         for (int i = 0; i < 2; i++) {
             Chat chatVolunteer = generator.generateChat(-1L, "", "", "", null, true);
             chatVolunteer = chatRepository.save(chatVolunteer);
-            User userVolunteer = generator.generateUser(null, null, chatVolunteer, null, null, true, true);
+            User userVolunteer = generator.generateUser(null, null, chatVolunteer, null, null, true, null,true);
             userVolunteer = userRepository.save(userVolunteer);
             for (int j = 0; j < 10; j++) {
                 Chat chatClient = generator.generateChat(-1L, "", "", "", null, true);
                 chatClient = chatRepository.save(chatClient);
-                User userClient = generator.generateUser(null, null, chatClient, null, null, false, true);
+                User userClient = generator.generateUser(null, null, chatClient, null, null, false, null,true);
                 userClient = userRepository.save(userClient);
                 CallRequest callRequest = new CallRequest();
                 callRequest.setVolunteer(userVolunteer);
