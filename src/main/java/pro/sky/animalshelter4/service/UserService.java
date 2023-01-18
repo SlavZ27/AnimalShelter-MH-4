@@ -5,12 +5,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.*;
 import pro.sky.animalshelter4.entityDto.UserDto;
-import pro.sky.animalshelter4.exception.AnimalOwnershipNotFoundException;
 import pro.sky.animalshelter4.exception.UserNotFoundException;
 import pro.sky.animalshelter4.exception.VolunteersIsAbsentException;
 import pro.sky.animalshelter4.repository.UserRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -236,4 +236,29 @@ public class UserService {
     }
 
 
+    public Report getOpenAndNotApproveReport() {
+        return animalOwnershipService.getOpenAndNotApproveReport();
+    }
+
+    public Report approveReport(Long idReport, boolean approve) {
+        return animalOwnershipService.approveReport(idReport, approve);
+    }
+
+    public void changeUserDateLastNotificationToNow(Chat chat) {
+        User user = getUserFromChat(chat);
+        user.setDateLastNotification(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    public AnimalOwnership getOneNotApproveOpenAnimalOwnershipWithNotTrial() {
+        return animalOwnershipService.getOneNotApproveOpenAnimalOwnershipWithNotTrial();
+    }
+
+    public AnimalOwnership approveAnimalOwnership(Long idAnimalOwnership, boolean approve) {
+        return animalOwnershipService.approveAnimalOwnership(idAnimalOwnership, approve);
+    }
+
+    public AnimalOwnership extendTrialAnimalOwnership(Long idAnimalOwnership) {
+        return animalOwnershipService.extendTrialAnimalOwnershipForAWeek(idAnimalOwnership);
+    }
 }

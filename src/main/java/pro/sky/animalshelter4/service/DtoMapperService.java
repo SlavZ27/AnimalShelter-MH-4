@@ -3,19 +3,13 @@ package pro.sky.animalshelter4.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import pro.sky.animalshelter4.entity.CallRequest;
-import pro.sky.animalshelter4.entity.Chat;
-import pro.sky.animalshelter4.entity.User;
-import pro.sky.animalshelter4.entityDto.CallRequestDto;
-import pro.sky.animalshelter4.entityDto.ChatDto;
-import pro.sky.animalshelter4.entityDto.UserDto;
-import pro.sky.animalshelter4.exception.ChatNotFoundException;
-import pro.sky.animalshelter4.exception.UserNotFoundException;
-import pro.sky.animalshelter4.repository.ChatRepository;
-import pro.sky.animalshelter4.repository.UserRepository;
+import pro.sky.animalshelter4.entity.*;
+import pro.sky.animalshelter4.entityDto.*;
+import pro.sky.animalshelter4.exception.*;
+import pro.sky.animalshelter4.repository.*;
 
 /**
- *This class is required for distilling data back and forth.
+ * This class is required for distilling data back and forth.
  * Which are necessary for a more convenient implementation of the project architecture.
  */
 @Service
@@ -23,11 +17,21 @@ public class DtoMapperService {
     private final Logger logger = LoggerFactory.getLogger(DtoMapperService.class);
     public final UserRepository userRepository;
     private final ChatRepository chatRepository;
+    private final AnimalRepository animalRepository;
+    private final AnimalTypeRepository animalTypeRepository;
+    private final AnimalOwnershipRepository animalOwnershipRepository;
+    private final PhotoRepository photoRepository;
 
     public DtoMapperService(UserRepository userRepository,
-                            ChatRepository chatRepository) {
+                            ChatRepository chatRepository, AnimalRepository animalRepository, AnimalTypeRepository animalTypeRepository,
+                            AnimalOwnershipRepository animalOwnershipRepository,
+                            PhotoRepository photoRepository) {
         this.userRepository = userRepository;
         this.chatRepository = chatRepository;
+        this.animalRepository = animalRepository;
+        this.animalTypeRepository = animalTypeRepository;
+        this.animalOwnershipRepository = animalOwnershipRepository;
+        this.photoRepository = photoRepository;
     }
 
 
@@ -120,4 +124,119 @@ public class DtoMapperService {
         userDto.setVolunteer(user.isVolunteer());
         return userDto;
     }
+
+
+    public AnimalOwnership toEntity(AnimalOwnershipDto animalOwnershipDto) {
+        AnimalOwnership animalOwnership = new AnimalOwnership();
+        animalOwnership.setId(animalOwnershipDto.getId());
+        if (animalOwnershipDto.getIdOwner() != null) {
+            User user = userRepository.findById(animalOwnershipDto.getIdOwner()).orElseThrow(() ->
+                    new UserNotFoundException(animalOwnershipDto.getIdOwner().toString()));
+            animalOwnership.setOwner(user);
+        }
+        if (animalOwnershipDto.getIdAnimal() != null) {
+            Animal animal = animalRepository.findById(animalOwnershipDto.getIdAnimal()).orElseThrow(() ->
+                    new AnimalNotFoundException(animalOwnershipDto.getIdAnimal().toString()));
+            animalOwnership.setAnimal(animal);
+        }
+        animalOwnership.setDateStartOwn(animalOwnershipDto.getDateStartOwn());
+        animalOwnership.setDateEndTrial(animalOwnershipDto.getDateEndTrial());
+        animalOwnership.setApprove(animalOwnershipDto.getApprove());
+        animalOwnership.setOpen(animalOwnershipDto.isOpen());
+        return animalOwnership;
+    }
+
+
+    public AnimalOwnershipDto toDto(AnimalOwnership animalOwnership) {
+        AnimalOwnershipDto animalOwnershipDto = new AnimalOwnershipDto();
+        animalOwnershipDto.setId(animalOwnership.getId());
+        if (animalOwnership.getOwner() != null) {
+            animalOwnershipDto.setIdOwner(animalOwnership.getOwner().getId());
+        }
+        if (animalOwnership.getAnimal() != null) {
+            animalOwnershipDto.setIdAnimal(animalOwnership.getAnimal().getId());
+        }
+        animalOwnershipDto.setDateStartOwn(animalOwnership.getDateStartOwn());
+        animalOwnershipDto.setDateEndTrial(animalOwnership.getDateEndTrial());
+        animalOwnershipDto.setApprove(animalOwnership.isApprove());
+        animalOwnershipDto.setOpen(animalOwnership.isOpen());
+        return animalOwnershipDto;
+    }
+
+    public AnimalType toEntity(AnimalTypeDto animalTypeDto) {
+        AnimalType animalType = new AnimalType();
+        animalType.setId(animalTypeDto.getId());
+        animalType.setTypeAnimal(animalTypeDto.getTypeAnimal());
+        return animalType;
+    }
+
+    public AnimalTypeDto toDto(AnimalType animalType) {
+        AnimalTypeDto animalTypeDto = new AnimalTypeDto();
+        animalTypeDto.setId(animalType.getId());
+        animalTypeDto.setTypeAnimal(animalType.getTypeAnimal());
+        return animalTypeDto;
+    }
+
+    public Animal toEntity(AnimalDto animalDto) {
+        Animal animal = new Animal();
+        animal.setId(animalDto.getId());
+        animal.setNameAnimal(animalDto.getNameAnimal());
+        animal.setBorn(animalDto.getBorn());
+        if (animalDto.getIdAnimalType() != null) {
+            AnimalType animalType = animalTypeRepository.findById(animalDto.getIdAnimalType()).orElseThrow(() ->
+                    new AnimalTypeNotFoundException(animalDto.getIdAnimalType().toString()));
+            animal.setAnimalType(animalType);
+        }
+        return animal;
+    }
+
+    public AnimalDto toDto(Animal animal) {
+        AnimalDto animalDto = new AnimalDto();
+        animalDto.setId(animal.getId());
+        animalDto.setNameAnimal(animal.getNameAnimal());
+        animalDto.setBorn(animal.getBorn());
+        animalDto.setIdAnimalType(animal.getAnimalType().getId());
+        return animalDto;
+    }
+
+    public Report toEntity(ReportDto reportDto) {
+        Report report = new Report();
+
+        report.setId(reportDto.getId());
+
+        if (reportDto.getIdAnimalOwnership() != null) {
+            AnimalOwnership animalOwnership = animalOwnershipRepository.findById(reportDto.getIdAnimalOwnership()).
+                    orElseThrow(() -> new AnimalOwnershipNotFoundException(reportDto.getIdAnimalOwnership().toString()));
+            report.setAnimalOwnership(animalOwnership);
+        }
+        report.setReportDate(reportDto.getReportDate());
+        report.setDiet(reportDto.getDiet());
+        report.setFeeling(reportDto.getFeeling());
+        report.setBehavior(reportDto.getBehavior());
+        if (reportDto.getIdPhoto() != null) {
+            Photo photo = photoRepository.findById(reportDto.getIdPhoto()).
+                    orElseThrow(() -> new PhotoNotFoundException(reportDto.getIdPhoto().toString()));
+            report.setPhoto(photo);
+        }
+        report.setApprove(reportDto.getApprove());
+        return report;
+    }
+
+    public ReportDto toDto(Report report) {
+        ReportDto reportDto = new ReportDto();
+        reportDto.setId(report.getId());
+        if (report.getAnimalOwnership() != null) {
+            reportDto.setIdAnimalOwnership(report.getAnimalOwnership().getId());
+        }
+        reportDto.setReportDate(report.getReportDate());
+        reportDto.setDiet(report.getDiet());
+        reportDto.setFeeling(report.getFeeling());
+        reportDto.setBehavior(report.getBehavior());
+        if (report.getPhoto() != null) {
+            reportDto.setIdPhoto(report.getPhoto().getId());
+        }
+        reportDto.setApprove(report.isApprove());
+        return reportDto;
+    }
+
 }

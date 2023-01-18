@@ -5,10 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.Animal;
 import pro.sky.animalshelter4.entity.AnimalType;
+import pro.sky.animalshelter4.entityDto.AnimalDto;
+import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.exception.AnimalNotFoundException;
 import pro.sky.animalshelter4.repository.AnimalRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AnimalService {
@@ -23,11 +26,13 @@ public class AnimalService {
 
     private final AnimalRepository animalRepository;
     private final AnimalTypeService animalTypeService;
+    private final DtoMapperService dtoMapperService;
     private final Logger logger = LoggerFactory.getLogger(AnimalService.class);
 
-    public AnimalService(AnimalRepository animalRepository, AnimalTypeService animalTypeService) {
+    public AnimalService(AnimalRepository animalRepository, AnimalTypeService animalTypeService, DtoMapperService dtoMapperService) {
         this.animalRepository = animalRepository;
         this.animalTypeService = animalTypeService;
+        this.dtoMapperService = dtoMapperService;
     }
 
     public Animal addAnimal(Animal animal) {
@@ -35,17 +40,24 @@ public class AnimalService {
         return animalRepository.save(animal);
     }
 
-//    public CallRequestDto createCallRequest(CallRequestDto callRequestDto) {
-//        logger.info("Method createCallRequest was start for create new CallRequest");
-//        return dtoMapperService.toDto(callRequestRepository.save(dtoMapperService.toEntity(callRequestDto)));
-//    }
+    public AnimalDto createAnimalDto(AnimalDto animalDto) {
+        logger.info("Method createAnimalDto was start for create new Animal");
+        return dtoMapperService.toDto(animalRepository.save(dtoMapperService.toEntity(animalDto)));
+    }
 
-//    public CallRequestDto readCallRequest(Long id) {
-//        logger.info("Method readCallRequest was start for find CallRequest by id");
-//        return dtoMapperService.toDto(
-//                callRequestRepository.findById(id).
-//                        orElseThrow(() -> new CallRequestNotFoundException(String.valueOf(id))));
-//    }
+    public AnimalDto readAnimal(Long id) {
+        logger.info("Method readAnimal was start for find animal by id");
+        return dtoMapperService.toDto(
+                animalRepository.findById(id).
+                        orElseThrow(() -> new AnimalNotFoundException(String.valueOf(id))));
+    }
+
+    public List<AnimalDto> getAll() {
+        logger.info("Method getAllAnimals was start for get all animal");
+        return animalRepository.findAll().stream().
+                map(dtoMapperService::toDto).collect(Collectors.toList());
+    }
+
 
     public Animal findAnimal(Long id) {
         logger.info("Method findAnimal was start for find Animal by id");
@@ -53,26 +65,24 @@ public class AnimalService {
                 orElseThrow(() -> new AnimalNotFoundException(String.valueOf(id)));
     }
 
-//    public CallRequestDto updateCallRequest(CallRequestDto callRequestDto) {
-//        logger.info("Method updateCallRequest was start for update callRequest");
-//        CallRequest newCallRequest = dtoMapperService.toEntity(callRequestDto);
-//        CallRequest oldCallRequest = findCallRequest(newCallRequest.getId());
-//        if (oldCallRequest == null) {
-//            throw new CallRequestNotFoundException(String.valueOf(newCallRequest.getId()));
-//        }
-//        oldCallRequest.setOpen(newCallRequest.isOpen());
-//        oldCallRequest.setVolunteer(newCallRequest.getVolunteer());
-//        oldCallRequest.setClient(newCallRequest.getClient());
-//        oldCallRequest.setLocalDateTimeOpen(newCallRequest.getLocalDateTimeOpen());
-//        oldCallRequest.setLocalDateTimeClose(newCallRequest.getLocalDateTimeClose());
-//        return dtoMapperService.toDto(callRequestRepository.save(oldCallRequest));
-//    }
+    public AnimalDto updateAnimal(AnimalDto animalDto) {
+        logger.info("Method updateAnimal was start for update Animal");
+        Animal newAnimal = dtoMapperService.toEntity(animalDto);
+        Animal oldAnimal = findAnimal(newAnimal.getId());
+        if (oldAnimal == null) {
+            throw new AnimalNotFoundException(String.valueOf(newAnimal.getId()));
+        }
+        oldAnimal.setNameAnimal(newAnimal.getNameAnimal());
+        oldAnimal.setBorn(newAnimal.getBorn());
+        oldAnimal.setAnimalType(newAnimal.getAnimalType());
+        return dtoMapperService.toDto(animalRepository.save(oldAnimal));
+    }
 
-//    public CallRequestDto deleteCallRequest(Long id) {
-//        CallRequest callRequest = new CallRequest();
-//        callRequest.setId(id);
-//        return dtoMapperService.toDto(deleteCallRequest(callRequest));
-//    }
+    public AnimalDto deleteAnimal(Long id) {
+        Animal animal = new Animal();
+        animal.setId(id);
+        return dtoMapperService.toDto(deleteAnimal(animal));
+    }
 
     public Animal deleteAnimal(Animal animal) {
         logger.info("Method deleteAnimal was start for delete animal");

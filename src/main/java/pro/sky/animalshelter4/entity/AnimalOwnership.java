@@ -18,8 +18,28 @@ public class AnimalOwnership {
     private LocalDate dateStartOwn;
     @JoinColumn(name = "date_end_trial")
     private LocalDate dateEndTrial;
+    @JoinColumn(name = "is_approve")
+    private Boolean isApprove;
+    @JoinColumn(name = "is_open")
+    private boolean isOpen;
 
     public AnimalOwnership() {
+    }
+
+    public boolean isApprove() {
+        return isApprove;
+    }
+
+    public void setApprove(boolean approve) {
+        isApprove = approve;
+    }
+
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    public void setOpen(boolean open) {
+        isOpen = open;
     }
 
     public Long getId() {
@@ -60,5 +80,15 @@ public class AnimalOwnership {
 
     public void setDateEndTrial(LocalDate dateEndTrial) {
         this.dateEndTrial = dateEndTrial;
+    }
+
+    @Override
+    public String toString() {
+        return "AnimalOwnership{" +
+                ", owner=" + owner +
+                ", animal=" + animal +
+                ", dateStartOwn=" + dateStartOwn +
+                ", dateEndTrial=" + dateEndTrial +
+                '}';
     }
 }

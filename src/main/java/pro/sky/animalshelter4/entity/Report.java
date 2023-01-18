@@ -19,9 +19,20 @@ public class Report {
     @OneToOne
     @JoinColumn(name = "id_photo")
     private Photo photo;
+    @JoinColumn(name = "is_approve")
+    private Boolean isApprove;
 
     public Report() {
     }
+
+    public boolean isApprove() {
+        return isApprove;
+    }
+
+    public void setApprove(boolean approve) {
+        isApprove = approve;
+    }
+
 
     public Long getId() {
         return id;
@@ -77,5 +88,17 @@ public class Report {
 
     public void setPhoto(Photo photo) {
         this.photo = photo;
+    }
+
+    @Override
+    public String toString() {
+        return "Report{" +
+                ", animalOwnership=" + animalOwnership +
+                ", reportDate=" + reportDate +
+                ", diet='" + diet + '\'' +
+                ", feeling='" + feeling + '\'' +
+                ", behavior='" + behavior + '\'' +
+                ", photo=" + photo+
+                '}';
     }
 }

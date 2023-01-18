@@ -233,3 +233,22 @@ alter table users
 --precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='photo'
 --onFail=MARK_RAN
 alter TABLE photo alter column id_media type text;
+--changeset zaytsev:30
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='report'
+--onFail=MARK_RAN
+alter TABLE report add column is_approve boolean;
+alter TABLE report add column is_open boolean default true;
+--changeset zaytsev:31
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='animal_ownership'
+--onFail=MARK_RAN
+alter TABLE animal_ownership add column is_approve boolean;
+alter TABLE animal_ownership add column is_open boolean default true;
+--changeset zaytsev:32
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='report'
+--onFail=MARK_RAN
+alter TABLE report drop column is_open;
+--changeset zaytsev:33
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='users'
+--onFail=MARK_RAN
+alter table users
+    add column date_last_notification TIMESTAMP;
