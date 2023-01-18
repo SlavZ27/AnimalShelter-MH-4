@@ -53,20 +53,26 @@ public class ScheduleService {
             lateList.addAll(noReportList);
 
             List<AnimalOwnership> actualLateList = lateList.stream()
-                    .filter(animalOwnership -> animalOwnership.getOwner().
-                            getDateLastNotification().plusHours(delayNotificationHours).isBefore(LocalDateTime.now()))
+                    .filter(animalOwnership ->
+                            animalOwnership.getOwner().
+                                    getDateLastNotification() == null ||
+                                    animalOwnership.getOwner().
+                                            getDateLastNotification().plusHours(delayNotificationHours).isBefore(LocalDateTime.now()))
                     .collect(Collectors.toList());
             if (lateList.size() > 0) {
                 chatService.sendNotificationAboutReport(actualLateList);
             }
             List<AnimalOwnership> actualViolatorsList = lateList.stream()
-                    .filter(animalOwnership -> animalOwnership.getOwner().
-                            getDateLastNotification().plusDays(countLateDayVeryBad).isBefore(LocalDateTime.now()))
+                    .filter(animalOwnership ->
+                            animalOwnership.getOwner().
+                                    getDateLastNotification() == null || animalOwnership.getOwner().
+                                    getDateLastNotification().plusDays(countLateDayVeryBad).isBefore(LocalDateTime.now()))
                     .collect(Collectors.toList());
             if (lateList.size() > 0) {
                 chatService.sendRequestToVolunteerToContactOwner(actualLateList);
             }
         }
+
     }
 
     @Scheduled(fixedDelay = 40_000_000)
