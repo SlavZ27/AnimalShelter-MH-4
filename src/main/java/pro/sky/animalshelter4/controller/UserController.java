@@ -71,7 +71,7 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "Changing the data in UserDto by id",
+                    description = "Delete the data in UserDto by id",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = UserDto.class)

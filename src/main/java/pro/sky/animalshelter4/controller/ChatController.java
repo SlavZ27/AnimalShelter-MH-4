@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import pro.sky.animalshelter4.entityDto.ChatDto;
+import pro.sky.animalshelter4.entityDto.UserDto;
 import pro.sky.animalshelter4.service.ChatService;
 
 import javax.validation.Valid;
@@ -30,12 +31,7 @@ public class ChatController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "We record the following data from the client 's chat from the bot 's Telegrams ." +
-                            "  ChatId\"" +
-                            " \"userNameTelegram\" " +
-                            "  \"firstNameUser\"" +
-                            "  \"lastNameUser\":" +
-                            "  \"last_activity\"",
+                    description = "We record the following data from the client 's chat from the bot 's ChatDto",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ChatDto.class)
@@ -50,11 +46,7 @@ public class ChatController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "Retrieves the following data from the client's chat by chatId." +
-                            "  userNameTelegram\"+\n" +
-                            "\"  firstNameUser\"+\n" +
-                            "\"  lastNameUser\"+\n" +
-                            "\"  last_activity\",",
+                    description = "Getting data for ChatDto by id.",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ChatDto.class)
@@ -69,12 +61,7 @@ public class ChatController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "Changing customer data." +
-                            "  ChatId\"" +
-                            " \"userNameTelegram\" " +
-                            "  \"firstNameUser\"" +
-                            "  \"lastNameUser\":" +
-                            "  \"last_activity\"",
+                    description = "We change the data according to the parameters ChatDto.",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ChatDto.class)
@@ -89,10 +76,10 @@ public class ChatController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "Delete customer chats by chatId.",
+                    description = "Delete the data in UserDto by id",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ChatDto.class)
+                            schema = @Schema(implementation = UserDto.class)
                     )}
             )
     })
@@ -104,12 +91,7 @@ public class ChatController {
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "Receives the following customer data." +
-                            "  ChatId\"" +
-                            " \"userNameTelegram\" " +
-                            "  \"firstNameUser\"" +
-                            "  \"lastNameUser\":" +
-                            "  \"last_activity\"",
+                    description = "Getting all users with data according to ChatDto.",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = ChatDto[].class)
