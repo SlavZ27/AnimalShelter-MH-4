@@ -36,8 +36,9 @@ public class PhotoService {
     /**
      * This method add new Photo and save photo
      * <p>
+     *
      * @param photo is not null
-     * <r>
+     *              <r>
      * @return photo
      */
     public Photo addPhoto(Photo photo) {
@@ -48,18 +49,23 @@ public class PhotoService {
     /**
      * This method read photo is telegram
      * <p>
+     *
      * @param id is not null
-     * <r>
+     *           <r>
      * @return photo
      * <t>
      * @throws IOException
      */
     public Pair<byte[], String> readPhotoFromTelegram(Long id) throws IOException {
         Photo photo = findPhoto(id);
-        GetFile getFile = new GetFile(photo.getIdMedia());
+        return Pair.of(getByteFromTelegram(photo.getIdMedia()), MediaType.IMAGE_JPEG_VALUE);
+    }
+
+    public byte[] getByteFromTelegram(String idMedia) throws IOException {
+        GetFile getFile = new GetFile(idMedia);
         GetFileResponse response = telegramBot.execute(getFile);
         File file = response.file();
-        return Pair.of(telegramBot.getFileContent(file).clone(), MediaType.IMAGE_JPEG_VALUE);
+        return telegramBot.getFileContent(file).clone();
     }
 
 
@@ -67,11 +73,12 @@ public class PhotoService {
      * This method locate photo by id, using method repository
      * Using{@link PhotoRepository#findById(Object)}
      * <p>
+     *
      * @param id is not null
-     * <t>
-     * @throws IOException PhotoNotFoundException(id)
-     * <r>
+     *           <t>
      * @return photo
+     * @throws IOException PhotoNotFoundException(id)
+     *                     <r>
      */
     public Photo findPhoto(Long id) {
         logger.info("Method findPhoto was start for find Photo by id");
@@ -79,9 +86,11 @@ public class PhotoService {
                 orElseThrow(() -> new PhotoNotFoundException(String.valueOf(id)));
     }
 
-    /** This method locate photo by Photo id, using method repository
+    /**
+     * This method locate photo by Photo id, using method repository
      * Using{@link PhotoRepository#findByIdPhoto(String)}
      * <p>
+     *
      * @param idMedia is not null
      *                <r></r>
      * @return photo
@@ -95,6 +104,7 @@ public class PhotoService {
     /**
      * This method delete photo by id
      * <p>
+     *
      * @param id is not null
      *           <r></r>
      * @return delete photo
@@ -107,6 +117,7 @@ public class PhotoService {
 
     /**
      * This method delete photo by photo id
+     *
      * @param photo is not null
      * @return delete photo
      */
@@ -123,6 +134,7 @@ public class PhotoService {
 
     /**
      * This method was start forget all Id of photo
+     *
      * @return delete photo
      */
     public List<Long> getAllId() {

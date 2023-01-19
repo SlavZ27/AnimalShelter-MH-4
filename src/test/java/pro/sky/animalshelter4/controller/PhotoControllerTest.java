@@ -1,6 +1,8 @@
 package pro.sky.animalshelter4.controller;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.File;
+import com.pengrad.telegrambot.response.GetFileResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,43 +15,40 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.util.Pair;
+import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
 import pro.sky.animalshelter4.entityDto.AnimalDto;
-import pro.sky.animalshelter4.entityDto.ChatDto;
-import pro.sky.animalshelter4.exception.AnimalNotFoundException;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.repository.*;
 import pro.sky.animalshelter4.service.*;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AnimalControllerTest {
+class PhotoControllerTest {
     @LocalServerPort
     private int port;
-    private final static String REQUEST_MAPPING_STRING = "animal";
+    private final static String REQUEST_MAPPING_STRING = "photo";
 
     @InjectMocks
     @Autowired
-    private AnimalController animalController;
+    private PhotoController photoController;
     @MockBean
     private TelegramBot telegramBot;
     @Autowired
@@ -64,6 +63,8 @@ class AnimalControllerTest {
     private ChatRepository chatRepository;
     @Autowired
     private PhotoRepository photoRepository;
+    @Autowired
+    private PhotoService photoService;
     @Autowired
     private ReportRepository reportRepository;
     @Autowired
@@ -84,8 +85,6 @@ class AnimalControllerTest {
     private CommandService commandService;
     @Autowired
     private DtoMapperService dtoMapperService;
-    @Autowired
-    private PhotoService photoService;
     @Autowired
     private ReportService reportService;
     @Autowired
@@ -272,147 +271,35 @@ class AnimalControllerTest {
         assertThat(userService).isNotNull();
         assertThat(telegramBotUpdatesListener).isNotNull();
         assertThat(testRestTemplate).isNotNull();
-        assertThat(animalController).isNotNull();
-    }
-
-
-    @Test
-    void createAnimal() {
-        Animal animal =
-                animalRepository.findAll().stream().findAny().orElse(null);
-        assertThat(animal).isNotNull();
-        AnimalDto animalDto = dtoMapperService.toDto(animal);
-        animalOwnershipRepository.findAll().stream().filter(animalOwnership ->
-                        animalOwnership.getAnimal().getId().equals(animal.getId())).
-                forEach(animalOwnership -> {
-                    reportRepository.findAll().stream().filter(report ->
-                                    report.getAnimalOwnership().getId().equals(animalOwnership.getId())).
-                            forEach(report -> reportRepository.delete(report));
-                    animalOwnershipRepository.delete(animalOwnership);
-                });
-        animalRepository.delete(animal);
-        assertThat(animalRepository.findById(animal.getId()).orElse(null))
-                .isNull();
-        final int countAnimal = animalRepository.findAll().size();
-
-        AnimalDto responseEntity = testRestTemplate.
-                postForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
-                        animalDto,
-                        AnimalDto.class);
-        assertEquals(countAnimal + 1, animalRepository.findAll().size());
-
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getIdAnimalType()).isEqualTo(animalDto.getIdAnimalType());
-        assertThat(responseEntity.getNameAnimal()).isEqualTo(animalDto.getNameAnimal());
-        assertThat(responseEntity.getBorn()).isEqualTo(animalDto.getBorn());
+        assertThat(photoController).isNotNull();
     }
 
     @Test
-    void readAnimal() {
-        Animal animal=
-                animalRepository.findAll().stream().findAny().orElse(null);
-        assertThat(animal).isNotNull();
-
-        AnimalDto animalDto = dtoMapperService.toDto(animal);
-        assertThat(animalRepository.findById(animalDto.getId()).orElse(null))
-                .isNotNull();
-
-        final int countAnimal = animalRepository.findAll().size();
-
-        AnimalDto responseEntity = testRestTemplate.
-                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + animal.getId(),
-                        AnimalDto.class);
-        assertEquals(countAnimal, animalRepository.findAll().size());
-
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getIdAnimalType()).isEqualTo(animalDto.getIdAnimalType());
-        assertThat(responseEntity.getNameAnimal()).isEqualTo(animalDto.getNameAnimal());
-        assertThat(responseEntity.getBorn()).isEqualTo(animalDto.getBorn());
-    }
-
-    @Test
-    void readAnimalNegative() {
-        List<Long> animalIdList = animalRepository.findAll().stream().map(Animal::getId).collect(Collectors.toList());
-        Long index = (long) random.nextInt(animalIdList.size());
-        while (animalIdList.contains(index)) {
-            index = (long) random.nextInt(animalIdList.size());
-        }
-
-        AnimalDto responseEntity = testRestTemplate.
-                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + index,
-                        AnimalDto.class);
-
-        Long finalIndex = index;
-        assertThatExceptionOfType(AnimalNotFoundException.class).isThrownBy(() -> animalService.readAnimal(finalIndex));
-    }
-
-    @Test
-    void updateAnimal() {
-        Animal animal =
-                animalRepository.findAll().stream().findAny().orElse(null);
-        assertThat(animal).isNotNull();
-
-        AnimalDto animalDto = dtoMapperService.toDto(animal);
-        assertThat(animalDto).isNotNull();
-        assertThat(animalRepository.findById(animalDto.getId()).orElse(null))
-                .isNotNull();
-        animalDto.setNameAnimal("fgfrergth");
-
-        final int countAnimal = animalRepository.findAll().size();
-        testRestTemplate.
-                put("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
-                        animalDto);
-        assertEquals(countAnimal, animalRepository.findAll().size());
-
-        Animal animalActual = animalRepository.findById(animalDto.getId()).orElse(null);
-
-        assertThat(animalActual).isNotNull();
-        assertThat(animalActual.getNameAnimal()).isEqualTo("fgfrergth");
-        assertThat(animalActual.getAnimalType().getId()).isEqualTo(animal.getAnimalType().getId());
-        assertThat(animalActual.getBorn()).isEqualTo(animal.getBorn());
-    }
-
-    @Test
-    void deleteAnimal() {
-        final int countAnimal = animalRepository.findAll().size();
-        Animal animal = animalRepository.findAll().stream().findFirst().orElse(null);
-
-        animalOwnershipRepository.findAll().stream().filter(animalOwnership ->
-                animalOwnership.getAnimal().getId().equals(animal.getId())).
-        forEach(animalOwnership -> {
-            reportRepository.findAll().stream().filter(report ->
-                    report.getAnimalOwnership().getId().equals(animalOwnership.getId())).
-                    forEach(report -> reportRepository.delete(report));
-            animalOwnershipRepository.delete(animalOwnership);
-        });
-
-
+    void deletePhoto() {
+        final int countPhoto = photoRepository.findAll().size();
+        Photo photo = photoRepository.findAll().stream().findFirst().orElse(null);
+        reportRepository.findAll().stream().filter(report -> report.getPhoto().getId().equals(photo.getId())).
+                forEach(report -> reportRepository.delete(report));
         ResponseEntity<String> responseEntity = testRestTemplate
-                .exchange("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + animal.getId()
+                .exchange("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + photo.getId()
                         , HttpMethod.DELETE,
                         HttpEntity.EMPTY,
                         new ParameterizedTypeReference<>() {
                         });
-
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody())
-                .contains(animal.getId().toString())
-                .contains(animal.getNameAnimal().toString())
-                .contains(animal.getAnimalType().getId().toString())
-                .contains(animal.getBorn().toString());
-        assertEquals(countAnimal - 1, animalRepository.findAll().size());
-        assertThat(animalRepository.findById(animal.getId()).orElse(null))
-                .isNull();
+        assertThat(responseEntity.getBody()).
+                contains(photo.getId().toString());
+        assertEquals(countPhoto - 1, photoRepository.findAll().size());
+        assertThat(photoRepository.findById(photo.getId()).orElse(null)).isNull();
     }
 
     @Test
-    public void getAllAnimalTest() {
-        final long countAnimal = animalRepository.findAll().size();
-        AnimalDto[] animalDtos = testRestTemplate
+    public void getAllIdPhotoTest() {
+        final long countPhoto = photoRepository.findAll().size();
+        Long[] idPhotoMas = testRestTemplate
                 .getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
-                        AnimalDto[].class);
-        assertThat(animalDtos.length)
-                .isEqualTo(countAnimal);
+                        Long[].class);
+        assertThat(idPhotoMas.length)
+                .isEqualTo(countPhoto);
     }
-
 }

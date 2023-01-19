@@ -2,6 +2,7 @@ package pro.sky.animalshelter4;
 
 import com.github.javafaker.Faker;
 import com.pengrad.telegrambot.model.*;
+import com.pengrad.telegrambot.response.GetFileResponse;
 import org.apache.commons.lang3.StringUtils;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.exception.BadPhoneNumberException;
@@ -43,6 +44,10 @@ public class Generator {
      */
     public int genInt(int min, int max) {
         return random.nextInt(max - min) + min;
+    }
+
+    public byte[] genByte() {
+        return faker.avatar().image().getBytes();
     }
 
 
