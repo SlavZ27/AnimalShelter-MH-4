@@ -32,15 +32,6 @@ public class TelegramUnfinishedRequestService {
     }
 
     /**
-     * This method using method repository
-     * Using {@link UnfinishedRequestTelegramRepository#findByIdChat(Long)}
-     * @param id is not null
-     * @return unfinished request
-     */
-    private UnfinishedRequestTelegram read(Long id) {
-        return unfinishedRequestTelegramRepository.findById(id).orElse(null);
-    }
-    /**
      * This method searches for incomplete requests in telegram by id chat using method repository
      * Using {@link UnfinishedRequestTelegramRepository#findByIdChat(Long)}
      * @param idChat is not null
@@ -48,18 +39,6 @@ public class TelegramUnfinishedRequestService {
      */
     public UnfinishedRequestTelegram findByIdChat(Long idChat) {
         return unfinishedRequestTelegramRepository.findByIdChat(idChat);
-    }
-
-
-    /**
-     * This method using method repository delete unfinished request by id
-     * Using {@link UnfinishedRequestTelegramRepository#deleteById(Object)}
-     * @param id is not null
-     */
-    private void delete(Long id) {
-        if (read(id) != null) {
-            unfinishedRequestTelegramRepository.deleteById(id);
-        }
     }
 
     /**

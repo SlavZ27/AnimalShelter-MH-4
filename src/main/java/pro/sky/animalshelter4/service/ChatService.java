@@ -7,9 +7,7 @@ import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.*;
 import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.exception.*;
-import pro.sky.animalshelter4.model.AnimalUnit;
 import pro.sky.animalshelter4.model.Command;
-import pro.sky.animalshelter4.model.OwnershipUnit;
 import pro.sky.animalshelter4.model.UpdateDPO;
 import pro.sky.animalshelter4.repository.ChatRepository;
 
@@ -17,9 +15,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static pro.sky.animalshelter4.model.AnimalUnit.ANIMAL_TYPE;
-import static pro.sky.animalshelter4.model.AnimalUnit.START;
 
 /**
  * The class is designed for the operation of the Call Request Service class
@@ -33,17 +28,15 @@ public class ChatService {
     private final TelegramUnfinishedRequestService telegramUnfinishedRequestService;
     private final Logger logger = LoggerFactory.getLogger(ChatService.class);
     private final TelegramBotSenderService telegramBotSenderService;
-    private final TelegramBotContentSaverService telegramBotContentSaverService;
     private final TelegramMapperService telegramMapperService;
     private final AnimalService animalService;
     private final UserService userService;
 
-    public ChatService(ChatRepository chatRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService, TelegramBotSenderService telegramBotSenderService, TelegramBotContentSaverService telegramBotContentSaverService, TelegramMapperService telegramMapperService, AnimalService animalService, UserService userService) {
+    public ChatService(ChatRepository chatRepository, DtoMapperService dtoMapperService, TelegramUnfinishedRequestService telegramUnfinishedRequestService, TelegramBotSenderService telegramBotSenderService, TelegramMapperService telegramMapperService, AnimalService animalService, UserService userService) {
         this.chatRepository = chatRepository;
         this.dtoMapperService = dtoMapperService;
         this.telegramUnfinishedRequestService = telegramUnfinishedRequestService;
         this.telegramBotSenderService = telegramBotSenderService;
-        this.telegramBotContentSaverService = telegramBotContentSaverService;
         this.telegramMapperService = telegramMapperService;
         this.animalService = animalService;
         this.userService = userService;
@@ -222,6 +215,7 @@ public class ChatService {
             return;
         }
         telegramUnfinishedRequestService.delUnfinishedRequestForChat(chat);
+        telegramBotSenderService.sendMessage(chat.getId(), UserService.MESSAGE_PHONE_IS_OK);
         telegramBotSenderService.sendButtonsCommandForChat(chat.getId());
     }
 
@@ -296,6 +290,7 @@ public class ChatService {
             callRequest = userService.createCallRequest(chatClient);
         } catch (VolunteersIsAbsentException e) {
             telegramBotSenderService.sendMessage(chatClient.getId(), UserService.MESSAGE_VOLUNTEERS_IS_ABSENT);
+            telegramBotSenderService.sendButtonsCommandForChat(chatClient.getId());
             return;
         }
         telegramBotSenderService.sendMessage(chatClient.getId(), CallRequestService.MESSAGE_SUCCESSFUL_CREATION);
@@ -393,14 +388,17 @@ public class ChatService {
             telegramBotSenderService.sendMessage(
                     chatVolunteer.getId(),
                     CallRequestService.MESSAGE_CALL_REQUEST_NOT_FOUND);
+            telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
             return;
         } catch (CantCloseCallRequestException e) {
             telegramBotSenderService.sendMessage(
                     chatVolunteer.getId(),
                     CallRequestService.MESSAGE_YOU_CANT_CLOSE_CALL_REQUEST);
+            telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
             return;
         }
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), CallRequestService.MESSAGE_CALL_REQUEST_IS_CLOSE);
+        telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
     }
 
     /**
@@ -435,42 +433,26 @@ public class ChatService {
             telegramBotSenderService.sendMessage(chatVolunteer.getId(), AnimalService.MESSAGE_ANIMALS_IS_ABSENT);
             return;
         }
-        OwnershipUnit ownershipUnit = null;
+
         String[] messageMas = null;
 
         if (message == null || message.length() == 0) {
-            ownershipUnit = OwnershipUnit.START;
-        } else if (message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
-            messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
-            if (message.length() > 2) {
-                ownershipUnit = OwnershipUnit.valueOf(messageMas[messageMas.length - 2]);
-            }
-        }
-
-        if (ownershipUnit == null) {
-            //badRequest
+            //send List of Users
+            startCreateOwnSendListClients(chatVolunteer, clientList);
             return;
         }
+        messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
 
-        switch (ownershipUnit) {
-            case START:
-                //send List of Users
-                startCreateOwnSendListClients(chatVolunteer, clientList);
-                break;
-            case USER:
+
+        switch (messageMas.length) {
+            case 1:
                 //send list of animals
-                if (messageMas == null || messageMas.length < 2) {
-                    return;
-                }
                 Long idUserClient = telegramMapperService.mapStringToLong(messageMas[messageMas.length - 1]);
                 continueCreateOwnSendListAnimals(chatVolunteer, idUserClient, animalList);
                 break;
-            case ANIMAL:
+            case 2:
                 //finish request
-                if (messageMas == null || messageMas.length < 4) {
-                    return;
-                }
-                idUserClient = telegramMapperService.mapStringToLong(messageMas[messageMas.length - 3]);
+                idUserClient = telegramMapperService.mapStringToLong(messageMas[messageMas.length - 2]);
                 Long idAnimal = telegramMapperService.mapStringToLong(messageMas[messageMas.length - 1]);
                 AnimalOwnership ownership;
                 try {
@@ -488,6 +470,7 @@ public class ChatService {
                                 ownership.getAnimal().getNameAnimal() + " starting  " +
                                 ownership.getDateStartOwn().toString() + " Probation period up to " +
                                 ownership.getDateEndTrial().toString());
+                telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
                 if (ownership.getOwner() != null &&
                         ownership.getOwner().getChatTelegram() != null &&
                         ownership.getOwner().getChatTelegram().getId() != null) {
@@ -511,9 +494,7 @@ public class ChatService {
                 map(user -> user.getId() + " " + user.getNameUser())
                 .collect(Collectors.toList());
         List<String> dataButtons = clientList.stream().
-                map(user ->
-                        OwnershipUnit.USER.name() +
-                                TelegramBotSenderService.REQUEST_SPLIT_SYMBOL + user.getId())
+                map(user -> user.getId().toString())
                 .collect(Collectors.toList());
         telegramBotSenderService.sendButtonsWithOneData(
                 chatVolunteer.getId(),
@@ -540,10 +521,7 @@ public class ChatService {
                 collect(Collectors.toList());
         List<String> dataButtons = animalList.stream().
                 map(animal ->
-                        OwnershipUnit.USER.name() +
-                                TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                                idUserClient +
-                                TelegramBotSenderService.REQUEST_SPLIT_SYMBOL + OwnershipUnit.ANIMAL.name() +
+                        idUserClient +
                                 TelegramBotSenderService.REQUEST_SPLIT_SYMBOL + animal.getId())
                 .collect(Collectors.toList());
         telegramBotSenderService.sendButtonsWithOneData(
@@ -581,6 +559,7 @@ public class ChatService {
             telegramBotSenderService.sendMessage(chatVolunteer.getId(),
                     AnimalService.MESSAGE_ANIMAL_CREATED + " " + animal.getNameAnimal());
             answerQuestionAboutAnimals(chatVolunteer, false);
+            telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
         }
     }
 
@@ -592,31 +571,19 @@ public class ChatService {
         Chat chatVolunteer = getChatByIdOrNew(updateDPO.getIdChat());
         String message = updateDPO.getMessage();
 
-        AnimalUnit animalUnit = null;
         String[] messageMas = null;
 
         if (message == null || message.length() == 0) {
-            animalUnit = START;
-        } else if (message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
-            messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
-            if (message.length() > 2) {
-                animalUnit = AnimalUnit.valueOf(messageMas[messageMas.length - 2]);
-            }
+            answerQuestionAboutAnimals(chatVolunteer, true);
         }
-        if (animalUnit == null || messageMas != null) {
-            //badRequest
-            return;
-        }
-        switch (animalUnit) {
-            case START:
-                answerQuestionAboutAnimals(chatVolunteer, true);
-                break;
-            case ANIMAL_TYPE:
-                Long idAnimal = telegramMapperService.mapStringToLong(messageMas[messageMas.length - 3]);
+        messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
+        switch (messageMas.length) {
+            case 2:
+                Long idAnimal = telegramMapperService.mapStringToLong(messageMas[messageMas.length - 2]);
                 Long idTypeAnimal = telegramMapperService.mapStringToLong(messageMas[messageMas.length - 1]);
                 Animal animal = animalService.updateAnimal(idAnimal, idTypeAnimal);
                 if (animal.getAnimalType().getId().equals(idTypeAnimal)) {
-                    telegramBotSenderService.sendMessage(chatVolunteer.getId(), AnimalService.MESSAGE_ANIMAL_UPDATER +
+                    telegramBotSenderService.sendMessage(chatVolunteer.getId(), AnimalService.MESSAGE_ANIMAL_UPDATED +
                             " " + animal.toString());
                 }
                 answerQuestionAboutAnimals(chatVolunteer, true);
@@ -657,10 +624,9 @@ public class ChatService {
                 map(AnimalType::getTypeAnimal).
                 collect(Collectors.toList());
         List<String> dataButtons = animalTypeList.stream().
-                map(animalType -> AnimalUnit.ID + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                map(animalType ->
                         animal.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                        ANIMAL_TYPE + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                        animalType.getId().toString()).
+                        animalType.getId()).
                 collect(Collectors.toList());
         telegramBotSenderService.sendButtonsWithOneData(
                 chatVolunteer.getId(),
@@ -680,7 +646,7 @@ public class ChatService {
     private void startCreateReport(Chat chatOwner) {
         telegramBotSenderService.sendMessageWithButtonCancel(
                 chatOwner.getId(),
-                ReportService.MESSAGE_WRITE_DIET + " and/or " + ReportService.MESSAGE_SEND_PHOTO,
+                ReportService.MESSAGE_WRITE_DIET + " or " + ReportService.MESSAGE_SEND_PHOTO,
                 TelegramBotSenderService.NAME_BUTTON_FOR_CANCEL
         );
     }
@@ -792,20 +758,25 @@ public class ChatService {
         String message = updateDpo.getMessage();
         if (message != null && message.length() > 0 && message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
             String[] messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
-            if (message.length() == 2) {
+            if (messageMas.length == 2) {
                 Long idReport = telegramMapperService.mapStringToLong(messageMas[0]);
                 boolean approve = Boolean.parseBoolean(messageMas[1]);
-                Report report = userService.approveReport(idReport, approve);
+                Report report = null;
+                try {
+                    report = userService.approveReport(idReport, approve);
+                } catch (ReportNotFoundException e) {
+                    //don't do anything
+                }
                 if (report != null) {
                     if (approve) {
                         telegramBotSenderService.sendMessage(chatVolunteer.getId(),
                                 ReportService.MESSAGE_REPORT_IS_PLACED_GOOD);
-                        telegramBotSenderService.sendMessage(report.getAnimalOwnership().getOwner().getId(),
+                        telegramBotSenderService.sendMessage(report.getAnimalOwnership().getOwner().getChatTelegram().getId(),
                                 ReportService.MESSAGE_REPORT_IS_PLACED_GOOD);
                     } else {
                         telegramBotSenderService.sendMessage(chatVolunteer.getId(),
                                 ReportService.MESSAGE_REPORT_IS_PLACED_BAD);
-                        telegramBotSenderService.sendMessage(report.getAnimalOwnership().getOwner().getId(),
+                        telegramBotSenderService.sendMessage(report.getAnimalOwnership().getOwner().getChatTelegram().getId(),
                                 ReportService.MESSAGE_REPORT_IS_PLACED_BAD_OWNER);
                     }
                 }
@@ -827,6 +798,7 @@ public class ChatService {
             Report report = userService.getOpenAndNotApproveReport();
             if (report == null) {
                 telegramBotSenderService.sendMessage(chatVolunteer.getId(), ReportService.MESSAGE_ALL_REPORT_ARE_APPROVE);
+                telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
             } else {
                 List<String> nameButtons = new ArrayList<>();
                 List<String> dataButtons = new ArrayList<>();
@@ -958,20 +930,32 @@ public class ChatService {
         String message = updateDpo.getMessage();
         if (message != null && message.length() > 0 && message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
             String[] messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
-            if (message.length() == 2) {
+            if (messageMas.length == 2) {
                 Long idAnimalOwnership = telegramMapperService.mapStringToLong(messageMas[0]);
                 boolean approve = Boolean.parseBoolean(messageMas[1]);
-                AnimalOwnership animalOwnership = userService.approveAnimalOwnership(idAnimalOwnership, approve);
+                AnimalOwnership animalOwnership = null;
+                try {
+                    animalOwnership = userService.approveAnimalOwnership(idAnimalOwnership, approve);
+                } catch (AnimalOwnershipNotFoundException e) {
+                    //don't do anything
+                    return;
+                } catch (AnimalOwnershipAlreadyCloseException e) {
+                    telegramBotSenderService.sendMessage(chatVolunteer.getId(), AnimalOwnershipService.MESSAGE_ALREADY_CLOSE);
+                    telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
+                    return;
+                }
                 if (animalOwnership != null) {
                     if (approve) {
                         telegramBotSenderService.sendMessage(chatVolunteer.getId(),
                                 AnimalOwnershipService.MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_GOOD);
-                        telegramBotSenderService.sendMessage(animalOwnership.getOwner().getId(),
+                        telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
+                        telegramBotSenderService.sendMessage(animalOwnership.getOwner().getChatTelegram().getId(),
                                 AnimalOwnershipService.MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_GOOD);
                     } else {
                         telegramBotSenderService.sendMessage(chatVolunteer.getId(),
                                 AnimalOwnershipService.MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_BAD);
-                        telegramBotSenderService.sendMessage(animalOwnership.getOwner().getId(),
+                        telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
+                        telegramBotSenderService.sendMessage(animalOwnership.getOwner().getChatTelegram().getId(),
                                 AnimalOwnershipService.MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_BAD_OWNER);
                     }
                 }
@@ -991,11 +975,18 @@ public class ChatService {
         String message = updateDpo.getMessage();
         if (message != null && message.length() > 0 && !message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
             Long idAnimalOwnership = telegramMapperService.mapStringToLong(message);
-            AnimalOwnership animalOwnership = userService.extendTrialAnimalOwnership(idAnimalOwnership);
+            AnimalOwnership animalOwnership = null;
+            try {
+                animalOwnership = userService.extendTrialAnimalOwnership(idAnimalOwnership);
+            } catch (AnimalOwnershipNotFoundException e) {
+                //don't do anything
+                return;
+            }
             if (animalOwnership != null) {
                 telegramBotSenderService.sendMessage(chatVolunteer.getId(),
                         animalOwnership.toString());
-                telegramBotSenderService.sendMessage(animalOwnership.getOwner().getId(),
+                telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
+                telegramBotSenderService.sendMessage(animalOwnership.getOwner().getChatTelegram().getId(),
                         animalOwnership.toString());
 
             }

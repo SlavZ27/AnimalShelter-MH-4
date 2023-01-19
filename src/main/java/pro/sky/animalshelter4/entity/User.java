@@ -103,12 +103,17 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
-                ", nameUser='" + nameUser + '\'' +
-                ", chatTelegram=" + chatTelegram +
-                ", phone='" + phone + '\'' +
-                ", address='" + address + '\'' +
-                ", isVolunteer=" + isVolunteer +
-                '}';
+        String isVolunteerStr;
+        if (this.isVolunteer) {
+            isVolunteerStr = "is Volunteer";
+        } else {
+            isVolunteerStr = "is not Volunteer";
+        }
+        return "User\n" +
+                "Named: " + nameUser +
+                "\nchatTelegram: " + chatTelegram +
+                "\nphone: " + phone +
+                "\naddress: " + address +
+                isVolunteerStr;
     }
 }

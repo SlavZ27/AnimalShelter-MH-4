@@ -70,7 +70,7 @@ public class CallRequestService {
      * @param idCallRequest is not null
      */
     public void closeCallRequest(User user, Long idCallRequest) {
-        CallRequest callRequest = findCallRequest(idCallRequest);
+        CallRequest callRequest = callRequestRepository.findById(idCallRequest).orElse(null);
         if (callRequest == null) {
             throw new CallRequestNotFoundException(idCallRequest.toString());
         }

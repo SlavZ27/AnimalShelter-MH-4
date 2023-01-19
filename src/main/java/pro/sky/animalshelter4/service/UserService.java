@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     public final static String MESSAGE_BAD_PHONE = "Bad phone. Try again, please";
+    public final static String MESSAGE_PHONE_IS_OK = "Phone has been changed";
     public final static String CAPTION_SELECT_USER = "Select user";
     public final static String MESSAGE_VOLUNTEERS_IS_ABSENT = "Sorry. All volunteers are absent";
     public final static String MESSAGE_CLIENTS_IS_ABSENT = "Sorry. Clients are absent";

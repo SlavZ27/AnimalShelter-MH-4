@@ -65,4 +65,24 @@ public class Chat {
     public void setLast_activity(LocalDateTime last_activity) {
         this.last_activity = last_activity;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Telegram chat");
+        sb.append("\nid: " + id);
+        if (userNameTelegram != null) {
+            sb.append("\nuser name: " + userNameTelegram);
+        }
+        if (firstNameUser != null) {
+            sb.append("\nfirst name: " + firstNameUser);
+        }
+        if (lastNameUser != null) {
+            sb.append("\nlast name: " + lastNameUser);
+        }
+        if (last_activity != null) {
+            sb.append("\nlast activity: " + last_activity);
+        }
+        return sb.toString();
+    }
 }

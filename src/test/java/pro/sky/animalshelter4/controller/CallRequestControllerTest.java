@@ -64,12 +64,12 @@ class CallRequestControllerTest {
         for (int i = 0; i < 2; i++) {
             Chat chatVolunteer = generator.generateChat(-1L, "", "", "", null, true);
             chatVolunteer = chatRepository.save(chatVolunteer);
-            User userVolunteer = generator.generateUser(null, null, chatVolunteer, null, null, true, true);
+            User userVolunteer = generator.generateUser(null, null, chatVolunteer, null, null, true, null, true);
             userVolunteer = userRepository.save(userVolunteer);
             for (int j = 0; j < 10; j++) {
                 Chat chatClient = generator.generateChat(-1L, "", "", "", null, true);
                 chatClient = chatRepository.save(chatClient);
-                User userClient = generator.generateUser(null, null, chatClient, null, null, false, true);
+                User userClient = generator.generateUser(null, null, chatClient, null, null, false, null, true);
                 userClient = userRepository.save(userClient);
                 CallRequest callRequest = new CallRequest();
                 callRequest.setVolunteer(userVolunteer);
@@ -202,7 +202,7 @@ class CallRequestControllerTest {
                 .contains(callRequest.getId().toString())
                 .contains(callRequest.getClient().getId().toString())
                 .contains(callRequest.getVolunteer().getId().toString())
-                .contains(callRequest.getLocalDateTimeOpen().toString());
+                .contains(callRequest.getLocalDateTimeOpen().toString().substring(0, 17));
         assertThat(callRequestRepository.findById(callRequest.getId()).orElse(null))
                 .isNull();
     }

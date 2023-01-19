@@ -10,6 +10,7 @@ public class ReportDto {
     private String feeling;
     private String behavior;
     private Long idPhoto;
+    private String linkPhoto;
     private Boolean isApprove;
 
     public Long getId() {
@@ -74,5 +75,13 @@ public class ReportDto {
 
     public void setApprove(Boolean approve) {
         isApprove = approve;
+    }
+
+    public String getLinkPhoto() {
+        return linkPhoto;
+    }
+
+    public void setLinkPhoto(String linkPhoto) {
+        this.linkPhoto = linkPhoto;
     }
 }
