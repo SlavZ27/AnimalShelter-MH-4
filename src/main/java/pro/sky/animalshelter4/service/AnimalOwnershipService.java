@@ -8,6 +8,7 @@ import pro.sky.animalshelter4.entity.Report;
 import pro.sky.animalshelter4.entity.User;
 import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.entityDto.AnimalOwnershipDto;
+import pro.sky.animalshelter4.exception.AnimalOwnershipAlreadyCloseException;
 import pro.sky.animalshelter4.exception.AnimalOwnershipNotFoundException;
 import pro.sky.animalshelter4.repository.AnimalOwnershipRepository;
 
@@ -18,11 +19,13 @@ import java.util.stream.Collectors;
 @Service
 public class AnimalOwnershipService {
     public final static String MESSAGE_SUCCESSFUL_CREATION = "OK.";
+    public final static String MESSAGE_ALREADY_CLOSE = "AnimalOwnership already close";
     public final static String MESSAGE_TRIAL_IS_OVER = "Trial period of animal ownership is over:\n";
     public final static String MESSAGE_ALL_ANIMAL_OWNERSHIP_ARE_APPROVE = "All AnimalOwnership are approve";
     public final static String MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_GOOD = "AnimalOwnership is placed good";
     public final static String MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_BAD = "AnimalOwnership is placed bad";
     public final static String MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_BAD_OWNER = "Recommendations for the owner";
+    public final static int count_extended_days = 7;
 
 
     private final AnimalOwnershipRepository animalOwnershipRepository;
@@ -138,6 +141,9 @@ public class AnimalOwnershipService {
         if (animalOwnership == null) {
             throw new AnimalOwnershipNotFoundException(idAnimalOwnership.toString());
         }
+        if (!animalOwnership.isOpen()) {
+            throw new AnimalOwnershipAlreadyCloseException(idAnimalOwnership.toString());
+        }
         animalOwnership.setApprove(approve);
         animalOwnership.setOpen(false);
         return animalOwnershipRepository.save(animalOwnership);
@@ -148,7 +154,7 @@ public class AnimalOwnershipService {
         if (animalOwnership == null) {
             throw new AnimalOwnershipNotFoundException(idAnimalOwnership.toString());
         }
-        animalOwnership.setDateEndTrial(animalOwnership.getDateEndTrial().plusDays(7));
+        animalOwnership.setDateEndTrial(animalOwnership.getDateEndTrial().plusDays(count_extended_days));
         return animalOwnershipRepository.save(animalOwnership);
     }
 }

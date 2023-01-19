@@ -21,18 +21,9 @@ public class TelegramUnfinishedRequestService {
         return null;
     }
 
-    private UnfinishedRequestTelegram read(Long id) {
-        return unfinishedRequestTelegramRepository.findById(id).orElse(null);
-    }
 
     public UnfinishedRequestTelegram findByIdChat(Long idChat) {
         return unfinishedRequestTelegramRepository.findByIdChat(idChat);
-    }
-
-    private void delete(Long id) {
-        if (read(id) != null) {
-            unfinishedRequestTelegramRepository.deleteById(id);
-        }
     }
 
     private void delete(UnfinishedRequestTelegram unfinishedRequestTelegram) {

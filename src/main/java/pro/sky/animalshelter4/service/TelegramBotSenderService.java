@@ -350,22 +350,6 @@ public class TelegramBotSenderService {
                 width, height);
     }
 
-    /**
-     * Method sends a photo to telegram chat located in the file system.
-     * Using {@link Paths#get(URI)}
-     * Using {@link Files#readAllBytes(Path)}
-     * Using {@link TelegramBot#execute(BaseRequest)}
-     *
-     * @param idChat   must be not null
-     * @param pathFile must be not null
-     * @throws IOException
-     */
-    public void sendPhoto(Long idChat, String pathFile) throws IOException {
-        Path path = Paths.get(pathFile);
-        byte[] file = Files.readAllBytes(path);
-        SendPhoto sendPhoto = new SendPhoto(idChat, file);
-        telegramBot.execute(sendPhoto).message();
-    }
 
     public void sendMessageWithButtonCancel(Long idChat, String message, String nameButton) {
         sendButtonsWithDifferentData(
