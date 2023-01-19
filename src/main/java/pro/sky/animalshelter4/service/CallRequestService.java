@@ -2,6 +2,7 @@ package pro.sky.animalshelter4.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.CallRequest;
 import pro.sky.animalshelter4.entity.User;
@@ -63,6 +64,11 @@ public class CallRequestService {
         }
     }
 
+    /**
+     * This method close call request by user and id call request
+     * @param user is not null
+     * @param idCallRequest is not null
+     */
     public void closeCallRequest(User user, Long idCallRequest) {
         CallRequest callRequest = callRequestRepository.findById(idCallRequest).orElse(null);
         if (callRequest == null) {
@@ -90,7 +96,6 @@ public class CallRequestService {
     /**
      * The method saves the call requests.
      * Using the repository metod {@link CallRequestRepository#save(Object)}
-     *
      * @param callRequest
      * @return returns a call Request
      */
@@ -99,11 +104,23 @@ public class CallRequestService {
         return callRequestRepository.save(callRequest);
     }
 
+    /**
+     * This method create call request by callRequestDto
+     * @param callRequestDto is not null
+     * @return new callRequest
+     */
     public CallRequestDto createCallRequest(CallRequestDto callRequestDto) {
         logger.info("Method createCallRequest was start for create new CallRequest");
         return dtoMapperService.toDto(callRequestRepository.save(dtoMapperService.toEntity(callRequestDto)));
     }
 
+    /**
+     * This method, using method repository allows you to find a call request
+     * Using: {@link CallRequestRepository#findById(Object)}
+     * @param id is not null
+     * @return CallRequestDto
+     * @Exception CallRequestNotFoundException
+     */
     public CallRequestDto readCallRequest(Long id) {
         logger.info("Method readCallRequest was start for find CallRequest by id");
         return dtoMapperService.toDto(
@@ -111,12 +128,26 @@ public class CallRequestService {
                         orElseThrow(() -> new CallRequestNotFoundException(String.valueOf(id))));
     }
 
+    /**
+     * This method, using method repository allows you to find a call request
+     * Using: {@link CallRequestRepository#findById(Object)}
+     * @param id is not null
+     * @return CallRequestDto
+     * @Exception CallRequestNotFoundException
+     */
     public CallRequest findCallRequest(Long id) {
         logger.info("Method findCallRequest was start for find CallRequest by id");
         return callRequestRepository.findById(id).
                 orElseThrow(() -> new CallRequestNotFoundException(String.valueOf(id)));
     }
 
+    /**
+     * This method,using method repository update call request by callRequestDto
+     * Using: {@link DtoMapperService#toEntity(CallRequestDto)}
+     * Using: {@link CallRequestRepository#save(Object)}
+     * @param callRequestDto is not null
+     * @return CallRequestDto
+     */
     public CallRequestDto updateCallRequest(CallRequestDto callRequestDto) {
         logger.info("Method updateCallRequest was start for update callRequest");
         CallRequest newCallRequest = dtoMapperService.toEntity(callRequestDto);
@@ -132,12 +163,25 @@ public class CallRequestService {
         return dtoMapperService.toDto(callRequestRepository.save(oldCallRequest));
     }
 
+    /**
+     * This method, using method class to delete call request by id
+     * Using: {@link CallRequestRepository#save(Object)}
+     * @param id is not null
+     * @return del CallRequestDto
+     */
     public CallRequestDto deleteCallRequest(Long id) {
         CallRequest callRequest = new CallRequest();
         callRequest.setId(id);
         return dtoMapperService.toDto(deleteCallRequest(callRequest));
     }
 
+    /**
+     * This method finds the call request that needs to be deleted, using method repository
+     * Using: {@link CallRequestRepository#findById(Object)}
+     * @param callRequest is not null
+     * @return callRequestFound
+     * @Exception IllegalArgumentException, CallRequestNotFoundException
+     */
     public CallRequest deleteCallRequest(CallRequest callRequest) {
         logger.info("Method deleteCallRequest was start for delete CallRequest");
         if (callRequest.getId() == null) {
@@ -149,6 +193,11 @@ public class CallRequestService {
         return callRequestFound;
     }
 
+    /**
+     * This method get all call request, using method repository
+     * Using:{@link CallRequestRepository#findAll()}
+     * @return List<CallRequestDto>
+     */
     public List<CallRequestDto> getAll() {
         logger.info("Method getAll was start for return all CallRequest");
         return callRequestRepository.findAll().stream().
@@ -163,6 +212,12 @@ public class CallRequestService {
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
+    /**
+     * This method, using method repository allow get all open call request volunteer
+     * Using: {@link CallRequestRepository#getAllOpenByUserIdForVolunteer(Long)}
+     * @param userVolunteer is not null
+     * @return List<CallRequest>
+     */
     public List<CallRequest> getAllOpenCallRequestVolunteer(User userVolunteer) {
         logger.info(
                 "Method getAllOpenCallRequestVolunteer was start for return all CallRequest Volunteer with id = {}"
@@ -170,6 +225,11 @@ public class CallRequestService {
         return new ArrayList<>(callRequestRepository.getAllOpenByUserIdForVolunteer(userVolunteer.getId()));
     }
 
+    /**
+     * This method, using method repository allow receive full call request client by id
+     * @param id is not null
+     * @return List<CallRequestDto>
+     */
     public List<CallRequestDto> getAllOpenCallRequestClient(Long id) {
         logger.info(
                 "Method getAllCallRequestUser was start for return all CallRequest Client with id = {}"
@@ -178,12 +238,22 @@ public class CallRequestService {
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
+    /**
+     * This method, using method repository allow get all open call request
+     * Using: {@link CallRequestRepository#getAllOpenCallRequest()}
+     * @return List<CallRequestDto>
+     */
     public List<CallRequestDto> getAllOpenCallRequest() {
         logger.info("Method getAllOpenCallRequest was start for return all open CallRequest");
         return callRequestRepository.getAllOpenCallRequest().stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
+    /**
+     * This method, using method repository allow get all close call request
+     * Using: {@link CallRequestRepository#getAllOpenCallRequest()}
+     * @return List<CallRequestDto>
+     */
     public List<CallRequestDto> getAllCloseCallRequest() {
         logger.info("Method getAllOpenCallRequest was start for return all close CallRequest");
         return callRequestRepository.getAllCloseCallRequest().stream().

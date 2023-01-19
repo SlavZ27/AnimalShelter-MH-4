@@ -50,17 +50,34 @@ public class UserService {
     private final Random random = new Random();
 
 
+    /**
+     * The method adds a new user to the repository and returns the same instance
+     * Using {@link UserRepository#save(Object)}
+     * @param userDto is not by null.
+     * @return User
+     */
     public UserDto createUser(UserDto userDto) {
         logger.info("Method createUser was start for create new User");
         return dtoMapperService.toDto(userRepository.save(dtoMapperService.toEntity(userDto)));
     }
 
+    /**
+     * The method adds a new user to the repository and returns the same instance
+     * Using {@link UserRepository#save(Object)}
+     * @param user is not by null.
+     * @return User
+     */
     public User addUser(User user) {
         logger.info("Method addUser was start for create new User");
         return userRepository.save(user);
     }
 
-
+    /**
+     * The method outputs the user from the database using the repository by its chat_id
+     * Using {@link UserRepository#findById(Object)}
+     * @param id is not by null.
+     * @return User by id
+     */
     public UserDto readUser(Long id) {
         logger.info("Method readUser was start for find User by id");
         return dtoMapperService.toDto(
@@ -68,12 +85,24 @@ public class UserService {
                         orElseThrow(() -> new UserNotFoundException(String.valueOf(id))));
     }
 
+    /**
+     * The method outputs the user from the database using the repository by its chat_id
+     * Using {@link UserRepository#findById(Object)}
+     * @param id is not by null.
+     * @return User by id
+     */
     public User findUser(Long id) {
         logger.info("Method readUser was start for find User by id");
         return userRepository.findById(id).
                 orElseThrow(() -> new UserNotFoundException(String.valueOf(id)));
     }
 
+    /**
+     * The method update a new user to the repository and returns the same instance
+     * Using {@link UserRepository#save(Object)}
+     * @param userDto is not by null.
+     * @return User
+     */
     public UserDto updateUser(UserDto userDto) {
         logger.info("Method updateUser was start for update User");
         User newUser = dtoMapperService.toEntity(userDto);
@@ -89,13 +118,24 @@ public class UserService {
         return dtoMapperService.toDto(userRepository.save(oldUser));
     }
 
+    /**
+     * The method delete the user from the database using the repository by its chat_id
+     * Using {@link UserRepository#delete(Object)}
+     * @param id is not by null.
+     * @return User by id
+     */
     public UserDto deleteUser(Long id) {
         User user = new User();
         user.setId(id);
         return dtoMapperService.toDto(deleteUser(user));
     }
 
-
+    /**
+     * The method delete the user from the database using the repository by its chat_id
+     * Using {@link UserRepository#delete(Object)}
+     * @param user is not by null.
+     * @return User by id
+     */
     public User deleteUser(User user) {
         logger.info("Method deleteUser was start for delete User");
         if (user.getId() == null) {
@@ -107,12 +147,22 @@ public class UserService {
         return userFound;
     }
 
+    /**
+     * The all method outputs the user from the database using the repository
+     * Using {@link UserRepository#findAll()}
+     * @return full user
+     */
     public List<UserDto> getAll() {
         logger.info("Method getAll was start for return all Users");
         return userRepository.findAll().stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
+    /**
+     * The all method outputs the volunteers from the database using the repository
+     * Using {@link UserRepository#getAllVolunteers()}
+     * @return full volunteers
+     */
     public List<UserDto> getAllVolunteers() {
         logger.info("Method getAllVolunteers was start for return all Users of Volunteers");
         return userRepository.getAllVolunteers().stream().
@@ -120,17 +170,32 @@ public class UserService {
                 collect(Collectors.toList());
     }
 
+    /**
+     * The all method outputs the clients from the database using the repository
+     * Using {@link UserRepository#getAllClients()}
+     * @return full clients
+     */
     public List<UserDto> getAllClientsDto() {
         logger.info("Method getAllClientsDto was start for return all Users of Clients");
         return userRepository.getAllClients().stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
+    /**The all method outputs the clients from the database using the repository
+     * Using {@link UserRepository#getAllClients()}
+     * @return full clients
+     */
     public List<User> getAllClientsEntity() {
         logger.info("Method getAllClientsEntity was start for return all Users of Clients");
         return new ArrayList<>(userRepository.getAllClients());
     }
 
+    /**
+     * Method check by user id whether this user is a volunteer
+     * using {@link UserRepository#getByIdTelegramChatAndVolunteer(Long)}
+     * @param idChatTelegram is not by null
+     * @return volonter or null
+     */
     public boolean isUserWithTelegramChatIdVolunteer(Long idChatTelegram) {
         logger.info("Method isUserOfVolunteer was start for to check if the User with id = {} is a volunteer", idChatTelegram);
         User user = userRepository.getByIdTelegramChatAndVolunteer(idChatTelegram);
@@ -142,6 +207,12 @@ public class UserService {
         return false;
     }
 
+    /**
+     * Method check by user id whether this user is owner
+     * using {@link UserRepository#getByIdTelegramChatAndOwner(Long)}
+     * @param idChatTelegram is not by null
+     * @return owner or null
+     */
     public boolean isUserWithTelegramChatIdOwner(Long idChatTelegram) {
         logger.info("Method isUserWithTelegramChatIdOwner was start for to check if the User with id = {} is a Owner",
                 idChatTelegram);
@@ -153,7 +224,11 @@ public class UserService {
         logger.debug("Method isUserWithTelegramChatIdOwner detected Owner by idUser = {}", idChatTelegram);
         return false;
     }
-
+    /**
+     * The method allows the user to change the phone number
+     * @param chat is not by null
+     * @param phone is not by null
+     */
     public void changePhone(Chat chat, String phone) {
         User user = getUserWithTelegramUserId(chat.getId());
         logger.info("Method changePhone was start for change phone by User id = {}",
@@ -162,13 +237,20 @@ public class UserService {
         addUser(user);
     }
 
+    /**
+     * The method allows you to get a chat user by User id
+     * using {@link UserRepository#getByIdTelegramChat(Long)}
+     * @param idUser is not null
+     * @return User
+     */
     public User getUserWithTelegramUserId(Long idUser) {
         logger.info("Method getUserWithTelegramUserId was start for to find user with telegram User id = {}", idUser);
         return userRepository.getByIdTelegramChat(idUser);
     }
 
     /**
-     * @return User belonging to a volunteer or null
+     * This method finds a random volunteer
+     * @return returns the volunteer if there is one
      */
     public User getRandomVolunteer() {
         List<User> userList = userRepository.getAllVolunteers();
@@ -178,6 +260,11 @@ public class UserService {
         return null;
     }
 
+    /**
+     * adds matching user for chat
+     * @param chat is not null
+     * @return user
+     */
     public User mapChatToUser(Chat chat) {
         User user = new User();
         user.setNameUser(chat.getFirstNameUser() + " " + chat.getLastNameUser());
@@ -186,6 +273,11 @@ public class UserService {
         return addUser(user);
     }
 
+    /**
+     * This metod get user from chat by user id
+     * @param chat is not by null
+     * @return user or adds matching user for chat
+     */
     public User getUserFromChat(Chat chat) {
         User user = getUserWithTelegramUserId(chat.getId());
         if (user == null) {
@@ -194,6 +286,11 @@ public class UserService {
         return user;
     }
 
+    /** this method gets the user from the chat takes the nearest volunteer
+     * if there is no volunteer now, it gives an error {@link VolunteersIsAbsentException }
+     * @param chatClient is not null
+     * @return userClient, userVolunteer
+     */
     public CallRequest createCallRequest(Chat chatClient) {
         User userClient = getUserFromChat(chatClient);
         User userVolunteer = getRandomVolunteer();
@@ -203,16 +300,32 @@ public class UserService {
         return callRequestService.createCallRequest(userClient, userVolunteer);
     }
 
+    /**
+     * This method allows you to get a list open call request
+     * @param chatVolunteer is not null
+     * @return getAllOpenCallRequestVolunteer
+     */
     public List<CallRequest> getListOpenCallRequests(Chat chatVolunteer) {
         User userVolunteer = getUserFromChat(chatVolunteer);
         return callRequestService.getAllOpenCallRequestVolunteer(userVolunteer);
     }
 
+    /**
+     * This method allows you to close a call request
+     * @param chatVolunteer is not null
+     * @param idCallRequest is not null
+     */
     public void closeCallRequest(Chat chatVolunteer, Long idCallRequest) {
         User userVolunteer = getUserFromChat(chatVolunteer);
         callRequestService.closeCallRequest(userVolunteer, idCallRequest);
     }
 
+    /**
+     * This method attach an animal to a person
+     * @param idUserClient is not null
+     * @param idAnimal is not null
+     * @return AnimalOwnership
+     */
     public AnimalOwnership createOwnershipAnimal(Long idUserClient, Long idAnimal) {
         User userClient = userRepository.findById(idUserClient).orElseThrow(() ->
                 new UserNotFoundException(String.valueOf(idUserClient)));
@@ -226,39 +339,83 @@ public class UserService {
         return animalOwnershipService.addAnimalOwnership(animalOwnership);
     }
 
+    /**
+     * This method allows find or create report
+     * @param chatUserOwner is not null
+     * @return report create or find owner
+     */
     public Report findOrCreateActualReport(Chat chatUserOwner) {
         User userOwner = getUserFromChat(chatUserOwner);
         return animalOwnershipService.findOrCreateActualReport(userOwner);
     }
 
+
+    /**
+     * This method create report on update
+     * @param chatUserOwner is not null
+     * @param diet
+     * @param feeling
+     * @param behavior
+     * @param idMedia
+     * @return report
+     */
     public Report createUpdateReport(Chat chatUserOwner, String diet, String feeling, String behavior, String idMedia) {
         User userOwner = getUserFromChat(chatUserOwner);
         return animalOwnershipService.createReport(userOwner, diet, feeling, behavior, idMedia);
     }
 
 
+    /**
+     * This method allows get report, open and not approve
+     * @return report open and not approve
+     */
     public Report getOpenAndNotApproveReport() {
         return animalOwnershipService.getOpenAndNotApproveReport();
     }
 
+    /**
+     *
+     * This method allows you to approve the owner report
+     * @param idReport is not null
+     * @param approve try
+     * @return report
+     */
     public Report approveReport(Long idReport, boolean approve) {
         return animalOwnershipService.approveReport(idReport, approve);
     }
-
+    /**
+     * This method allows update date last notification user to the Present time
+     * @return user with a new LocalDateTime
+     */
     public void changeUserDateLastNotificationToNow(Chat chat) {
         User user = getUserFromChat(chat);
         user.setDateLastNotification(LocalDateTime.now());
         userRepository.save(user);
     }
 
+    /**
+     * Method to Get One Non-Approved Open Possession of an Animal and Take the animals Away
+     * @return {@link AnimalOwnershipService#getOneNotApproveOpenAnimalOwnershipWithNotTrial()}
+     */
     public AnimalOwnership getOneNotApproveOpenAnimalOwnershipWithNotTrial() {
         return animalOwnershipService.getOneNotApproveOpenAnimalOwnershipWithNotTrial();
     }
 
+    /**
+     * This method allows you to approve the owner of the animal
+     * @param idAnimalOwnership is not null
+     * @param approve is not null
+     * @return
+     */
     public AnimalOwnership approveAnimalOwnership(Long idAnimalOwnership, boolean approve) {
         return animalOwnershipService.approveAnimalOwnership(idAnimalOwnership, approve);
     }
 
+    /**
+     * This method allows you to extend the trial ownership of the animal
+     * @param idAnimalOwnership is not null
+     * @return {@link AnimalOwnershipService#extendTrialAnimalOwnershipForAWeek(Long)}  }
+     */
     public AnimalOwnership extendTrialAnimalOwnership(Long idAnimalOwnership) {
         return animalOwnershipService.extendTrialAnimalOwnershipForAWeek(idAnimalOwnership);
     }

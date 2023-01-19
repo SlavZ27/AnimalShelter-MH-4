@@ -7,6 +7,7 @@ import pro.sky.animalshelter4.entity.AnimalOwnership;
 import pro.sky.animalshelter4.entity.Photo;
 import pro.sky.animalshelter4.entity.Report;
 import pro.sky.animalshelter4.entityDto.AnimalDto;
+import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.entityDto.ReportDto;
 import pro.sky.animalshelter4.exception.ReportNotFoundException;
 import pro.sky.animalshelter4.repository.PhotoRepository;
@@ -16,6 +17,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This class handles ovner requests, using repository and other service
+ */
 @Service
 public class ReportService {
     public final static String MESSAGE_REPORT_CREATE = "Report create";
@@ -48,33 +52,70 @@ public class ReportService {
         this.dtoMapperService = dtoMapperService;
     }
 
+    /**
+     * This method, using the method repository, allows you to create a new report
+     * Using{@link ReportRepository#save(Object)}
+     * @param report is not null
+     * @return new report
+     */
     public Report addReport(Report report) {
         logger.info("Method addReport was start for create new Report");
         return reportRepository.save(report);
     }
 
+    /**
+     * This method, using the method repository, allows you to create a new report
+     * Using{@link ReportRepository#save(Object)}
+     * @param reportDto is not null
+     * @return new report
+     */
     public ReportDto createReport(ReportDto reportDto) {
         logger.info("Method createReport was start for create new report");
         return dtoMapperService.toDto(reportRepository.save(dtoMapperService.toEntity(reportDto)));
     }
 
+    /**
+     * This method, using the method class, allows find report by id
+     * Using{@link ReportService#findReport(Long)}
+     * @param id is not null
+     * @return report
+     */
     public ReportDto readReport(Long id) {
         logger.info("Method readReport was start for find report by id");
         return dtoMapperService.toDto(findReport(id));
     }
 
+
+    /**
+     * This method, using the method repository, allows find report by id
+     * Using {@link ReportRepository#findById(Object)}
+     * @param id is not null
+     * @return report
+     */
     public Report findReport(Long id) {
         logger.info("Method findReport was start for find Report by id");
         return reportRepository.findById(id).
                 orElseThrow(() -> new ReportNotFoundException(String.valueOf(id)));
     }
 
+    /**
+     * This method, using the method repository, finds all report
+     * Using {@link ReportRepository#findAll()}
+     * @return list report
+     */
     public List<ReportDto> getAll() {
         logger.info("Method getAll was start for get all Report");
         return reportRepository.findAll().stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
+    /**
+     * This method, using the method repository, find or create new report by id Ownership animal
+     * Using {@link ReportRepository#findReportByIdAnimalOwnershipAndDate(Long, LocalDate)}
+     * Using {@link ReportRepository#save(Object)}
+     * @param animalOwnership is not null
+     * @return report
+     */
     public Report findOrCreateActualReport(AnimalOwnership animalOwnership) {
         logger.info("Method findOrCreateActualReport was start");
         LocalDate localDate = LocalDate.now();
@@ -88,6 +129,13 @@ public class ReportService {
         return report;
     }
 
+    /**
+     * This method,using the method repository and dto class dtoMapperService , allows update old report by reportDto
+     * Using {@link DtoMapperService#toEntity(ReportDto)}
+     * Using {@link ReportRepository#save(Object)}
+     * @param reportDto is not null
+     * @return new report
+     */
     public ReportDto updateReport(ReportDto reportDto) {
         logger.info("Method updateCallRequest was start for update callRequest");
         Report newReport = dtoMapperService.toEntity(reportDto);
@@ -105,12 +153,25 @@ public class ReportService {
         return dtoMapperService.toDto(reportRepository.save(oldReport));
     }
 
+    /**
+     * This method,using  the method class, allows del finished report by id
+     * Using{@link DtoMapperService#toDto(Report)}
+     * @param id is not null
+     * @return del report
+     */
     public ReportDto deleteReport(Long id) {
         Report report = new Report();
         report.setId(id);
         return dtoMapperService.toDto(deleteReport(report));
     }
 
+    /**
+     * This method,using  the method repository, allows del finished report by report
+     * Using{@link ReportRepository#findById(Object)}
+     * Using{@link ReportRepository#delete(Object)}
+     * @param report is not null
+     * @return del report
+     */
     public Report deleteReport(Report report) {
         logger.info("Method deleteReport was start for delete Report");
         if (report.getId() == null) {
@@ -122,6 +183,18 @@ public class ReportService {
         return reportFound;
     }
 
+    /**
+     * This method,using  the method repository,allows generate update report, and using class
+     * Using{@link PhotoRepository#findByIdPhoto(String)}
+     * Using{@link PhotoService#addPhoto(Photo)}
+     * Using{@link ReportRepository#save(Object)}
+     * @param animalOwnership
+     * @param diet
+     * @param feeling
+     * @param behavior
+     * @param idMedia is not null
+     * @return report
+     */
     public Report createUpdateReport(AnimalOwnership animalOwnership, String diet, String feeling, String behavior, String idMedia) {
         Report report = findOrCreateActualReport(animalOwnership);
 
@@ -148,10 +221,23 @@ public class ReportService {
         return reportRepository.save(report);
     }
 
+    /**
+     * This method, using the method repository , allow find open and not approve report
+     * Using{@link ReportRepository#getOpenAndNotApproveReport()}
+     * @return report
+     */
     public Report getOpenAndNotApproveReport() {
         return reportRepository.getOpenAndNotApproveReport();
     }
 
+    /**
+     * This method, using the methods repository, allows you to approve a report by the report ID
+     * Using{@link ReportRepository#findById(Object)}
+     * Using{@link ReportRepository#save(Object)}
+     * @param idReport is not null
+     * @param approve is not null
+     * @return report
+     */
     public Report approveReport(Long idReport, boolean approve) {
         Report report = reportRepository.findById(idReport).orElseThrow(() ->
                 new ReportNotFoundException(idReport.toString()));

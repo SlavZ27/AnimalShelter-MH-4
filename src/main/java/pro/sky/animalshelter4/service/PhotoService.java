@@ -33,11 +33,27 @@ public class PhotoService {
     }
 
 
+    /**
+     * This method add new Photo and save photo
+     * <p>
+     * @param photo is not null
+     * <r>
+     * @return photo
+     */
     public Photo addPhoto(Photo photo) {
         logger.info("Method addPhoto was start for create new Photo");
         return photoRepository.save(photo);
     }
 
+    /**
+     * This method read photo is telegram
+     * <p>
+     * @param id is not null
+     * <r>
+     * @return photo
+     * <t>
+     * @throws IOException
+     */
     public Pair<byte[], String> readPhotoFromTelegram(Long id) throws IOException {
         Photo photo = findPhoto(id);
         GetFile getFile = new GetFile(photo.getIdMedia());
@@ -47,24 +63,53 @@ public class PhotoService {
     }
 
 
+    /**
+     * This method locate photo by id, using method repository
+     * Using{@link PhotoRepository#findById(Object)}
+     * <p>
+     * @param id is not null
+     * <t>
+     * @throws IOException PhotoNotFoundException(id)
+     * <r>
+     * @return photo
+     */
     public Photo findPhoto(Long id) {
         logger.info("Method findPhoto was start for find Photo by id");
         return photoRepository.findById(id).
                 orElseThrow(() -> new PhotoNotFoundException(String.valueOf(id)));
     }
 
+    /** This method locate photo by Photo id, using method repository
+     * Using{@link PhotoRepository#findByIdPhoto(String)}
+     * <p>
+     * @param idMedia is not null
+     *                <r></r>
+     * @return photo
+     */
     public Photo findPhotoByIdPhoto(String idMedia) {
         logger.info("Method findPhoto was start for find Photo by idPhoto");
         return photoRepository.findByIdPhoto(idMedia);
     }
 
 
+    /**
+     * This method delete photo by id
+     * <p>
+     * @param id is not null
+     *           <r></r>
+     * @return delete photo
+     */
     public Long deletePhoto(Long id) {
         Photo photo = new Photo();
         photo.setId(id);
         return deletePhoto(photo);
     }
 
+    /**
+     * This method delete photo by photo id
+     * @param photo is not null
+     * @return delete photo
+     */
     public Long deletePhoto(Photo photo) {
         logger.info("Method deletePhoto was start for delete Photo");
         if (photo.getId() == null) {
@@ -76,6 +121,10 @@ public class PhotoService {
         return photoFound.getId();
     }
 
+    /**
+     * This method was start forget all Id of photo
+     * @return delete photo
+     */
     public List<Long> getAllId() {
         logger.info("Method getAllId was start for get all Id of photo");
         return photoRepository.findAll().stream().

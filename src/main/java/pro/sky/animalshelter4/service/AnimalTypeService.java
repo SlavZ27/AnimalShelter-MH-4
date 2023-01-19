@@ -11,6 +11,11 @@ import pro.sky.animalshelter4.repository.AnimalTypeRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This class is necessary to manage actions with animals
+ * The class must have many dependencies so that it can work correctly.
+ * And also respond to requests received from {@link AnimalTypeRepository}
+ */
 @Service
 public class AnimalTypeService {
 

@@ -8,7 +8,6 @@ import pro.sky.animalshelter4.service.CallRequestService;
 import pro.sky.animalshelter4.service.UserService;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
-
 public class UserNotFoundException extends RuntimeException{
     public UserNotFoundException(String message) {
         super(message);

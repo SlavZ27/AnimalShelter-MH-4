@@ -6,7 +6,9 @@ import org.springframework.stereotype.Repository;
 import pro.sky.animalshelter4.entity.User;
 
 import java.util.List;
-
+/**
+ * This class was created to use the database to create methods used in the class UserService
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 

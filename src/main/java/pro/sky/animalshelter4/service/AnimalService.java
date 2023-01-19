@@ -8,10 +8,16 @@ import pro.sky.animalshelter4.entity.AnimalType;
 import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.exception.AnimalNotFoundException;
 import pro.sky.animalshelter4.repository.AnimalRepository;
+import pro.sky.animalshelter4.repository.AnimalTypeRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This class is necessary to manage actions with animals
+ * The class must have many dependencies so that it can work correctly.
+ * And also respond to requests received from {@link AnimalRepository}
+ */
 @Service
 public class AnimalService {
     public final static String MESSAGE_ANIMALS_IS_ABSENT = "Sorry. Animals are absent";

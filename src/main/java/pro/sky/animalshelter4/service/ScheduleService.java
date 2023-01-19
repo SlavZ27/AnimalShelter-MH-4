@@ -38,6 +38,9 @@ public class ScheduleService {
 // хозяина или нет. Испытательный срок может быть пройден, может быть продлен на любое количество дней, а
 // может быть не пройден.*
 
+    /**
+     * This method check report Client AnimalOwnership
+     */
     @Scheduled(fixedDelay = 3_600_000)
     public void checkLateReportsAndNoReports() {
         int countLateDay = 1;
