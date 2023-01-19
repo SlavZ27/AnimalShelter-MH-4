@@ -17,18 +17,24 @@ import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.CallRequest;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.entity.User;
+import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.entityDto.UserDto;
+import pro.sky.animalshelter4.exception.ChatNotFoundException;
+import pro.sky.animalshelter4.exception.UserNotFoundException;
 import pro.sky.animalshelter4.repository.CallRequestRepository;
 import pro.sky.animalshelter4.repository.ChatRepository;
 import pro.sky.animalshelter4.repository.UserRepository;
 import pro.sky.animalshelter4.service.DtoMapperService;
+import pro.sky.animalshelter4.service.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -53,10 +59,13 @@ class UserControllerTest {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private UserService userService;
+    @Autowired
     private DtoMapperService dtoMapperService;
     @Autowired
     private TestRestTemplate testRestTemplate;
     private Generator generator = new Generator();
+    private final Random random = new Random();
 
     @BeforeEach
     public void generateData() {
@@ -67,12 +76,12 @@ class UserControllerTest {
         for (int i = 0; i < 2; i++) {
             Chat chatVolunteer = generator.generateChat(-1L, "", "", "", null, true);
             chatVolunteer = chatRepository.save(chatVolunteer);
-            User userVolunteer = generator.generateUser(null, null, chatVolunteer, null, null, true, true);
+            User userVolunteer = generator.generateUser(null, null, chatVolunteer, null, null, true, null,true);
             userVolunteer = userRepository.save(userVolunteer);
             for (int j = 0; j < 10; j++) {
                 Chat chatClient = generator.generateChat(-1L, "", "", "", null, true);
                 chatClient = chatRepository.save(chatClient);
-                User userClient = generator.generateUser(null, null, chatClient, null, null, false, true);
+                User userClient = generator.generateUser(null, null, chatClient, null, null, false, null,true);
                 userClient = userRepository.save(userClient);
                 CallRequest callRequest = new CallRequest();
                 callRequest.setVolunteer(userVolunteer);
@@ -102,6 +111,7 @@ class UserControllerTest {
         assertThat(userRepository).isNotNull();
         assertThat(dtoMapperService).isNotNull();
         assertThat(testRestTemplate).isNotNull();
+        assertThat(userService).isNotNull();
     }
 
 
@@ -160,6 +170,22 @@ class UserControllerTest {
         assertThat(responseEntity.getAddress()).isEqualTo(userDto.getAddress());
         assertThat(responseEntity.getNameUser()).isEqualTo(userDto.getNameUser());
         assertThat(responseEntity.getPhone()).isEqualTo(userDto.getPhone());
+    }
+
+    @Test
+    void readUserNegative() {
+        List<Long> userIdList = userRepository.findAll().stream().map(User::getId).collect(Collectors.toList());
+        Long index = (long) random.nextInt(userIdList.size());
+        while (userIdList.contains(index)) {
+            index = (long) random.nextInt(userIdList.size());
+        }
+
+        UserDto responseEntity = testRestTemplate.
+                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + index,
+                        UserDto.class);
+
+        Long finalIndex = index;
+        assertThatExceptionOfType(UserNotFoundException.class).isThrownBy(() -> userService.readUser(finalIndex));
     }
 
     @Test

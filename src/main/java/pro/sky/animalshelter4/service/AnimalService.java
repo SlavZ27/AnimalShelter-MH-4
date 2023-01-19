@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.Animal;
 import pro.sky.animalshelter4.entity.AnimalType;
 import pro.sky.animalshelter4.entityDto.AnimalDto;
-import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.exception.AnimalNotFoundException;
 import pro.sky.animalshelter4.repository.AnimalRepository;
 
@@ -19,7 +18,7 @@ public class AnimalService {
     public final static String MESSAGE_ANIMAL_NOT_FOUND = "Sorry. Animals not found";
     public final static String CAPTION_SELECT_ANIMAL = "Select animal";
     public final static String MESSAGE_ANIMAL_CREATED = "Created animal";
-    public final static String MESSAGE_ANIMAL_UPDATER = "Updated animal";
+    public final static String MESSAGE_ANIMAL_UPDATED = "Updated animal";
     public final static String MESSAGE_ALL_ANIMAL_COMPLEMENT = "All animal are ok";
     public final static String CAPTION_SELECT_TYPE_OF_ANIMAL = "Select type of animal";
     public final static String CAPTION_WRITE_NAME_OF_ANIMAL = "Write name of animal";

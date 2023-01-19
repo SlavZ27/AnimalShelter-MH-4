@@ -1,11 +1,10 @@
 package pro.sky.animalshelter4;
 
 import com.github.javafaker.Faker;
-import com.pengrad.telegrambot.model.CallbackQuery;
-import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.User;
+import com.pengrad.telegrambot.model.*;
+import org.apache.commons.lang3.StringUtils;
 import pro.sky.animalshelter4.entity.Chat;
+import pro.sky.animalshelter4.exception.BadPhoneNumberException;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -58,19 +57,36 @@ public class Generator {
         if (isPast) {
             tldt = localDateTime.plusYears(1L);
             while (tldt.isBefore(localDateTime)) {
-                LocalDate localDate = LocalDate.of(genInt(year-2, year), genInt(12), genInt(25));
-                LocalTime localTime = LocalTime.of(genInt(23), genInt(59));
+                LocalDate localDate = LocalDate.of(genInt(year - 2, year), genInt(12), genInt(25));
+                LocalTime localTime = LocalTime.of(genInt(23), genInt(59), genInt(59), 0);
                 tldt = LocalDateTime.of(localDate, localTime);
             }
         } else {
             tldt = localDateTime.minusYears(1L);
             while (tldt.isAfter(localDateTime)) {
-                LocalDate localDate = LocalDate.of(genInt(year-2, year), genInt(12), genInt(25));
-                LocalTime localTime = LocalTime.of(genInt(23), genInt(59));
+                LocalDate localDate = LocalDate.of(genInt(year - 2, year), genInt(12), genInt(25));
+                LocalTime localTime = LocalTime.of(genInt(23), genInt(59), genInt(59), 0);
                 tldt = LocalDateTime.of(localDate, localTime);
             }
         }
         return tldt;
+    }
+
+    public LocalDate generateDate(boolean isPast, LocalDate localDate) {
+        LocalDate tld = LocalDate.now();
+        int year = tld.getYear();
+        if (isPast) {
+            tld = localDate.plusYears(1L);
+            while (tld.isBefore(localDate)) {
+                tld = LocalDate.of(genInt(year - 2, year), genInt(12), genInt(25));
+            }
+        } else {
+            tld = localDate.minusYears(1L);
+            while (tld.isAfter(localDate)) {
+                tld = LocalDate.of(genInt(year - 2, year), genInt(12), genInt(25));
+            }
+        }
+        return tld;
     }
 
     /**
@@ -97,7 +113,7 @@ public class Generator {
         return chat;
     }
 
-    public pro.sky.animalshelter4.entity.User generateUser(Long idUser, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer, boolean needGenerate) {
+    public pro.sky.animalshelter4.entity.User generateUser(Long idUser, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer, LocalDateTime dateLastNotification, boolean needGenerate) {
         if (needGenerate) {
             idUser = generateIdIfEmpty(idUser);
             nameUser = generateNameIfEmpty(nameUser);
@@ -106,6 +122,7 @@ public class Generator {
             }
             phone = generatePhoneIfEmpty(phone);
             address = generateAddressIfEmpty(address);
+            dateLastNotification = generateDateTime(true, LocalDateTime.now());
         }
         return new pro.sky.animalshelter4.entity.User(
                 idUser,
@@ -113,7 +130,8 @@ public class Generator {
                 chatTelegram,
                 phone,
                 address,
-                isVolunteer);
+                isVolunteer,
+                dateLastNotification);
     }
 
     /**
@@ -212,6 +230,7 @@ public class Generator {
         return update;
     }
 
+
     public Update generateUpdateMessageWithReflection() {
         return generateUpdateMessageWithReflection("", "", "", -1L, "", true);
     }
@@ -288,6 +307,79 @@ public class Generator {
         return update;
     }
 
+    public Update generateUpdateMessagePhotoWithReflection(String userName,
+                                                           String firstName,
+                                                           String lastName,
+                                                           Long chatId,
+                                                           String captionText,
+                                                           String file_id,
+                                                           boolean needGenerate) {
+        if (needGenerate) {
+            userName = generateNameIfEmpty(userName);
+            firstName = generateNameIfEmpty(firstName);
+            lastName = generateNameIfEmpty(lastName);
+            captionText = generateMessageIfEmpty(captionText);
+            file_id = generateMessageIfEmpty(file_id);
+            chatId = generateIdIfEmpty(chatId);
+        }
+
+        Update update = new Update();
+        Message message = new Message();
+        com.pengrad.telegrambot.model.Chat chat = new com.pengrad.telegrambot.model.Chat();
+        User user = new User(0L);
+        PhotoSize[] photo = {new PhotoSize(), new PhotoSize(), new PhotoSize(), new PhotoSize()};
+
+        try {
+            Field userNameField = user.getClass().getDeclaredField("username");
+            userNameField.setAccessible(true);
+            Field firstNameField = user.getClass().getDeclaredField("first_name");
+            firstNameField.setAccessible(true);
+            Field lastNameField = user.getClass().getDeclaredField("last_name");
+            lastNameField.setAccessible(true);
+            Field userId = user.getClass().getDeclaredField("id");
+            userId.setAccessible(true);
+            userNameField.set(user, userName);
+            firstNameField.set(user, firstName);
+            lastNameField.set(user, lastName);
+            userId.set(user, chatId);
+
+
+            Field chatIdField = chat.getClass().getDeclaredField("id");
+            chatIdField.setAccessible(true);
+            chatIdField.set(chat, chatId);
+
+            Field photo0 = photo[0].getClass().getDeclaredField("file_id");
+            photo0.setAccessible(true);
+            photo0.set(photo[0], file_id);
+            Field photo1 = photo[1].getClass().getDeclaredField("file_id");
+            photo1.setAccessible(true);
+            photo1.set(photo[1], file_id);
+            Field photo2 = photo[2].getClass().getDeclaredField("file_id");
+            photo2.setAccessible(true);
+            photo2.set(photo[2], file_id);
+            Field photo3 = photo[3].getClass().getDeclaredField("file_id");
+            photo3.setAccessible(true);
+            photo3.set(photo[3], file_id);
+
+
+            Field messageChatField = message.getClass().getDeclaredField("chat");
+            messageChatField.setAccessible(true);
+            Field messageUserField = message.getClass().getDeclaredField("from");
+            messageUserField.setAccessible(true);
+            Field messagePhotoSize = message.getClass().getDeclaredField("photo");
+            messagePhotoSize.setAccessible(true);
+            messageChatField.set(message, chat);
+            messageUserField.set(message, user);
+            messagePhotoSize.set(message, photo);
+
+            Field updateMessageField = update.getClass().getDeclaredField("message");
+            updateMessageField.setAccessible(true);
+            updateMessageField.set(update, message);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return update;
+    }
 
     /**
      * The method generates a random time zone if it gets null
@@ -341,13 +433,17 @@ public class Generator {
      */
     public String generatePhoneIfEmpty(String phone) {
         if (phone == null || phone.length() == 0) {
-            String tempPhone = faker.phoneNumber().phoneNumber();
-            if (tempPhone.length() > 15) {
-                tempPhone = tempPhone.substring(0, 14);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 10; i++) {
+                sb.append(random.nextInt(10));
             }
-            return tempPhone;
+            return sb.toString();
         }
         return phone;
+    }
+
+    public String generateAnimalType() {
+        return faker.animal().name();
     }
 
     /**
@@ -400,5 +496,14 @@ public class Generator {
 
     public boolean generateBool() {
         return faker.bool().bool();
+    }
+
+    public Boolean generateBoolWithNull() {
+        int i = random.nextInt(50);
+        if (i < 25) {
+            return faker.bool().bool();
+        } else {
+            return null;
+        }
     }
 }
