@@ -22,6 +22,7 @@ import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
 import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.entityDto.ChatDto;
+import pro.sky.animalshelter4.exception.AnimalNotFoundException;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.repository.*;
 import pro.sky.animalshelter4.service.*;
@@ -32,8 +33,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
@@ -304,9 +307,10 @@ class AnimalControllerTest {
         assertThat(responseEntity.getBorn()).isEqualTo(animalDto.getBorn());
     }
 
+
     @Test
     void readAnimal() {
-        Animal animal=
+        Animal animal =
                 animalRepository.findAll().stream().findAny().orElse(null);
         assertThat(animal).isNotNull();
 
@@ -325,6 +329,22 @@ class AnimalControllerTest {
         assertThat(responseEntity.getIdAnimalType()).isEqualTo(animalDto.getIdAnimalType());
         assertThat(responseEntity.getNameAnimal()).isEqualTo(animalDto.getNameAnimal());
         assertThat(responseEntity.getBorn()).isEqualTo(animalDto.getBorn());
+    }
+
+    @Test
+    void readAnimalNegative() {
+        List<Long> animalIdList = animalRepository.findAll().stream().map(Animal::getId).collect(Collectors.toList());
+        Long index = (long) random.nextInt(animalIdList.size());
+        while (animalIdList.contains(index)) {
+            index = (long) random.nextInt(animalIdList.size());
+        }
+
+        AnimalDto responseEntity = testRestTemplate.
+                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + index,
+                        AnimalDto.class);
+
+        Long finalIndex = index;
+        assertThatExceptionOfType(AnimalNotFoundException.class).isThrownBy(() -> animalService.readAnimal(finalIndex));
     }
 
     @Test
@@ -359,13 +379,13 @@ class AnimalControllerTest {
         Animal animal = animalRepository.findAll().stream().findFirst().orElse(null);
 
         animalOwnershipRepository.findAll().stream().filter(animalOwnership ->
-                animalOwnership.getAnimal().getId().equals(animal.getId())).
-        forEach(animalOwnership -> {
-            reportRepository.findAll().stream().filter(report ->
-                    report.getAnimalOwnership().getId().equals(animalOwnership.getId())).
-                    forEach(report -> reportRepository.delete(report));
-            animalOwnershipRepository.delete(animalOwnership);
-        });
+                        animalOwnership.getAnimal().getId().equals(animal.getId())).
+                forEach(animalOwnership -> {
+                    reportRepository.findAll().stream().filter(report ->
+                                    report.getAnimalOwnership().getId().equals(animalOwnership.getId())).
+                            forEach(report -> reportRepository.delete(report));
+                    animalOwnershipRepository.delete(animalOwnership);
+                });
 
 
         ResponseEntity<String> responseEntity = testRestTemplate

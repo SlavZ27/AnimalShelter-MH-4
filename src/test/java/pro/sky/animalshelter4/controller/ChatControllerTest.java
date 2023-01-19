@@ -14,20 +14,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
+import pro.sky.animalshelter4.entity.Animal;
 import pro.sky.animalshelter4.entity.CallRequest;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.entity.User;
+import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.entityDto.ChatDto;
+import pro.sky.animalshelter4.exception.AnimalNotFoundException;
+import pro.sky.animalshelter4.exception.ChatNotFoundException;
 import pro.sky.animalshelter4.repository.CallRequestRepository;
 import pro.sky.animalshelter4.repository.ChatRepository;
 import pro.sky.animalshelter4.repository.UserRepository;
+import pro.sky.animalshelter4.service.ChatService;
 import pro.sky.animalshelter4.service.DtoMapperService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
@@ -48,12 +56,15 @@ class ChatControllerTest {
     @Autowired
     private ChatRepository chatRepository;
     @Autowired
+    private ChatService chatService;
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private DtoMapperService dtoMapperService;
     @Autowired
     private TestRestTemplate testRestTemplate;
     private Generator generator = new Generator();
+    private final Random random = new Random();
 
     @BeforeEach
     public void generateData() {
@@ -99,6 +110,7 @@ class ChatControllerTest {
         assertThat(userRepository).isNotNull();
         assertThat(dtoMapperService).isNotNull();
         assertThat(testRestTemplate).isNotNull();
+        assertThat(chatService).isNotNull();
     }
 
 
@@ -167,6 +179,22 @@ class ChatControllerTest {
         assertThat(responseEntity.getLast_activity()).isEqualTo(chatDto.getLast_activity());
         assertThat(responseEntity.getUserNameTelegram()).isEqualTo(chatDto.getUserNameTelegram());
         assertThat(responseEntity.getLast_activity()).isEqualTo(chatDto.getLast_activity());
+    }
+
+    @Test
+    void readChatNegative() {
+        List<Long> chatIdList = chatRepository.findAll().stream().map(Chat::getId).collect(Collectors.toList());
+        Long index = (long) random.nextInt(chatIdList.size());
+        while (chatIdList.contains(index)) {
+            index = (long) random.nextInt(chatIdList.size());
+        }
+
+        ChatDto responseEntity = testRestTemplate.
+                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + index,
+                        ChatDto.class);
+
+        Long finalIndex = index;
+        assertThatExceptionOfType(ChatNotFoundException.class).isThrownBy(() -> chatService.readChat(finalIndex));
     }
 
     @Test

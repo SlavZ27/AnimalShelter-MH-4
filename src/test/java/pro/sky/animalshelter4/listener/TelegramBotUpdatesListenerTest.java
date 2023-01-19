@@ -859,6 +859,37 @@ class TelegramBotUpdatesListenerTest {
         validateString = "OK.You is now the owner of ";
         Assertions.assertThat(actual4.getParameters().get("text").toString().substring(0, validateString.length())).
                 isEqualTo(validateString);
+        //delete all animals
+        reportRepository.deleteAll();
+        animalOwnershipRepository.deleteAll();
+        animalRepository.deleteAll();
+        updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatVolunteer.getUserNameTelegram(),
+                        chatVolunteer.getFirstNameUser(),
+                        chatVolunteer.getLastNameUser(),
+                        chatVolunteer.getId(),
+                        Command.CREATE_OWNERSHIP.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        //delete all users
+        callRequestRepository.deleteAll();
+        userRepository.findAll().stream().filter(user -> !user.isVolunteer()).forEach(user -> userRepository.delete(user));
+        telegramBotUpdatesListener.process(updateList);
+
+        argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        Mockito.verify(telegramBot, times(7)).execute(argumentCaptor.capture());
+        actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(7);
+        SendMessage actual5 = actualList.get(5);
+        SendMessage actual6 = actualList.get(6);
+
+        Assertions.assertThat(actual5.getParameters().get("chat_id")).isEqualTo(chatVolunteer.getId());
+        Assertions.assertThat(actual5.getParameters().get("text")).isEqualTo(AnimalService.MESSAGE_ANIMALS_IS_ABSENT);
+
+        Assertions.assertThat(actual6.getParameters().get("chat_id")).isEqualTo(chatVolunteer.getId());
+        Assertions.assertThat(actual6.getParameters().get("text")).isEqualTo(UserService.MESSAGE_CLIENTS_IS_ABSENT);
     }
 
     @Test
@@ -1479,7 +1510,7 @@ class TelegramBotUpdatesListenerTest {
                 filter(User::isVolunteer).findFirst().orElse(null);
         //get userClient
         User userClient = userRepository.findAll().stream().
-                filter(user -> user.isVolunteer()==false).findFirst().orElse(null);
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
         //get chatVolunteer
         Chat chatVolunteer = userVolunteer.getChatTelegram();
         Chat chatClient = userClient.getChatTelegram();

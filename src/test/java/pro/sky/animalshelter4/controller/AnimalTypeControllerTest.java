@@ -20,7 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
+import pro.sky.animalshelter4.entityDto.AnimalOwnershipDto;
 import pro.sky.animalshelter4.entityDto.AnimalTypeDto;
+import pro.sky.animalshelter4.exception.AnimalOwnershipNotFoundException;
+import pro.sky.animalshelter4.exception.AnimalTypeNotFoundException;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.repository.*;
 import pro.sky.animalshelter4.service.*;
@@ -30,8 +33,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
@@ -323,6 +328,24 @@ class AnimalTypeControllerTest {
 
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getTypeAnimal()).isEqualTo(animalTypeDto.getTypeAnimal());
+    }
+
+    @Test
+    void readAnimalTypeNegative() {
+        List<Long> animalTypeIdList = animalTypeRepository.findAll().stream().
+                map(AnimalType::getId).collect(Collectors.toList());
+        Long index = (long) random.nextInt(animalTypeIdList.size());
+        while (animalTypeIdList.contains(index)) {
+            index = (long) random.nextInt(animalTypeIdList.size());
+        }
+
+        AnimalTypeDto responseEntity = testRestTemplate.
+                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + index,
+                        AnimalTypeDto.class);
+
+        Long finalIndex = index;
+        assertThatExceptionOfType(AnimalTypeNotFoundException.class).isThrownBy(()
+                -> animalTypeService.readAnimalType(finalIndex));
     }
 
     @Test
