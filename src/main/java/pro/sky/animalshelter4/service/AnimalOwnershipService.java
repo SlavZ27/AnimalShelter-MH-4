@@ -10,11 +10,17 @@ import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.entityDto.AnimalOwnershipDto;
 import pro.sky.animalshelter4.exception.AnimalOwnershipNotFoundException;
 import pro.sky.animalshelter4.repository.AnimalOwnershipRepository;
+import pro.sky.animalshelter4.repository.AnimalRepository;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * * This class is necessary to manage actions with the owner and the animal
+ * The class must have many dependencies so that it can work correctly.
+ * * And also respond to requests received from {@link AnimalRepository}
+ */
 @Service
 public class AnimalOwnershipService {
     public final static String MESSAGE_SUCCESSFUL_CREATION = "OK.";

@@ -43,10 +43,8 @@ public class TelegramBotContentSaverService {
      * using {@link TelegramBot#execute(BaseRequest)}
      * using {@link TelegramBotContentSaverService#getAndCreatePath(Long, String, String)}
      * using {@link Files#write(Path, byte[], OpenOption...)}
-     * <p>
      * {@link Update#message()#chat()#id()} must be not null
      * {@link Update#message()#photo()} must be not null
-     *
      * @param update
      * @throws IOException
      */
@@ -82,7 +80,6 @@ public class TelegramBotContentSaverService {
     /**
      * The method checks folder exists in the file system and creates if necessary
      * using {@link java.io.File#mkdir()}
-     *
      * @param path must be not null
      * @return true if folder was created, else false
      */
@@ -93,6 +90,11 @@ public class TelegramBotContentSaverService {
         }
     }
 
+    /**
+     * This method check file exist
+     * @param path is not null
+     * @return file
+     */
     private boolean checkFileExist(String path) {
         java.io.File file = new java.io.File(path);
         return !file.exists();
@@ -103,10 +105,9 @@ public class TelegramBotContentSaverService {
      * The data is taken from the input data. <br>
      * Example of a path: <br> {@link TelegramBotContentSaverService#materialsDir} + / + idChat + / +  folderName + / + YYYY.MM.DD_HH.MM. + fileFormat
      * using {@link TelegramBotContentSaverService#checkAndCreateFolder(String)}
-     *
-     * @param idChat
-     * @param folderName
-     * @param fileFormat
+     * @param idChat is not null
+     * @param folderName is not null
+     * @param fileFormat is not null
      * @return
      */
     private Path getAndCreatePath(Long idChat, String folderName, String fileFormat) {
@@ -132,7 +133,6 @@ public class TelegramBotContentSaverService {
 
     /**
      * The method gets the path to the file and outputs characters after the last dot
-     *
      * @param filePath must be not null
      * @return file format without dot, if string don't contain dot then return null
      */

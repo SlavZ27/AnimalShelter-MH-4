@@ -46,21 +46,55 @@ public enum Command {
      * The command is used by a volunteer to call up a list of users who created a callback request
      */
     CALL_CLIENT(4, "/CALL_CLIENT", "Call client", true, false, false, true),
-    CLOSE_CALL_REQUEST(5, "/CLOSE_CALL_REQUEST", "Close req", false, false, false, true),
-    CHANGE_PHONE(6, "/CHANGE_PHONE", "phone", false, true, true, false),
-    ADD_ANIMAL(7, "/ADD_ANIMAL", "Add animal", true, false, false, true),
-    COMPLEMENT_ANIMAL(7, "/COMPLEMENT_ANIMAL", "Complement animal", true, false, false, true),
-    CREATE_OWNERSHIP(8, "/CREATE_OWNERSHIP", "Own", true, false, false, true),
-    REPORT(9, "/REPORT", "Report", true, false, true, false),
-    VIEW_REPORT(9, "/VIEW_REPORT", "Reports", true, false, false, true),
-    APPROVE_REPORT(10, "/APPROVE_REPORT", "Approve reports", false, false, false, true),
-    VIEW_OWNERSHIP(11, "/VIEW_OWNERSHIP", "View_ownership", true, false, false, true),
-    APPROVE_OWNERSHIP(12, "/APPROVE_OWNERSHIP", "Approve_ownership", false, false, false, true),
-    EXTEND_TRIAL(13, "/EXTEND_TRIAL", "Extend trial", false, false, false, true),
-    CLOSE_UNFINISHED_REQUEST(80, "/CLOSE_UNFINISHED_REQUEST", "Cancel", false, true, true, true),
     /**
-     * The command is used to add it to dummy buttons. Clicking on such buttons does nothing
+     * The command is used by a volunteer to close a call to the list of users who created a callback request
      */
+    CLOSE_CALL_REQUEST(5, "/CLOSE_CALL_REQUEST", "Close req", false, false, false, true),
+    /**
+     * The command is used by a client and owner to changes number phone
+     */
+    CHANGE_PHONE(6, "/CHANGE_PHONE", "phone", false, true, true, false),
+    /**
+     * The command is used by a volunteer to add an animal
+     */
+    ADD_ANIMAL(7, "/ADD_ANIMAL", "Add animal", true, false, false, true),
+    /**
+     * The command is used by a volunteer to add info animal
+     */
+    COMPLEMENT_ANIMAL(7, "/COMPLEMENT_ANIMAL", "Complement animal", true, false, false, true),
+    /**
+     * The team is used by a volunteer to add an animal to a client's property
+     */
+    CREATE_OWNERSHIP(8, "/CREATE_OWNERSHIP", "Own", true, false, false, true),
+    /**
+     * The command is used by the owner to create a report
+     */
+    REPORT(9, "/REPORT", "Report", true, false, true, false),
+    /**
+     * The command is used by the volunteer to view the report
+     */
+    VIEW_REPORT(9, "/VIEW_REPORT", "Reports", true, false, false, true),
+    /**
+     * The team is used by the volunteer to approve the report
+     */
+    APPROVE_REPORT(10, "/APPROVE_REPORT", "Approve reports", false, false, false, true),
+    /**
+     * The command is used by the volunteer to view ownership
+     */
+    VIEW_OWNERSHIP(11, "/VIEW_OWNERSHIP", "View_ownership", true, false, false, true),
+    /**
+     * The team is used by a volunteer to assert ownership
+     */
+    APPROVE_OWNERSHIP(12, "/APPROVE_OWNERSHIP", "Approve_ownership", false, false, false, true),
+    /**
+     * The team is used by a volunteer to extend temporary ownership
+     */
+    EXTEND_TRIAL(13, "/EXTEND_TRIAL", "Extend trial", false, false, false, true),
+    /**
+     * The command is used by all users to close the request
+     */
+    CLOSE_UNFINISHED_REQUEST(80, "/CLOSE_UNFINISHED_REQUEST", "Cancel", false, true, true, true),
+
     EMPTY_CALLBACK_DATA_FOR_BUTTON(-1, "...", "", false, true, true, true);
 
 

@@ -93,10 +93,9 @@ public class CommandService {
 
 
     /**
+     * This method allow get all command as text for Client
      * using {@link Command#getOnlyShowCommandForClient()}
-     *
-     * @return The method outputs String consisting of {@link Command#getTextCommand()} as a list available to
-     * not volunteer
+     * @return String Command
      */
     private String getAllTextCommandAsListForClientExcludeHide() {
         StringBuilder sb = new StringBuilder();
@@ -108,6 +107,11 @@ public class CommandService {
         return sb.toString();
     }
 
+    /**
+     * This method allow get all command as text for Owner
+     * using {@link Command#getOnlyShowCommandForOwner()}
+     * @return String Command
+     */
     private String getAllTextCommandAsListForOwnerExcludeHide() {
         StringBuilder sb = new StringBuilder();
         getOnlyShowCommandForOwner().
@@ -119,9 +123,9 @@ public class CommandService {
     }
 
     /**
+     * This method allow get all command as text for Volunteer
      * using {@link Command#getOnlyShowCommandForVolunteer()}
-     *
-     * @return The method outputs String consisting of {@link Command#getTextCommand()} as a list available to volunteer
+     * @return String Command
      */
     private String getAllTextCommandAsListForVolunteerExcludeHide() {
         StringBuilder sb = new StringBuilder();
@@ -135,9 +139,9 @@ public class CommandService {
 
 
     /**
+     * This method allow get all command as text for Client
      * using {@link Command#getOnlyShowCommandForClient()}
-     *
-     * @return List of String consisting of {@link Command#getTextCommand()} from the list available to a non-volunteer
+     * @return String Command
      */
     private List<String> getAllTextCommandForClientExcludeHide() {
         return getOnlyShowCommandForClient().stream().
@@ -145,6 +149,11 @@ public class CommandService {
                 collect(Collectors.toList());
     }
 
+    /**
+     * This method allow get all command as text for Owner
+     * using {@link Command#getOnlyShowCommandForOwner()}
+     * @return String Command
+     */
     private List<String> getAllTextCommandForOwnerExcludeHide() {
         return getOnlyShowCommandForOwner().stream().
                 map(Command::getTextCommand).
@@ -152,9 +161,9 @@ public class CommandService {
     }
 
     /**
+     * This method allow get all command as text for Volunteer
      * using {@link Command#getOnlyShowCommandForVolunteer()}
-     *
-     * @return List of String consisting of {@link Command#getTextCommand()} from the list available to a volunteer
+     * @return String Command
      */
     private List<String> getAllTextCommandForVolunteerExcludeHide() {
         return getOnlyShowCommandForVolunteer().stream().
@@ -164,6 +173,7 @@ public class CommandService {
 
 
     /**
+     * This method allows you to get some buttons for the client and hide others
      * @return Pair<List < String>, List<String>> for the client.
      * First list contains the names of the buttons {@link Command#getNameButton()},
      * second one contains data for buttons {@link Command#getTextCommand()}
@@ -180,6 +190,12 @@ public class CommandService {
         return Pair.of(nameButton, dataButton);
     }
 
+    /**
+     * This method allows you to get some buttons for the owner and hide others
+     * @return Pair<List < String>, List<String>> for the owner.
+     * First list contains the names of the buttons {@link Command#getNameButton()},
+     * second one contains data for buttons {@link Command#getTextCommand()}
+     */
     private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForOwnerExcludeHide() {
         List<String> nameButton = new ArrayList<>();
         List<String> dataButton = new ArrayList<>();
@@ -193,6 +209,7 @@ public class CommandService {
     }
 
     /**
+     * This method allows you to get some buttons for the owner and hide volunteer
      * @return Pair<List < String>, List<String>> for the volunteer.
      * First list contains the names of the buttons {@link Command#getNameButton()},
      * second one contains data for buttons {@link Command#getTextCommand()}

@@ -38,7 +38,6 @@ public class TelegramBotUpdatesService {
      * and command {@link Command} and other parameters, the next action is selected.
      * The method terminates if it detects an {@link Command#EMPTY_CALLBACK_DATA_FOR_BUTTON} in {@link Update},
      * or when receiving an unexpected {@link Update}, when null comes from {@link TelegramMapperService#toDPO(Update)}.
-     *
      * @param update
      */
     public void processUpdate(Update update) {
@@ -91,6 +90,17 @@ public class TelegramBotUpdatesService {
         }
     }
 
+    /**
+     * The method deals with the choice of actions depending
+     * on the incoming object that came from {@link TelegramBotUpdatesListener#process(List)}
+     * The definition and conversion of a hostile {@link UpdateDPO}
+     * to native {@link UpdateDPO} is handled by the {@link TelegramMapperService#toDPO(Update)}.
+     * Then, depending on the type of interaction {@link pro.sky.animalshelter4.model.InteractionUnit}
+     * and command {@link Command} and other parameters, the next action is selected.
+     * The method terminates if it detects an {@link Command#EMPTY_CALLBACK_DATA_FOR_BUTTON} in {@link Update},
+     * or when receiving an unexpected {@link Update}, when null comes from {@link TelegramMapperService#toDPO(Update)}.
+     * @param updateDpo is not null
+     */
     public void processUpdateDpoWithCommand(UpdateDPO updateDpo) {
         if (updateDpo.getCommand() == null) {
             chatService.sendUnknownProcess(updateDpo.getIdChat());
@@ -114,6 +124,7 @@ public class TelegramBotUpdatesService {
                 case HOW:
                     chatService.sendHowTakeDog(updateDpo.getIdChat());
                     break;
+
                 case CALL_REQUEST:
                     chatService.createCallRequest(updateDpo);
                     break;
@@ -167,7 +178,6 @@ public class TelegramBotUpdatesService {
      * for which the bot will do nothing.
      * The text with this command is located in {@link Update} here <b>update.callbackQuery().data()</b>
      * The method should work before laborious parsing of the entire incoming object {@link Update}
-     *
      * @param update
      * @return true - if emptyCommand was detected, else false
      */

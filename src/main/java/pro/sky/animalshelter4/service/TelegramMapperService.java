@@ -28,7 +28,6 @@ public class TelegramMapperService {
      * then {@link UpdateDPO#setInteractionUnit(InteractionUnit)} changes to {@link InteractionUnit#PHOTO}
      * If update.message().text()!=null && update.message().text().startWith("/")
      * then {@link UpdateDPO#setInteractionUnit(InteractionUnit)} changes to {@link InteractionUnit#COMMAND}
-     *
      * @param update
      * @return {@link UpdateDPO}  <br>
      * where UpdateDPO.IdChat() must be not null <br>
@@ -144,7 +143,6 @@ public class TelegramMapperService {
 
     /**
      * The method checks the string so that it is not null, or empty
-     *
      * @param s
      * @return true or false
      */
@@ -154,7 +152,6 @@ public class TelegramMapperService {
 
     /**
      * The method makes a single word from a string with many words
-     *
      * @param s,
      * @param indexWord
      * @return word with indexWord <br>
@@ -183,6 +180,11 @@ public class TelegramMapperService {
         return sMas[indexWord];
     }
 
+    /**
+     * This method juxtapose string to long
+     * @param message is not null
+     * @return long message
+     */
     public Long mapStringToLong(String message) {
         if (!StringUtils.isNumeric(message)) {
             throw new IllegalArgumentException(message);
