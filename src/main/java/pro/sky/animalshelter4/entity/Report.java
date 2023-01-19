@@ -92,13 +92,18 @@ public class Report {
 
     @Override
     public String toString() {
-        return "Report{" +
-                ", animalOwnership=" + animalOwnership +
-                ", reportDate=" + reportDate +
-                ", diet='" + diet + '\'' +
-                ", feeling='" + feeling + '\'' +
-                ", behavior='" + behavior + '\'' +
-                ", photo=" + photo+
-                '}';
+        String photoExist;
+        if (photo != null) {
+            photoExist = "+";
+        } else {
+            photoExist = "-";
+        }
+        return "Report\n" +
+                "AnimalOwnership: " + animalOwnership +
+                "\nDate: " + reportDate.toString() +
+                "\ndiet: " + diet + '\'' +
+                "\nfeeling: " + feeling + '\'' +
+                "\nbehavior: " + behavior + '\'' +
+                "\nphoto: " + photoExist;
     }
 }

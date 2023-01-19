@@ -184,6 +184,7 @@ public class ChatService {
             return;
         }
         telegramUnfinishedRequestService.delUnfinishedRequestForChat(chat);
+        telegramBotSenderService.sendMessage(chat.getId(), UserService.MESSAGE_PHONE_IS_OK);
         telegramBotSenderService.sendButtonsCommandForChat(chat.getId());
     }
 
@@ -385,6 +386,7 @@ public class ChatService {
                                 ownership.getAnimal().getNameAnimal() + " starting  " +
                                 ownership.getDateStartOwn().toString() + " Probation period up to " +
                                 ownership.getDateEndTrial().toString());
+                telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
                 if (ownership.getOwner() != null &&
                         ownership.getOwner().getChatTelegram() != null &&
                         ownership.getOwner().getChatTelegram().getId() != null) {
@@ -463,6 +465,7 @@ public class ChatService {
             telegramBotSenderService.sendMessage(chatVolunteer.getId(),
                     AnimalService.MESSAGE_ANIMAL_CREATED + " " + animal.getNameAnimal());
             answerQuestionAboutAnimals(chatVolunteer, false);
+            telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer.getId());
         }
     }
 
@@ -481,7 +484,7 @@ public class ChatService {
                 animalUnit = AnimalUnit.valueOf(messageMas[messageMas.length - 2]);
             }
         }
-        if (animalUnit == null || messageMas != null) {
+        if (animalUnit == null && messageMas != null) {
             //badRequest
             return;
         }
@@ -494,7 +497,7 @@ public class ChatService {
                 Long idTypeAnimal = telegramMapperService.mapStringToLong(messageMas[messageMas.length - 1]);
                 Animal animal = animalService.updateAnimal(idAnimal, idTypeAnimal);
                 if (animal.getAnimalType().getId().equals(idTypeAnimal)) {
-                    telegramBotSenderService.sendMessage(chatVolunteer.getId(), AnimalService.MESSAGE_ANIMAL_UPDATER +
+                    telegramBotSenderService.sendMessage(chatVolunteer.getId(), AnimalService.MESSAGE_ANIMAL_UPDATED +
                             " " + animal.toString());
                 }
                 answerQuestionAboutAnimals(chatVolunteer, true);
@@ -528,7 +531,7 @@ public class ChatService {
                 map(animalType -> AnimalUnit.ID + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
                         animal.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
                         ANIMAL_TYPE + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                        animalType.getId().toString()).
+                        animalType.getId()).
                 collect(Collectors.toList());
         telegramBotSenderService.sendButtonsWithOneData(
                 chatVolunteer.getId(),
@@ -543,7 +546,7 @@ public class ChatService {
     private void startCreateReport(Chat chatOwner) {
         telegramBotSenderService.sendMessageWithButtonCancel(
                 chatOwner.getId(),
-                ReportService.MESSAGE_WRITE_DIET + " and/or " + ReportService.MESSAGE_SEND_PHOTO,
+                ReportService.MESSAGE_WRITE_DIET + " or " + ReportService.MESSAGE_SEND_PHOTO,
                 TelegramBotSenderService.NAME_BUTTON_FOR_CANCEL
         );
     }

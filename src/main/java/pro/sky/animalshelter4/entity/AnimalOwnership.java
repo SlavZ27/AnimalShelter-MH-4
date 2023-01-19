@@ -13,7 +13,7 @@ public class AnimalOwnership {
     private User owner;
     @OneToOne
     @JoinColumn(name = "id_animal")
-        private Animal animal;
+    private Animal animal;
     @JoinColumn(name = "date_start_own")
     private LocalDate dateStartOwn;
     @JoinColumn(name = "date_end_trial")
@@ -84,11 +84,10 @@ public class AnimalOwnership {
 
     @Override
     public String toString() {
-        return "AnimalOwnership{" +
-                ", owner=" + owner +
-                ", animal=" + animal +
-                ", dateStartOwn=" + dateStartOwn +
-                ", dateEndTrial=" + dateEndTrial +
-                '}';
+        return "AnimalOwnership\n" +
+                "Owner: " + owner +
+                "\nanimal: " + animal +
+                "\n dateStartOwn: " + dateStartOwn.toString() +
+                "\ndateEndTrial: " + dateEndTrial.toString();
     }
 }

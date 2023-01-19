@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface AnimalOwnershipRepository extends JpaRepository<AnimalOwnership, Long> {
 
-    @Query(value = "select animal_ownership.* from animal_ownership where animal_ownership.id_user=:idUserOwner and animal_ownership.date_end_trial>:localDateNow"
+    @Query(value = "select animal_ownership.* from animal_ownership where animal_ownership.id_user=:idUserOwner and is_open=true and animal_ownership.date_end_trial>:localDateNow"
             , nativeQuery = true)
     AnimalOwnership getActualAnimalOwnership(Long idUserOwner,LocalDate localDateNow);
 
