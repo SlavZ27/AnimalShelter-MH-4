@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.*;
 import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.exception.*;
+import pro.sky.animalshelter4.info.*;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.UpdateDPO;
 import pro.sky.animalshelter4.repository.ChatRepository;
@@ -45,6 +46,7 @@ public class ChatService {
 
     /**
      * The method performs a search and returns an existing chat
+     *
      * @param updateDPO is not null
      * @return chat
      */
@@ -81,6 +83,7 @@ public class ChatService {
     /**
      * The method adds a new chat to the repository and returns the same instance
      * using {@link ChatRepository#save(Object)}
+     *
      * @param chatDto id of chat must be not null
      * @return {@link Chat}
      */
@@ -88,9 +91,11 @@ public class ChatService {
         logger.info("Method createChat was start for create new Chat");
         return dtoMapperService.toDto(chatRepository.save(dtoMapperService.toEntity(chatDto)));
     }
+
     /**
      * The method adds a new chat to the repository and returns the same instance
      * using {@link ChatRepository#save(Object)}
+     *
      * @param chat id of chat must be not null
      * @return {@link Chat}
      */
@@ -102,6 +107,7 @@ public class ChatService {
     /**
      * The method searches for a chat in the repository by id of chat
      * using {@link ChatRepository#getChatById(Long)}
+     *
      * @param id
      * @return found chat
      */
@@ -115,6 +121,7 @@ public class ChatService {
     /**
      * The method searches for a chat in the repository by id of chat
      * using {@link ChatRepository#getChatById(Long)}
+     *
      * @param id
      * @return found chat
      */
@@ -127,6 +134,7 @@ public class ChatService {
     /**
      * The method update  a new chat to the repository and returns the same instance
      * using {@link ChatRepository#save(Object)}
+     *
      * @param chatDto id of chat must be not null
      * @return {@link Chat}
      */
@@ -147,6 +155,7 @@ public class ChatService {
     /**
      * The method delete chat from repository
      * using {@link ChatService#deleteChat(Chat)}
+     *
      * @param id must be not null
      */
     public ChatDto deleteChat(Long id) {
@@ -158,6 +167,7 @@ public class ChatService {
     /**
      * The method delete chat from repository
      * using {@link ChatRepository#delete(Object)}
+     *
      * @param chat
      */
     public Chat deleteChat(Chat chat) {
@@ -174,6 +184,7 @@ public class ChatService {
     /**
      * The all method outputs the chat from the database using the repository
      * using {@link ChatRepository#findAll()}
+     *
      * @return full user
      */
     public List<ChatDto> getAll() {
@@ -186,6 +197,7 @@ public class ChatService {
      * The method allows the user to create their phone number and add it to telegram
      * using {@link TelegramUnfinishedRequestService#addUnfinishedRequestForChat(Chat, Command)}
      * using {@link TelegramBotSenderService#sendIDontKnowYourPhoneWriteIt(Long)}
+     *
      * @param chat is not by null
      */
     public void startChangePhoneByUserFromTelegram(Chat chat) {
@@ -198,6 +210,7 @@ public class ChatService {
      * using {@link TelegramBotSenderService#sendMessageWithButtonCancel(Long, String, String)}
      * using {@link TelegramUnfinishedRequestService#delUnfinishedRequestForChat(Chat)}
      * using {@link TelegramBotSenderService#sendButtonsCommandForChat(Long)}
+     *
      * @param updateDPO is not by null
      */
     public void changePhoneUser(UpdateDPO updateDPO) {
@@ -222,8 +235,9 @@ public class ChatService {
 
     /**
      * This method allows unfinished request for chat by updateDpo
+     *
      * @param updateDpo is not null
-     * using {@link TelegramUnfinishedRequestService#findUnfinishedRequestForChat(Chat)}
+     *                  using {@link TelegramUnfinishedRequestService#findUnfinishedRequestForChat(Chat)}
      * @return unfinished request
      */
     public Command getUnfinishedRequestForChat(UpdateDPO updateDpo) {
@@ -233,6 +247,7 @@ public class ChatService {
 
     /**
      * This method allows send message in chat user on id chat Sorry I Know This
+     *
      * @param idChat is not by null
      */
     public void sendSorryIKnowThis(Long idChat) {
@@ -242,6 +257,7 @@ public class ChatService {
 
     /**
      * this method uses the send button command for the chat process
+     *
      * @param idChat is not null
      */
     public void sendUnknownProcess(Long idChat) {
@@ -251,8 +267,9 @@ public class ChatService {
 
     /**
      * This method send hello message
+     *
      * @param idChat is not null
-     * @param name is not null
+     * @param name   is not null
      */
     public void sendHello(Long idChat, String name) {
         telegramBotSenderService.sendHello(idChat, name);
@@ -260,6 +277,7 @@ public class ChatService {
 
     /**
      * This method send Info About Shelter message
+     *
      * @param idChat is not null
      */
     public void sendInfoAboutShelter(Long idChat) {
@@ -267,7 +285,9 @@ public class ChatService {
         telegramBotSenderService.sendButtonsCommandForChat(idChat);
     }
 
-    /**This method send How Take Dog
+    /**
+     * This method send How Take Dog
+     *
      * @param idChat is not null
      */
     public void sendHowTakeDog(Long idChat) {
@@ -281,6 +301,7 @@ public class ChatService {
      * Using{@link UserService#createCallRequest(Chat)}
      * Using{@link TelegramBotSenderService#sendMessage(Long, String)}
      * Using{@link TelegramBotSenderService#sendButtonsCommandForChat(Long)}
+     *
      * @param updateDPO is not null
      */
     public void createCallRequest(UpdateDPO updateDPO) {
@@ -311,6 +332,7 @@ public class ChatService {
     /**
      * This method sends a call request to a volunteer
      * Using{@link TelegramBotSenderService#sendButtonsWithDifferentData}
+     *
      * @param updateDPO is not null
      */
     public void sendNotificationAboutCallRequestsToTelegramVolunteer(UpdateDPO updateDPO) {
@@ -323,7 +345,8 @@ public class ChatService {
      * This method processes the call request command and prompts the client to fill out his phone
      * Using{@link TelegramBotSenderService#sendMessage}
      * Using{@link TelegramBotSenderService#sendButtonsWithDifferentData}
-     * @param chatVolunteer is not null
+     *
+     * @param chatVolunteer    is not null
      * @param requiredResponse MESSAGE_YOU_DONT_HAVE_CALL_REQUEST
      */
     private void sendNotificationAboutCallRequestsToTelegramVolunteer(Chat chatVolunteer, boolean requiredResponse) {
@@ -377,6 +400,7 @@ public class ChatService {
      * Using{@link UserService#closeCallRequest(Chat, Long)}
      * Using{@link TelegramMapperService#mapStringToLong(String)}
      * Using{@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param updateDPO is not null
      * @Exception : CallRequestNotFoundException, CantCloseCallRequestException
      */
@@ -405,6 +429,7 @@ public class ChatService {
      * This method close unfinished request using method class
      * Using{@link TelegramUnfinishedRequestService#delUnfinishedRequestForChat(Chat)}
      * Using{@link TelegramBotSenderService#sendButtonsCommandForChat(Long)}
+     *
      * @param updateDPO is not null
      */
     public void closeUnfinishedRequest(UpdateDPO updateDPO) {
@@ -418,6 +443,7 @@ public class ChatService {
      * Using{@link UserService#getAllClientsEntity()}
      * Using{@link AnimalService#getAllNotBusyAnimals()}
      * Using{@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param updateDPO is not null
      */
     public void createOwn(UpdateDPO updateDPO) {
@@ -484,10 +510,12 @@ public class ChatService {
         }
     }
 
-    /** This method sends a list of clients who want to take animals
+    /**
+     * This method sends a list of clients who want to take animals
      * Using{@link TelegramBotSenderService#sendButtonsWithOneData} ()}
+     *
      * @param chatVolunteer is not null
-     * @param clientList is not null
+     * @param clientList    is not null
      */
     private void startCreateOwnSendListClients(Chat chatVolunteer, List<User> clientList) {
         List<String> nameButtons = clientList.stream().
@@ -506,11 +534,13 @@ public class ChatService {
                 dataButtons.size());
     }
 
-    /** This method continues to create a list of animals that are at OWN at the temporary stage of maintenance
+    /**
+     * This method continues to create a list of animals that are at OWN at the temporary stage of maintenance
      * Using{@link TelegramBotSenderService#sendButtonsWithOneData}
+     *
      * @param chatVolunteer is not null
-     * @param idUserClient is not null
-     * @param animalList is not null
+     * @param idUserClient  is not null
+     * @param animalList    is not null
      */
     private void continueCreateOwnSendListAnimals(Chat chatVolunteer, Long idUserClient, List<Animal> animalList) {
         List<String> nameButtons = animalList.stream().
@@ -537,6 +567,7 @@ public class ChatService {
 
     /**
      * This method crate new animal and their description
+     *
      * @param updateDpo is not null
      */
     public void addAnimal(UpdateDPO updateDpo) {
@@ -565,6 +596,7 @@ public class ChatService {
 
     /**
      * This method allow complement their description animal
+     *
      * @param updateDPO is not null
      */
     public void complementAnimal(UpdateDPO updateDPO) {
@@ -593,7 +625,8 @@ public class ChatService {
 
     /**
      * This method answer question about animal
-     * @param chatVolunteer is not null
+     *
+     * @param chatVolunteer    is not null
      * @param requiredResponse is not null
      */
     private void answerQuestionAboutAnimals(Chat chatVolunteer, boolean requiredResponse) {
@@ -615,8 +648,9 @@ public class ChatService {
 
     /**
      * This method describes sending buttons for different types of animals
+     *
      * @param chatVolunteer is not null
-     * @param animal is not null
+     * @param animal        is not null
      */
     private void sendAnimalTypeButtons(Chat chatVolunteer, Animal animal) {
         List<AnimalType> animalTypeList = animalService.getAllAnimalType();
@@ -626,7 +660,7 @@ public class ChatService {
         List<String> dataButtons = animalTypeList.stream().
                 map(animalType ->
                         animal.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                        animalType.getId()).
+                                animalType.getId()).
                 collect(Collectors.toList());
         telegramBotSenderService.sendButtonsWithOneData(
                 chatVolunteer.getId(),
@@ -641,6 +675,7 @@ public class ChatService {
     /**
      * This method allows you to start creating a report on the condition of the animal
      * Using{@link TelegramBotSenderService#sendMessageWithButtonCancel}
+     *
      * @param chatOwner is not null
      */
     private void startCreateReport(Chat chatOwner) {
@@ -657,8 +692,9 @@ public class ChatService {
      * Using{@link TelegramUnfinishedRequestService#delUnfinishedRequestForChat}
      * Using{@link TelegramBotSenderService#sendMessage(Long, String)}
      * Using{@link TelegramBotSenderService#sendButtonsCommandForChat(Long)}
+     *
      * @param chatOwner is not null
-     * @param report is not null
+     * @param report    is not null
      */
     private void continueCreateReport(Chat chatOwner, Report report) {
         if (report != null) {
@@ -703,6 +739,7 @@ public class ChatService {
      * Using{@link TelegramUnfinishedRequestService#addUnfinishedRequestForChat(Chat, Command)}
      * Using{@link UserService#findOrCreateActualReport(Chat)
      * Using{@link UserService#createUpdateReport(Chat, String, String, String, String)}
+     *
      * @param updateDpo is not null
      */
     public void report(UpdateDPO updateDpo) {
@@ -751,6 +788,7 @@ public class ChatService {
      * Using{@link TelegramMapperService#mapStringToLong(String)}
      * Using{@link UserService#approveReport(Long, boolean)}
      * Using{@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param updateDpo is not null
      */
     public void approveReport(UpdateDPO updateDpo) {
@@ -789,6 +827,7 @@ public class ChatService {
      * Using {@link UserService#getOpenAndNotApproveReport()}
      * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
      * Using {@link TelegramBotSenderService#sendButtonsWithOneData(Long, String, String, List, List, int, int)}
+     *
      * @param updateDpo is not null
      */
     public void viewReport(UpdateDPO updateDpo) {
@@ -822,6 +861,7 @@ public class ChatService {
      * This method sends the owner a notification about the need to fill out a report
      * Using {@link UserService#changeUserDateLastNotificationToNow(Chat)}
      * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param lateList is not null
      */
     public void sendNotificationAboutReport(List<AnimalOwnership> lateList) {
@@ -841,6 +881,7 @@ public class ChatService {
      * This method allows the volunteer to contact the owner through a request
      * Using {@link UserService#getRandomVolunteer()}
      * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param lateList is not null
      */
     public void sendRequestToVolunteerToContactOwner(List<AnimalOwnership> lateList) {
@@ -864,6 +905,7 @@ public class ChatService {
      * This method allows you not to approve the open receipt of an animal without a trial period
      * Using{@link UserService#getRandomVolunteer()}
      * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param animalOwnershipList is not null
      */
     public void sendNotApproveOpenAnimalOwnershipWithNotTrial(List<AnimalOwnership> animalOwnershipList) {
@@ -887,6 +929,7 @@ public class ChatService {
      * Using{@link UserService#getOneNotApproveOpenAnimalOwnershipWithNotTrial()}
      * Using{@link TelegramBotSenderService#REQUEST_SPLIT_SYMBOL}
      * Using{@link TelegramBotSenderService#sendButtonsWithOneData}
+     *
      * @param updateDpo
      */
     public void viewAnimalOwnership(UpdateDPO updateDpo) {
@@ -923,6 +966,7 @@ public class ChatService {
      * Using{@link TelegramMapperService#mapStringToLong(String)}
      * Using{@link UserService#approveAnimalOwnership(Long, boolean)}
      * Using{@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param updateDpo is not null
      */
     public void approveAnimalOwnership(UpdateDPO updateDpo) {
@@ -968,6 +1012,7 @@ public class ChatService {
      * Using {@link TelegramMapperService#mapStringToLong(String)}
      * Using {@link UserService#extendTrialAnimalOwnership(Long)}
      * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param updateDpo is not null
      */
     public void extendTrial(UpdateDPO updateDpo) {
@@ -991,5 +1036,50 @@ public class ChatService {
 
             }
         }
+    }
+
+    public void sendInfoDogsDisabilities(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoDogsWithDisabilities.getInfoEn());
+    }
+
+    public void sendInfoListDocuments(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoListOfDocuments.getInfoEn());
+    }
+
+    public void sendInfoRecommendHomeDog(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoRecommendationsHomeDog.getInfoEn());
+    }
+
+    public void sendInfoRecommendHomeDogSmall(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoRecommendationsHomeSmallDog.getInfoEn());
+    }
+
+    public void sendInfoRefuse(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoRefuseDogFromShelter.getInfoEn());
+    }
+
+    public void sendInfoTips(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoTipsFromDogHandler.getInfoEn());
+    }
+
+    public void sendInfoTransportation(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoTransportationAnimals.getInfoEn());
+    }
+
+    public void sendInfoNeedHandler(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoWhyDoYouNeedDogHandler.getInfoEn());
+    }
+
+    public void sendInfoGetDog(UpdateDPO updateDpo) {
+        Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
+        telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoGettingKnowDog.getInfoEn());
     }
 }

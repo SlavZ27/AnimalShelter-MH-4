@@ -164,6 +164,33 @@ public class TelegramBotUpdatesService {
                 case EXTEND_TRIAL:
                     chatService.extendTrial(updateDpo);
                     break;
+                case INFO_DOGS_DISABILITIES:
+                    chatService.sendInfoDogsDisabilities(updateDpo);
+                    break;
+                case INFO_LIST_DOCUMENTS:
+                    chatService.sendInfoListDocuments(updateDpo);
+                    break;
+                case INFO_RECOMMEND_HOME_DOG:
+                    chatService.sendInfoRecommendHomeDog(updateDpo);
+                    break;
+                case INFO_RECOMMEND_HOME_DOG_SMALL:
+                    chatService.sendInfoRecommendHomeDogSmall(updateDpo);
+                    break;
+                case INFO_REFUSE:
+                    chatService.sendInfoRefuse(updateDpo);
+                    break;
+                case INFO_TIPS:
+                    chatService.sendInfoTips(updateDpo);
+                    break;
+                case INFO_TRANSPORTATION:
+                    chatService.sendInfoTransportation(updateDpo);
+                    break;
+                case INFO_NEED_HANDLER:
+                    chatService.sendInfoNeedHandler(updateDpo);
+                    break;
+                case INFO_GET_DOG:
+                    chatService.sendInfoGetDog(updateDpo);
+                    break;
                 case CLOSE_UNFINISHED_REQUEST:
                     chatService.closeUnfinishedRequest(updateDpo);
                 case EMPTY_CALLBACK_DATA_FOR_BUTTON:

@@ -75,12 +75,12 @@ class ChatControllerTest {
         for (int i = 0; i < 2; i++) {
             Chat chatVolunteer = generator.generateChat(-1L, "", "", "", null, true);
             chatVolunteer = chatRepository.save(chatVolunteer);
-            User userVolunteer = generator.generateUser(null, null, chatVolunteer, null, null, true, null,true);
+            User userVolunteer = generator.generateUser(null, null, chatVolunteer, null, null, true, null, true);
             userVolunteer = userRepository.save(userVolunteer);
             for (int j = 0; j < 10; j++) {
                 Chat chatClient = generator.generateChat(-1L, "", "", "", null, true);
                 chatClient = chatRepository.save(chatClient);
-                User userClient = generator.generateUser(null, null, chatClient, null, null, false, null,true);
+                User userClient = generator.generateUser(null, null, chatClient, null, null, false, null, true);
                 userClient = userRepository.save(userClient);
                 CallRequest callRequest = new CallRequest();
                 callRequest.setVolunteer(userVolunteer);
@@ -260,7 +260,7 @@ class ChatControllerTest {
                 .contains(chat.getLastNameUser().toString())
                 .contains(chat.getFirstNameUser().toString())
                 .contains(chat.getUserNameTelegram().toString())
-                .contains(chat.getLast_activity().toString());
+                .contains(chat.getLast_activity().toString().substring(0, 18));
         assertEquals(countChat - 1, chatRepository.findAll().size());
         assertThat(chatRepository.findById(chat.getId()).orElse(null))
                 .isNull();

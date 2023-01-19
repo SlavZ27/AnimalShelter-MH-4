@@ -19,9 +19,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
+import pro.sky.animalshelter4.info.*;
 import pro.sky.animalshelter4.model.Command;
-import pro.sky.animalshelter4.info.InfoAboutShelter;
-import pro.sky.animalshelter4.info.InfoTakeADog;
 import pro.sky.animalshelter4.repository.*;
 import pro.sky.animalshelter4.service.*;
 
@@ -1559,5 +1558,219 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
     }
 
+    @Test
+    public void INFO_DOGS_DISABILITIESTest() {
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
+        Chat chatClient = userClient.getChatTelegram();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO_DOGS_DISABILITIES.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(1)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(1);
+        SendMessage actual0 = actualList.get(0);
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(InfoDogsWithDisabilities.getInfoEn());
+    }
 
+    @Test
+    public void INFO_LIST_DOCUMENTSTest() {
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
+        Chat chatClient = userClient.getChatTelegram();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO_LIST_DOCUMENTS.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(1)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(1);
+        SendMessage actual0 = actualList.get(0);
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(InfoListOfDocuments.getInfoEn());
+    }
+
+    @Test
+    public void INFO_RECOMMEND_HOME_DOGTest() {
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
+        Chat chatClient = userClient.getChatTelegram();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO_RECOMMEND_HOME_DOG.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(1)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(1);
+        SendMessage actual0 = actualList.get(0);
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(InfoRecommendationsHomeDog.getInfoEn());
+    }
+
+    @Test
+    public void INFO_RECOMMEND_HOME_DOG_SMALLTest() {
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
+        Chat chatClient = userClient.getChatTelegram();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO_RECOMMEND_HOME_DOG_SMALL.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(1)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(1);
+        SendMessage actual0 = actualList.get(0);
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(InfoRecommendationsHomeSmallDog.getInfoEn());
+    }
+
+    @Test
+    public void INFO_REFUSETest() {
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
+        Chat chatClient = userClient.getChatTelegram();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO_REFUSE.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(1)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(1);
+        SendMessage actual0 = actualList.get(0);
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(InfoRefuseDogFromShelter.getInfoEn());
+    }
+
+    @Test
+    public void INFO_TIPSTest() {
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
+        Chat chatClient = userClient.getChatTelegram();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO_TIPS.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(1)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(1);
+        SendMessage actual0 = actualList.get(0);
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(InfoTipsFromDogHandler.getInfoEn());
+    }
+
+    @Test
+    public void INFO_TRANSPORTATIONTest() {
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
+        Chat chatClient = userClient.getChatTelegram();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO_TRANSPORTATION.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(1)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(1);
+        SendMessage actual0 = actualList.get(0);
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(InfoTransportationAnimals.getInfoEn());
+    }
+
+    @Test
+    public void INFO_NEED_HANDLERTest() {
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
+        Chat chatClient = userClient.getChatTelegram();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO_NEED_HANDLER.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(1)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(1);
+        SendMessage actual0 = actualList.get(0);
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(InfoWhyDoYouNeedDogHandler.getInfoEn());
+    }
+
+    @Test
+    public void INFO_GET_DOGTest() {
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findFirst().orElse(null);
+        Chat chatClient = userClient.getChatTelegram();
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO_GET_DOG.getTextCommand(),
+                        false)
+        ));
+        telegramBotUpdatesListener.process(updateList);
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(1)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(1);
+        SendMessage actual0 = actualList.get(0);
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(InfoGettingKnowDog.getInfoEn());
+    }
 }

@@ -90,6 +90,15 @@ public enum Command {
      * The team is used by a volunteer to extend temporary ownership
      */
     EXTEND_TRIAL(13, "/EXTEND_TRIAL", "Extend trial", false, false, false, true),
+    INFO_DOGS_DISABILITIES(14, "/INFO_DOGS_DISABILITIES", "Disabilities dogs", true, true, true, true),
+    INFO_LIST_DOCUMENTS(15, "/INFO_LIST_DOCUMENTS", "Documents", true, true, true, true),
+    INFO_RECOMMEND_HOME_DOG(16, "/INFO_RECOMMEND_HOME_DOG", "Dog in home", true, true, true, true),
+    INFO_RECOMMEND_HOME_DOG_SMALL(17, "/INFO_RECOMMEND_HOME_DOG_SMALL", "Small dog in home", true, true, true, true),
+    INFO_REFUSE(18, "/INFO_REFUSE", "Refuse", true, true, true, true),
+    INFO_TIPS(19, "/INFO_TIPS", "Tips", true, true, true, true),
+    INFO_TRANSPORTATION(20, "/INFO_TRANSPORTATION", "Transportation", true, true, true, true),
+    INFO_NEED_HANDLER(21, "/INFO_NEED_HANDLER", "Handler", true, true, true, true),
+    INFO_GET_DOG(22, "/INFO_GET_DOG", "Get dog", true, true, true, true),
     /**
      * The command is used by all users to close the request
      */

@@ -57,6 +57,7 @@ public class TelegramBotSenderService {
     /**
      * A universal method for sending messages to telegram chats
      * using {@link TelegramBot#execute(BaseRequest)}
+     *
      * @param idChat      must be not null
      * @param textMessage must be not null
      */
@@ -81,6 +82,7 @@ public class TelegramBotSenderService {
      * A method with a prepared message to send a message about receiving an unknown command
      * using {@link TelegramBotSenderService#MESSAGE_SORRY_I_DONT_KNOW_COMMAND}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendUnknownProcess(Long idChat) {
@@ -93,6 +95,7 @@ public class TelegramBotSenderService {
      * A method with a prepared message for sending a welcome message
      * using {@link TelegramBotSenderService#MESSAGE_HELLO} + name + ".\n"
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      * @param name   must be not null
      */
@@ -106,6 +109,7 @@ public class TelegramBotSenderService {
      * A method with a prepared message to send an alert about an unknown action
      * using {@link TelegramBotSenderService#MESSAGE_SORRY_I_KNOW_THIS}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendSorryIKnowThis(Long idChat) {
@@ -118,6 +122,7 @@ public class TelegramBotSenderService {
      * A method with a prepared message for sending a message with information about the shelter
      * using {@link InfoAboutShelter#getInfoEn()}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendInfoAboutShelter(Long idChat) {
@@ -129,6 +134,7 @@ public class TelegramBotSenderService {
      * A method with a prepared message for sending a message with information about how to take a dog from a shelter
      * using {@link InfoTakeADog#getInfoEn()}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendHowTakeDog(Long idChat) {
@@ -147,6 +153,7 @@ public class TelegramBotSenderService {
      * /start 3 <br>
      * The size of the common rectangle of buttons is set by {@param width} and {@param height}
      * using {@link TelegramBot#execute(BaseRequest)}
+     *
      * @param idChat      must be not null
      * @param caption     must be not null
      * @param command     must be not null
@@ -204,6 +211,7 @@ public class TelegramBotSenderService {
      * Each button will contain a value from the {@param dataButtons}. <br>
      * The size of the common rectangle of buttons is set by {@param width} and {@param height}
      * using {@link TelegramBot#execute(BaseRequest)}
+     *
      * @param idChat      must be not null
      * @param caption     must be not null
      * @param nameButtons must be not null
@@ -255,6 +263,7 @@ public class TelegramBotSenderService {
      * The method sends the string value of all available commands to idChat as a list.
      * The provision of the list, using idChat, is handled by {@link CommandService#getAllTitlesAsListExcludeHide(Long)}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     *
      * @param idChat must be not null
      */
     public void sendListCommandForChat(Long idChat) {
@@ -265,6 +274,7 @@ public class TelegramBotSenderService {
 
     /**
      * Method calculates the optimal width and height values depending on the number of objects
+     *
      * @param countElements
      * @return Pair of width and height
      */
@@ -274,24 +284,13 @@ public class TelegramBotSenderService {
         if (countElements == 1) {
             width = 1;
             height = 1;
-        } else if (countElements % 19 == 0) {
-            width = 19;
-            height = countElements / 19;
-        } else if (countElements % 17 == 0) {
-            width = 17;
-            height = countElements / 17;
-        } else if (countElements % 13 == 0) {
-            width = 13;
-            height = countElements / 13;
-        } else if (countElements % 11 == 0) {
-            width = 11;
-            height = countElements / 11;
-        } else if (countElements % 7 == 0) {
-            width = 7;
-            height = countElements / 7;
-        } else if (countElements % 5 == 0) {
-            width = 5;
-            height = countElements / 5;
+        } else if (countElements > 4) {
+            width = 4;
+            if (countElements % 4 == 0) {
+                height = countElements / 4;
+            } else {
+                height = countElements / 4 + 1;
+            }
         } else if (countElements % 4 == 0) {
             width = 4;
             height = countElements / 4;
@@ -312,6 +311,7 @@ public class TelegramBotSenderService {
      * receives a pair of values width and height from {@link TelegramBotSenderService#getTableSize(int)},
      * forms a request and starts sending buttons to the chat
      * using {@link TelegramBotSenderService#sendButtonsWithDifferentData(Long, String, List, List, int, int)}
+     *
      * @param idChat must be not null
      */
     public void sendButtonsCommandForChat(Long idChat) {
@@ -342,6 +342,7 @@ public class TelegramBotSenderService {
      * Using {@link Paths#get(URI)}
      * Using {@link Files#readAllBytes(Path)}
      * Using {@link TelegramBot#execute(BaseRequest)}
+     *
      * @param idChat   must be not null
      * @param pathFile must be not null
      * @throws IOException
@@ -355,8 +356,9 @@ public class TelegramBotSenderService {
 
     /**
      * this method allows you to close an incomplete request using the cancel button
-     * @param idChat is not null
-     * @param message is not null
+     *
+     * @param idChat     is not null
+     * @param message    is not null
      * @param nameButton is not null
      */
     public void sendMessageWithButtonCancel(Long idChat, String message, String nameButton) {
@@ -371,6 +373,7 @@ public class TelegramBotSenderService {
 
     /**
      * This method send message client I Don't Know Your Phone Write It
+     *
      * @param idChat is not null
      */
     public void sendIDontKnowYourPhoneWriteIt(Long idChat) {
