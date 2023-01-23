@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>/Users/slavz/IdeaProjects/AnimalShelter4/src/main/java/pro/sky/animalshelter4</OriginalElement>
+  <nodes>
+    <node x="-248.87704918032773" y="391.0">pro.sky.animalshelter4.service.TelegramUnfinishedRequestService</node>
+    <node x="-827.0" y="147.0">pro.sky.animalshelter4.service.CallRequestService</node>
+    <node x="-161.87704918032773" y="473.0">pro.sky.animalshelter4.service.ChatService</node>
+    <node x="-571.0" y="-9.0">pro.sky.animalshelter4.service.PhotoService</node>
+    <node x="-574.5" y="69.0">pro.sky.animalshelter4.service.ReportService</node>
+    <node x="259.7431693989072" y="227.0">pro.sky.animalshelter4.controller.ChatController</node>
+    <node x="-836.0" y="227.0">pro.sky.animalshelter4.controller.CallRequestController</node>
+    <node x="-781.2090163934425" y="309.0">pro.sky.animalshelter4.controller.UserController</node>
+    <node x="-520.8770491803277" y="391.0">pro.sky.animalshelter4.service.TelegramBotSenderService</node>
+    <node x="-698.25" y="631.0">pro.sky.animalshelter4.listener.TelegramBotUpdatesListener</node>
+    <node x="-614.0" y="147.0">pro.sky.animalshelter4.service.AnimalOwnershipService</node>
+    <node x="4.409836065573927" y="69.0">pro.sky.animalshelter4.service.AnimalTypeService</node>
+    <node x="22.909836065573927" y="147.0">pro.sky.animalshelter4.service.AnimalService</node>
+    <node x="-603.2090163934425" y="309.0">pro.sky.animalshelter4.service.CommandService</node>
+    <node x="-696.25" y="553.0">pro.sky.animalshelter4.service.TelegramBotUpdatesService</node>
+    <node x="-567.0" y="227.0">pro.sky.animalshelter4.service.UserService</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="pro.sky.animalshelter4.controller.UserController" target="pro.sky.animalshelter4.service.UserService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-702.2090163934425" y="282.0" />
+      <point x="-496.99999999999994" y="282.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.TelegramBotSenderService" target="pro.sky.animalshelter4.service.CommandService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-394.8770491803278" y="364.0" />
+      <point x="-512.7090163934425" y="364.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.AnimalService" target="pro.sky.animalshelter4.service.AnimalTypeService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.controller.CallRequestController" target="pro.sky.animalshelter4.service.CallRequestService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.ReportService" target="pro.sky.animalshelter4.service.PhotoService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.AnimalOwnershipService" target="pro.sky.animalshelter4.service.ReportService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.CommandService" target="pro.sky.animalshelter4.service.UserService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-512.7090163934425" y="282.0" />
+      <point x="-496.99999999999994" y="282.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.ChatService" target="pro.sky.animalshelter4.service.AnimalService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-91.87704918032773" y="446.0" />
+      <point x="100.40983606557393" y="446.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.UserService" target="pro.sky.animalshelter4.service.AnimalService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-496.99999999999994" y="206.0" />
+      <point x="100.40983606557393" y="206.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.TelegramBotUpdatesService" target="pro.sky.animalshelter4.service.CommandService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-565.25" y="364.0" />
+      <point x="-512.7090163934425" y="364.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.ChatService" target="pro.sky.animalshelter4.service.TelegramUnfinishedRequestService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.ChatService" target="pro.sky.animalshelter4.service.UserService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-91.87704918032773" y="446.0" />
+      <point x="75.62295081967227" y="446.0" />
+      <point x="75.62295081967227" y="282.0" />
+      <point x="-497.0" y="282.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.UserService" target="pro.sky.animalshelter4.service.AnimalOwnershipService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.ChatService" target="pro.sky.animalshelter4.service.TelegramBotSenderService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-91.87704918032773" y="446.0" />
+      <point x="-394.87704918032773" y="446.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.listener.TelegramBotUpdatesListener" target="pro.sky.animalshelter4.service.TelegramBotUpdatesService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.UserService" target="pro.sky.animalshelter4.service.CallRequestService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-496.99999999999994" y="196.0" />
+      <point x="-730.5" y="196.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.controller.ChatController" target="pro.sky.animalshelter4.service.ChatService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="338.7431693989072" y="527.0" />
+      <point x="-91.87704918032773" y="527.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="pro.sky.animalshelter4.service.TelegramBotUpdatesService" target="pro.sky.animalshelter4.service.ChatService" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="-565.25" y="527.0" />
+      <point x="-91.87704918032773" y="527.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic" zoom="1.5" showDependencies="true" x="-309.4999999999999" y="335.0" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

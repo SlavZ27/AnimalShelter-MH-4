@@ -1,13 +1,24 @@
 package pro.sky.animalshelter4.model;
 
-import org.springframework.stereotype.Component;
+
+import com.pengrad.telegrambot.model.Update;
+import pro.sky.animalshelter4.service.TelegramMapperService;
 
 import java.util.Objects;
 
+/**
+ * The class is needed for simplified program interaction with {@link com.pengrad.telegrambot.model.Update}.
+ * The class is mapped from {@link com.pengrad.telegrambot.model.Update}.
+ * The class contains all the fields necessary for the work, which are filled in as needed and immediately pass checks
+ * where {@link com.pengrad.telegrambot.model.Update} map to UpdateDPO by
+ * {@link TelegramMapperService#toDPO(Update)}
+ * Which has a positive effect on the fault tolerance of the application
+ */
 //Data Processing object
-@Component
 public class UpdateDPO {
     private Long idChat;
+    private String firstName;
+    private String lastName;
     private String userName;
     private Command command;
     private String message;
@@ -17,21 +28,15 @@ public class UpdateDPO {
     public UpdateDPO() {
     }
 
-    public UpdateDPO(Long idChat, String userName, Command command, String message, String idMedia, InteractionUnit interactionUnit) {
+    public UpdateDPO(Long idChat, String firstName, String lastName, String userName, Command command, String message, String idMedia, InteractionUnit interactionUnit) {
         this.idChat = idChat;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.userName = userName;
         this.command = command;
         this.message = message;
         this.idMedia = idMedia;
         this.interactionUnit = interactionUnit;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public Long getIdChat() {
@@ -42,12 +47,28 @@ public class UpdateDPO {
         this.idChat = idChat;
     }
 
-    public String getIdMedia() {
-        return idMedia;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setIdMedia(String idMedia) {
-        this.idMedia = idMedia;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public Command getCommand() {
@@ -66,6 +87,14 @@ public class UpdateDPO {
         this.message = message;
     }
 
+    public String getIdMedia() {
+        return idMedia;
+    }
+
+    public void setIdMedia(String idMedia) {
+        this.idMedia = idMedia;
+    }
+
     public InteractionUnit getInteractionUnit() {
         return interactionUnit;
     }
@@ -78,12 +107,12 @@ public class UpdateDPO {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UpdateDPO updateDpo = (UpdateDPO) o;
-        return idChat.equals(updateDpo.idChat) && userName.equals(updateDpo.userName) && command == updateDpo.command && Objects.equals(message, updateDpo.message) && Objects.equals(idMedia, updateDpo.idMedia) && interactionUnit == updateDpo.interactionUnit;
+        UpdateDPO updateDPO = (UpdateDPO) o;
+        return Objects.equals(idChat, updateDPO.idChat) && Objects.equals(firstName, updateDPO.firstName) && Objects.equals(lastName, updateDPO.lastName) && Objects.equals(userName, updateDPO.userName) && command == updateDPO.command && Objects.equals(message, updateDPO.message) && Objects.equals(idMedia, updateDPO.idMedia) && interactionUnit == updateDPO.interactionUnit;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(idChat, userName, command, message, idMedia, interactionUnit);
+        return Objects.hash(idChat, firstName, lastName, userName, command, message, idMedia, interactionUnit);
     }
 }
