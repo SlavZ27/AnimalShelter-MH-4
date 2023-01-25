@@ -16,7 +16,7 @@ import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("user")
+@RequestMapping("{db}/user")
 public class UserController {
     private final UserService userService;
 
@@ -50,7 +50,7 @@ public class UserController {
             )
     })
     @GetMapping("{id}")  //GET http://localhost:8080/user/1
-    public ResponseEntity<UserDto> readUser(@Parameter(description = "user Id")@PathVariable Long id) {
+    public ResponseEntity<UserDto> readUser(@Parameter(description = "user Id") @PathVariable Long id) {
         return ResponseEntity.ok(userService.readUser(id));
     }
 
@@ -68,6 +68,7 @@ public class UserController {
     public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto userDto) {
         return ResponseEntity.ok(userService.updateUser(userDto));
     }
+
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
@@ -94,7 +95,8 @@ public class UserController {
             )
     })
     @GetMapping()  //GET http://localhost:8080/user/
-    public ResponseEntity<Collection<UserDto>> getAllUsers() {
+    public ResponseEntity<Collection<UserDto>> getAllUsers(@PathVariable String db) {
+        System.out.println("Detected DB = " + db);
         return ResponseEntity.ok(userService.getAll());
     }
 

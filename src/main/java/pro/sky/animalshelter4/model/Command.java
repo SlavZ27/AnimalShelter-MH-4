@@ -22,9 +22,6 @@ import java.util.stream.Stream;
  * There are also methods for parsing commands from a string
  */
 public enum Command {
-    // isShow команду нужно показывать, но даже если isShow=false команда доступна для выполнения
-    // isClient доступна для клиента(не волонтёры)
-    // isVolunteer доступна для админов(волонтёров)
     // textCommand.substring(1).toUpperCase() = value
     /**
      * A command to greet the user and familiarize them with the available functions
@@ -37,7 +34,7 @@ public enum Command {
     /**
      * The command is used to call information about how to take an animal from a shelter
      */
-    HOW(2, "/HOW", "Dog?", true, true, true, true),
+    HOW(2, "/HOW", "how?", true, true, true, true),
     /**
      * The command is used by the client to create a callback request
      */
@@ -58,11 +55,7 @@ public enum Command {
      * The command is used by a volunteer to add an animal
      */
     ADD_ANIMAL(7, "/ADD_ANIMAL", "Add animal", true, false, false, true),
-    /**
-     * The command is used by a volunteer to add info animal
-     */
-    COMPLEMENT_ANIMAL(7, "/COMPLEMENT_ANIMAL", "Complement animal", true, false, false, true),
-    /**
+     /**
      * The team is used by a volunteer to add an animal to a client's property
      */
     CREATE_OWNERSHIP(8, "/CREATE_OWNERSHIP", "Own", true, false, false, true),
@@ -90,15 +83,16 @@ public enum Command {
      * The team is used by a volunteer to extend temporary ownership
      */
     EXTEND_TRIAL(13, "/EXTEND_TRIAL", "Extend trial", false, false, false, true),
-    INFO_DOGS_DISABILITIES(14, "/INFO_DOGS_DISABILITIES", "Disabilities dogs", true, true, true, true),
+    INFO_DISABILITIES(14, "/INFO_DISABILITIES", "Disabilities", true, true, true, true),
     INFO_LIST_DOCUMENTS(15, "/INFO_LIST_DOCUMENTS", "Documents", true, true, true, true),
-    INFO_RECOMMEND_HOME_DOG(16, "/INFO_RECOMMEND_HOME_DOG", "Dog in home", true, true, true, true),
-    INFO_RECOMMEND_HOME_DOG_SMALL(17, "/INFO_RECOMMEND_HOME_DOG_SMALL", "Small dog in home", true, true, true, true),
+    INFO_RECOMMEND_HOME_ANIMAL(16, "/INFO_RECOMMEND_HOME_ANIMAL", "Animal in home", true, true, true, true),
+    INFO_RECOMMEND_HOME_ANIMAL_SMALL(17, "/INFO_RECOMMEND_HOME_ANIMAL_SMALL", "Small animal in home", true, true, true, true),
     INFO_REFUSE(18, "/INFO_REFUSE", "Refuse", true, true, true, true),
     INFO_TIPS(19, "/INFO_TIPS", "Tips", true, true, true, true),
     INFO_TRANSPORTATION(20, "/INFO_TRANSPORTATION", "Transportation", true, true, true, true),
     INFO_NEED_HANDLER(21, "/INFO_NEED_HANDLER", "Handler", true, true, true, true),
-    INFO_GET_DOG(22, "/INFO_GET_DOG", "Get dog", true, true, true, true),
+    INFO_GET_ANIMAL(22, "/INFO_GET_ANIMAL", "Get animal", true, true, true, true),
+    SET_SHELTER(23, "/SET_SHELTER", "Set shelter", false, true, true, false),
     /**
      * The command is used by all users to close the request
      */
@@ -127,6 +121,9 @@ public enum Command {
      * Responsible for the availability of the team from the client
      */
     private final boolean isClient;
+    /**
+     * Responsible for the availability of the team from the owner
+     */
     private final boolean isOwner;
     /**
      * Responsible for the availability of the team from the volunteer

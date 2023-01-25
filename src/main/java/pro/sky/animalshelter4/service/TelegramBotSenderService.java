@@ -14,14 +14,17 @@ import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.info.InfoAboutShelter;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.info.InfoTakeADog;
+import pro.sky.animalshelter4.configuration.DataSourceType;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The class is needed for the simplicity of sending a message to telegram chats using {@link TelegramBot#execute(BaseRequest)}.
@@ -39,6 +42,7 @@ public class TelegramBotSenderService {
      */
     public static final String REQUEST_SPLIT_SYMBOL = " ";
     public static final String MESSAGE_SELECT_COMMAND = "Select action";
+    public static final String MESSAGE_SELECT_SHELTER = "Select shelter";
     public static final String MESSAGE_SORRY_I_DONT_KNOW_COMMAND = "Sorry, I don't know this command";
     public static final String MESSAGE_SORRY_I_DONT_KNOW_YOUR_PHONE = "I do not know your phone number. Please write";
     public static final String MESSAGE_SORRY_I_KNOW_THIS = "Sorry.\nI know only this command:\n";
@@ -102,7 +106,18 @@ public class TelegramBotSenderService {
     public void sendHello(Long idChat, String name) {
         logger.info("ChatId={}; Method sendStartButtons was started for send a welcome message", idChat);
         sendMessage(idChat, MESSAGE_HELLO + name + ".\n");
-        sendButtonsCommandForChat(idChat);
+        sendSelectShelter(idChat);
+    }
+
+    public void sendSelectShelter(Long idChat) {
+        List<String> nameDataButtons = Arrays.stream(DataSourceType.values()).map(Enum::toString).collect(Collectors.toList());
+        Pair<Integer, Integer> widthAndHeight = getTableSize(nameDataButtons.size());
+        sendButtonsWithOneData(idChat,
+                MESSAGE_SELECT_SHELTER,
+                Command.SET_SHELTER.getTextCommand(),
+                nameDataButtons,
+                nameDataButtons,
+                widthAndHeight.getFirst(), widthAndHeight.getSecond());
     }
 
     /**

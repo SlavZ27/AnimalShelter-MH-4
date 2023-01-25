@@ -11,14 +11,16 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "name_user")
     private String nameUser;
     @OneToOne
     @JoinColumn(name = "id_telegram_chat")
     private Chat chatTelegram;
     private String phone;
     private String address;
+    @Column(name = "is_volunteer")
     boolean isVolunteer;
-    @JoinColumn(name = "date_last_notification")
+    @Column(name = "date_last_notification")
     LocalDateTime dateLastNotification;
 
     public User() {

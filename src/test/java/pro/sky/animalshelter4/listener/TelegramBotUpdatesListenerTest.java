@@ -6,7 +6,6 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.assertj.core.api.Assertions;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1569,7 +1568,7 @@ class TelegramBotUpdatesListenerTest {
                         chatClient.getFirstNameUser(),
                         chatClient.getLastNameUser(),
                         chatClient.getId(),
-                        Command.INFO_DOGS_DISABILITIES.getTextCommand(),
+                        Command.INFO_DISABILITIES.getTextCommand(),
                         false)
         ));
         telegramBotUpdatesListener.process(updateList);
@@ -1617,7 +1616,7 @@ class TelegramBotUpdatesListenerTest {
                         chatClient.getFirstNameUser(),
                         chatClient.getLastNameUser(),
                         chatClient.getId(),
-                        Command.INFO_RECOMMEND_HOME_DOG.getTextCommand(),
+                        Command.INFO_RECOMMEND_HOME_ANIMAL.getTextCommand(),
                         false)
         ));
         telegramBotUpdatesListener.process(updateList);
@@ -1641,7 +1640,7 @@ class TelegramBotUpdatesListenerTest {
                         chatClient.getFirstNameUser(),
                         chatClient.getLastNameUser(),
                         chatClient.getId(),
-                        Command.INFO_RECOMMEND_HOME_DOG_SMALL.getTextCommand(),
+                        Command.INFO_RECOMMEND_HOME_ANIMAL_SMALL.getTextCommand(),
                         false)
         ));
         telegramBotUpdatesListener.process(updateList);
@@ -1761,7 +1760,7 @@ class TelegramBotUpdatesListenerTest {
                         chatClient.getFirstNameUser(),
                         chatClient.getLastNameUser(),
                         chatClient.getId(),
-                        Command.INFO_GET_DOG.getTextCommand(),
+                        Command.INFO_GET_ANIMAL.getTextCommand(),
                         false)
         ));
         telegramBotUpdatesListener.process(updateList);

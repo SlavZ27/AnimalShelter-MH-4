@@ -20,8 +20,11 @@ public class CallRequest {
     @ManyToOne
     @JoinColumn(name = "id_volunteer")
     private User volunteer;
+    @Column(name = "is_open")
     private boolean isOpen;
+    @Column(name = "local_date_time_open")
     private LocalDateTime localDateTimeOpen;
+    @Column(name = "local_date_time_close")
     private LocalDateTime localDateTimeClose;
 
     public CallRequest() {

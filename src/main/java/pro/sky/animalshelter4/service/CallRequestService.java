@@ -2,7 +2,6 @@ package pro.sky.animalshelter4.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.CallRequest;
 import pro.sky.animalshelter4.entity.User;

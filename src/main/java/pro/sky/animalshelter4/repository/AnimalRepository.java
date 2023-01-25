@@ -11,8 +11,4 @@ public interface AnimalRepository extends JpaRepository<Animal, Long> {
             , nativeQuery = true)
     List<Animal> getAllNotBusyAnimals();
 
-    @Query(value = "select * from animal where animal.id_animal_type is null limit 1"
-            , nativeQuery = true)
-    Animal getNotComplement();
-
 }

@@ -257,7 +257,7 @@ public class UserService {
         if (userList.size() != 0) {
             return userList.get(random.nextInt(userList.size()));
         }
-        return null;
+        throw new VolunteersIsAbsentException();
     }
 
     /**

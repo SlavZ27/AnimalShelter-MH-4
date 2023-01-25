@@ -4,11 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.Animal;
-import pro.sky.animalshelter4.entity.AnimalType;
 import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.exception.AnimalNotFoundException;
 import pro.sky.animalshelter4.repository.AnimalRepository;
-import pro.sky.animalshelter4.repository.AnimalTypeRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,13 +28,11 @@ public class AnimalService {
     public final static String CAPTION_WRITE_NAME_OF_ANIMAL = "Write name of animal";
 
     private final AnimalRepository animalRepository;
-    private final AnimalTypeService animalTypeService;
     private final DtoMapperService dtoMapperService;
     private final Logger logger = LoggerFactory.getLogger(AnimalService.class);
 
-    public AnimalService(AnimalRepository animalRepository, AnimalTypeService animalTypeService, DtoMapperService dtoMapperService) {
+    public AnimalService(AnimalRepository animalRepository, DtoMapperService dtoMapperService) {
         this.animalRepository = animalRepository;
-        this.animalTypeService = animalTypeService;
         this.dtoMapperService = dtoMapperService;
     }
 
@@ -79,7 +75,6 @@ public class AnimalService {
         }
         oldAnimal.setNameAnimal(newAnimal.getNameAnimal());
         oldAnimal.setBorn(newAnimal.getBorn());
-        oldAnimal.setAnimalType(newAnimal.getAnimalType());
         return dtoMapperService.toDto(animalRepository.save(oldAnimal));
     }
 
@@ -102,23 +97,6 @@ public class AnimalService {
 
     public List<Animal> getAllNotBusyAnimals() {
         return animalRepository.getAllNotBusyAnimals();
-    }
-
-    public Animal getNotComplement() {
-        return animalRepository.getNotComplement();
-    }
-
-    public List<AnimalType> getAllAnimalType() {
-        return animalTypeService.getAll();
-    }
-
-
-    public Animal updateAnimal(Long idAnimal, Long idAnimalType) {
-        Animal animal = animalRepository.findById(idAnimal).orElseThrow(() ->
-                new AnimalNotFoundException(String.valueOf(idAnimal)));
-        AnimalType animalType = animalTypeService.findAnimalType(idAnimalType);
-        animal.setAnimalType(animalType);
-        return animalRepository.save(animal);
     }
 
 }

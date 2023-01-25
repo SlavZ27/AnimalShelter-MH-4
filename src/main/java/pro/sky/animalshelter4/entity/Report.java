@@ -11,7 +11,7 @@ public class Report {
     @OneToOne
     @JoinColumn(name = "id_animal_ownership")
     private AnimalOwnership animalOwnership;
-    @JoinColumn(name = "report_date")
+    @Column(name = "report_date")
     private LocalDate reportDate;
     private String diet;
     private String feeling;
@@ -19,7 +19,7 @@ public class Report {
     @OneToOne
     @JoinColumn(name = "id_photo")
     private Photo photo;
-    @JoinColumn(name = "is_approve")
+    @Column(name = "is_approve")
     private Boolean isApprove;
 
     public Report() {
@@ -88,6 +88,10 @@ public class Report {
 
     public void setPhoto(Photo photo) {
         this.photo = photo;
+    }
+
+    public Boolean getApprove() {
+        return isApprove;
     }
 
     @Override

@@ -20,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
-import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.entityDto.ReportDto;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.repository.*;

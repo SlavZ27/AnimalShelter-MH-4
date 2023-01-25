@@ -7,7 +7,7 @@ public class Photo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @JoinColumn(name = "id_media")
+    @Column(name = "id_media")
     private String idMedia;
 
     public Photo() {

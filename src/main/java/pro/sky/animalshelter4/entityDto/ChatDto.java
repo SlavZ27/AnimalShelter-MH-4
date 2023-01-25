@@ -7,7 +7,7 @@ public class ChatDto {
     private String userNameTelegram;
     private String firstNameUser;
     private String lastNameUser;
-    private LocalDateTime last_activity;
+    private LocalDateTime lastActivity;
 
     public Long getId() {
         return id;
@@ -41,11 +41,11 @@ public class ChatDto {
         this.lastNameUser = lastNameUser;
     }
 
-    public LocalDateTime getLast_activity() {
-        return last_activity;
+    public LocalDateTime getLastActivity() {
+        return lastActivity;
     }
 
     public void setLast_activity(LocalDateTime last_activity) {
-        this.last_activity = last_activity;
+        this.lastActivity = last_activity;
     }
 }

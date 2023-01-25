@@ -21,7 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
 import pro.sky.animalshelter4.entityDto.AnimalDto;
-import pro.sky.animalshelter4.entityDto.ChatDto;
 import pro.sky.animalshelter4.exception.AnimalNotFoundException;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.repository.*;
@@ -31,7 +30,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 

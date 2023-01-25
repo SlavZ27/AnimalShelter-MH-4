@@ -18,18 +18,16 @@ public class DtoMapperService {
     public final UserRepository userRepository;
     private final ChatRepository chatRepository;
     private final AnimalRepository animalRepository;
-    private final AnimalTypeRepository animalTypeRepository;
     private final AnimalOwnershipRepository animalOwnershipRepository;
     private final PhotoRepository photoRepository;
 
     public DtoMapperService(UserRepository userRepository,
-                            ChatRepository chatRepository, AnimalRepository animalRepository, AnimalTypeRepository animalTypeRepository,
+                            ChatRepository chatRepository, AnimalRepository animalRepository,
                             AnimalOwnershipRepository animalOwnershipRepository,
                             PhotoRepository photoRepository) {
         this.userRepository = userRepository;
         this.chatRepository = chatRepository;
         this.animalRepository = animalRepository;
-        this.animalTypeRepository = animalTypeRepository;
         this.animalOwnershipRepository = animalOwnershipRepository;
         this.photoRepository = photoRepository;
     }
@@ -41,7 +39,7 @@ public class DtoMapperService {
         chat.setUserNameTelegram(chatDto.getUserNameTelegram());
         chat.setFirstNameUser(chatDto.getFirstNameUser());
         chat.setLastNameUser(chatDto.getLastNameUser());
-        chat.setLast_activity(chatDto.getLast_activity());
+        chat.setLastActivity(chatDto.getLastActivity());
         return chat;
     }
 
@@ -52,7 +50,7 @@ public class DtoMapperService {
         chatDto.setUserNameTelegram(chat.getUserNameTelegram());
         chatDto.setFirstNameUser(chat.getFirstNameUser());
         chatDto.setLastNameUser(chat.getLastNameUser());
-        chatDto.setLast_activity(chat.getLast_activity());
+        chatDto.setLast_activity(chat.getLastActivity());
         return chatDto;
     }
 
@@ -163,30 +161,12 @@ public class DtoMapperService {
         return animalOwnershipDto;
     }
 
-    public AnimalType toEntity(AnimalTypeDto animalTypeDto) {
-        AnimalType animalType = new AnimalType();
-        animalType.setId(animalTypeDto.getId());
-        animalType.setTypeAnimal(animalTypeDto.getTypeAnimal());
-        return animalType;
-    }
-
-    public AnimalTypeDto toDto(AnimalType animalType) {
-        AnimalTypeDto animalTypeDto = new AnimalTypeDto();
-        animalTypeDto.setId(animalType.getId());
-        animalTypeDto.setTypeAnimal(animalType.getTypeAnimal());
-        return animalTypeDto;
-    }
 
     public Animal toEntity(AnimalDto animalDto) {
         Animal animal = new Animal();
         animal.setId(animalDto.getId());
         animal.setNameAnimal(animalDto.getNameAnimal());
         animal.setBorn(animalDto.getBorn());
-        if (animalDto.getIdAnimalType() != null) {
-            AnimalType animalType = animalTypeRepository.findById(animalDto.getIdAnimalType()).orElseThrow(() ->
-                    new AnimalTypeNotFoundException(animalDto.getIdAnimalType().toString()));
-            animal.setAnimalType(animalType);
-        }
         return animal;
     }
 
@@ -195,7 +175,6 @@ public class DtoMapperService {
         animalDto.setId(animal.getId());
         animalDto.setNameAnimal(animal.getNameAnimal());
         animalDto.setBorn(animal.getBorn());
-        animalDto.setIdAnimalType(animal.getAnimalType().getId());
         return animalDto;
     }
 

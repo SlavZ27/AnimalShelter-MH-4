@@ -6,8 +6,6 @@ import pro.sky.animalshelter4.service.UserService;
 
 public class BadPhoneNumberException extends RuntimeException{
     public BadPhoneNumberException(String message) {
-        super(message);
-        Logger logger = LoggerFactory.getLogger(UserService.class);
-        logger.error("Bad phone = " + message);
+        super("Bad phone = " + message);
     }
 }

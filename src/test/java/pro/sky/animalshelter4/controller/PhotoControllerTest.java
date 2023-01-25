@@ -1,8 +1,6 @@
 package pro.sky.animalshelter4.controller;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.File;
-import com.pengrad.telegrambot.response.GetFileResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,17 +13,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.util.Pair;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
-import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.repository.*;
 import pro.sky.animalshelter4.service.*;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,7 +31,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)

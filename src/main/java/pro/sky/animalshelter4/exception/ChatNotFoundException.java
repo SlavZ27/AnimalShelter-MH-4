@@ -9,8 +9,6 @@ import pro.sky.animalshelter4.service.ChatService;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class ChatNotFoundException extends RuntimeException{
     public ChatNotFoundException(String message) {
-        super(message);
-        Logger logger = LoggerFactory.getLogger(ChatService.class);
-        logger.error("Chat with id = " + message + " not found");
+        super("Chat with id = " + message + " not found");
     }
 }

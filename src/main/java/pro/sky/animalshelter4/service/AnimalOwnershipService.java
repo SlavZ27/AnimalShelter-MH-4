@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.AnimalOwnership;
 import pro.sky.animalshelter4.entity.Report;
 import pro.sky.animalshelter4.entity.User;
-import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.entityDto.AnimalOwnershipDto;
 import pro.sky.animalshelter4.exception.AnimalOwnershipAlreadyCloseException;
 import pro.sky.animalshelter4.exception.AnimalOwnershipNotFoundException;
@@ -116,7 +115,7 @@ public class AnimalOwnershipService {
     public Report findOrCreateActualReport(User userOwner) {
         AnimalOwnership animalOwnership = getActualAnimalOwnership(userOwner);
         if (animalOwnership == null) {
-            throw new AnimalOwnershipNotFoundException();
+            throw new AnimalOwnershipNotFoundException("Actual");
         }
         return reportService.findOrCreateActualReport(animalOwnership);
     }
@@ -124,7 +123,7 @@ public class AnimalOwnershipService {
     public Report createReport(User userOwner, String diet, String feeling, String behavior, String idMedia) {
         AnimalOwnership animalOwnership = getActualAnimalOwnership(userOwner);
         if (animalOwnership == null) {
-            throw new AnimalOwnershipNotFoundException();
+            throw new AnimalOwnershipNotFoundException("Actual");
         }
         return reportService.createUpdateReport(animalOwnership, diet, feeling, behavior, idMedia);
     }

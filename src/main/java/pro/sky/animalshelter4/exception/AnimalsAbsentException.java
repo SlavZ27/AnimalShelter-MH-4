@@ -9,8 +9,5 @@ import pro.sky.animalshelter4.service.UserService;
 public class AnimalsAbsentException extends RuntimeException {
 
     public AnimalsAbsentException() {
-        Logger logger = LoggerFactory.getLogger(AnimalService.class);
-        logger.error("List of animals is empty");
-
     }
 }
