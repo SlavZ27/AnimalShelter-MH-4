@@ -47,16 +47,34 @@ public class AnimalOwnershipService {
         this.dtoMapperService = dtoMapperService;
     }
 
+    /**
+     * This method using method repository, allows add AnimalOwnership
+     *
+     * @param animalOwnership is not null
+     * @return animalOwnership
+     */
     public AnimalOwnership addAnimalOwnership(AnimalOwnership animalOwnership) {
         logger.info("Method addAnimal was start for create new AnimalOwnership");
         return animalOwnershipRepository.save(animalOwnership);
     }
 
+    /**
+     * This method using method repository, allows create AnimalOwnership
+     *
+     * @param animalOwnershipDto is not null
+     * @return animalOwnershipDto
+     */
     public AnimalOwnershipDto createAnimalOwnership(AnimalOwnershipDto animalOwnershipDto) {
         logger.info("Method createAnimalOwnership was start for create new animalOwnership");
         return dtoMapperService.toDto(animalOwnershipRepository.save(dtoMapperService.toEntity(animalOwnershipDto)));
     }
 
+    /**
+     * This method using method repository, allows read AnimalOwnership
+     *
+     * @param id is not null
+     * @return AnimalOwnershipDto
+     */
     public AnimalOwnershipDto readAnimalOwnership(Long id) {
         logger.info("Method readAnimalOwnershipDto was start for find animalOwnership by id");
         return dtoMapperService.toDto(
@@ -64,18 +82,35 @@ public class AnimalOwnershipService {
                         orElseThrow(() -> new AnimalOwnershipNotFoundException(String.valueOf(id))));
     }
 
+    /**
+     * This method using method repository, allows get all AnimalOwnership
+     *
+     * @return List<AnimalOwnershipDto>
+     */
     public List<AnimalOwnershipDto> getAll() {
         logger.info("Method getAll was start for get all AnimalOwnership");
         return animalOwnershipRepository.findAll().stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
+    /**
+     * This method using method repository, allows find AnimalOwnership
+     *
+     * @param id is not null
+     * @return AnimalOwnershipDto
+     */
     public AnimalOwnership findAnimalOwnership(Long id) {
         logger.info("Method findAnimal was start for find AnimalOwnership by id");
         return animalOwnershipRepository.findById(id).
                 orElseThrow(() -> new AnimalOwnershipNotFoundException(String.valueOf(id)));
     }
 
+    /**
+     * This method using method repository allows update AnimalOwnership
+     *
+     * @param animalOwnershipDto is not null
+     * @return animalOwnershipDto
+     */
     public AnimalOwnershipDto updateAnimalOwnership(AnimalOwnershipDto animalOwnershipDto) {
         logger.info("Method updateAnimalOwnership was start for update AnimalOwnership");
         AnimalOwnership newAnimalOwnership = dtoMapperService.toEntity(animalOwnershipDto);
@@ -91,13 +126,23 @@ public class AnimalOwnershipService {
         oldAnimalOwnership.setOpen(newAnimalOwnership.isOpen());
         return dtoMapperService.toDto(animalOwnershipRepository.save(oldAnimalOwnership));
     }
-
+    /**
+     * This method using method repository allows del AnimalOwnership
+     *
+     * @param id is not null
+     * @return animalOwnershipDto
+     */
     public AnimalOwnershipDto deleteAnimalOwnership(Long id) {
         AnimalOwnership animalOwnership = new AnimalOwnership();
         animalOwnership.setId(id);
         return dtoMapperService.toDto(deleteAnimalOwnership(animalOwnership));
     }
-
+    /**
+     * This method using method repository allows del AnimalOwnership
+     *
+     * @param animalOwnership is not null
+     * @return animalOwnershipDto
+     */
     public AnimalOwnership deleteAnimalOwnership(AnimalOwnership animalOwnership) {
         logger.info("Method deleteAnimalOwnership was start for delete AnimalOwnership");
         if (animalOwnership.getId() == null) {
@@ -109,10 +154,21 @@ public class AnimalOwnershipService {
         return animalOwnershipFound;
     }
 
+    /**
+     * This method using method repository allows get actual AnimalOwnership
+     * @param userOwner is not null
+     * @return AnimalOwnership
+     */
     public AnimalOwnership getActualAnimalOwnership(User userOwner) {
         return animalOwnershipRepository.getActualAnimalOwnership(userOwner.getId(), LocalDate.now());
     }
 
+    /**
+     * This method using method repository allows find or create actual report
+     *
+     * @param userOwner is not null
+     * @return animalOwnership
+     */
     public Report findOrCreateActualReport(User userOwner) {
         AnimalOwnership animalOwnership = getActualAnimalOwnership(userOwner);
         if (animalOwnership == null) {
@@ -121,6 +177,12 @@ public class AnimalOwnershipService {
         return reportService.findOrCreateActualReport(animalOwnership);
     }
 
+    /**
+     * This method using method repository allows create report
+     *
+     * @param userOwner is not null
+     * @return animalOwnership, diet, feeling, behavior, idMedia
+     */
     public Report createReport(User userOwner, String diet, String feeling, String behavior, String idMedia) {
         AnimalOwnership animalOwnership = getActualAnimalOwnership(userOwner);
         if (animalOwnership == null) {
@@ -129,19 +191,43 @@ public class AnimalOwnershipService {
         return reportService.createUpdateReport(animalOwnership, diet, feeling, behavior, idMedia);
     }
 
+    /**
+     * This method using method repository allows get open and not approve report
+     *
+     * @return animalOwnership
+     */
     public Report getOpenAndNotApproveReport() {
         return reportService.getOpenAndNotApproveReport();
     }
 
+    /**
+     * This method using method repository allows approve report
+     *
+     * @param idReport is not null
+     * @param approve is not null
+     * @return idReport, approve
+     */
     public Report approveReport(Long idReport, boolean approve) {
         return reportService.approveReport(idReport, approve);
     }
 
+    /**
+     * This method using method repository allows get One Not Approve Open Animal Ownership With Not Trial
+     *
+     * @return getOneNotApproveOpenAnimalOwnershipWithNotTrial(localDateNow)
+     */
     public AnimalOwnership getOneNotApproveOpenAnimalOwnershipWithNotTrial() {
         LocalDate localDateNow = LocalDate.now();
         return animalOwnershipRepository.getOneNotApproveOpenAnimalOwnershipWithNotTrial(localDateNow);
     }
 
+    /**
+     * This method using method repository allows approve AnimalOwnership
+     *
+     * @param idAnimalOwnership is not null
+     * @param approve is not null
+     * @return animalOwnership
+     */
     public AnimalOwnership approveAnimalOwnership(Long idAnimalOwnership, boolean approve) {
         AnimalOwnership animalOwnership = findAnimalOwnership(idAnimalOwnership);
         if (animalOwnership == null) {
@@ -155,6 +241,12 @@ public class AnimalOwnershipService {
         return animalOwnershipRepository.save(animalOwnership);
     }
 
+    /**
+     * This method using method repository allows extend trial animal ownership for a week
+     *
+     * @param idAnimalOwnership is not null
+     * @return animalOwnership
+     */
     public AnimalOwnership extendTrialAnimalOwnershipForAWeek(Long idAnimalOwnership) {
         AnimalOwnership animalOwnership = findAnimalOwnership(idAnimalOwnership);
         if (animalOwnership == null) {

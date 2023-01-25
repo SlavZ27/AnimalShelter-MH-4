@@ -41,7 +41,7 @@ public class DtoMapperService {
         chat.setUserNameTelegram(chatDto.getUserNameTelegram());
         chat.setFirstNameUser(chatDto.getFirstNameUser());
         chat.setLastNameUser(chatDto.getLastNameUser());
-        chat.setLast_activity(chatDto.getLast_activity());
+        chat.setLastActivity(chatDto.getLastActivity());
         return chat;
     }
 
@@ -52,7 +52,7 @@ public class DtoMapperService {
         chatDto.setUserNameTelegram(chat.getUserNameTelegram());
         chatDto.setFirstNameUser(chat.getFirstNameUser());
         chatDto.setLastNameUser(chat.getLastNameUser());
-        chatDto.setLast_activity(chat.getLast_activity());
+        chatDto.setLastActivity(chat.getLastActivity());
         return chatDto;
     }
 

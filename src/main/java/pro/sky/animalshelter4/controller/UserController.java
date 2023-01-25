@@ -115,7 +115,7 @@ public class UserController {
 
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "201",
                     description = "Getting all clients with data according to UserDto.",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,

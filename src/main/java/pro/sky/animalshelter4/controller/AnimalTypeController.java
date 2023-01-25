@@ -29,7 +29,7 @@ public class AnimalTypeController {
 
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "201",
                     description = "Creating data for AnimalTypeDto.",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
