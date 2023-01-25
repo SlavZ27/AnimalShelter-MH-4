@@ -1,5 +1,6 @@
 package pro.sky.animalshelter4.entityDto;
 
+import javax.persistence.Column;
 import java.time.LocalDateTime;
 
 public class ChatDto {
@@ -7,6 +8,7 @@ public class ChatDto {
     private String userNameTelegram;
     private String firstNameUser;
     private String lastNameUser;
+    @Column(name= "last_activity")
     private LocalDateTime lastActivity;
 
     public Long getId() {
@@ -45,7 +47,7 @@ public class ChatDto {
         return lastActivity;
     }
 
-    public void setLast_activity(LocalDateTime last_activity) {
-        this.lastActivity = last_activity;
+    public void setLastActivity(LocalDateTime lastActivity) {
+        this.lastActivity = lastActivity;
     }
 }

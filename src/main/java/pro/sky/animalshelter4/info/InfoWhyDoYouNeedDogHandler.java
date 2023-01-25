@@ -1,5 +1,8 @@
 package pro.sky.animalshelter4.info;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class InfoWhyDoYouNeedDogHandler {
     private final static String infoEn =
             "Why do you need a dog handler?\n"+

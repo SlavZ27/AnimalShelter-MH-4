@@ -30,7 +30,7 @@ public class ChatController {
 
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "201",
                     description = "We record the following data from the client 's chat from the bot 's ChatDto",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
