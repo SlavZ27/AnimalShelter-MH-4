@@ -9,10 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @OpenAPIDefinition
-@SpringBootApplication(exclude = {
-        DataSourceAutoConfiguration.class,
-        DataSourceTransactionManagerAutoConfiguration.class
-})
+@SpringBootApplication
 public class AnimalShelter4Application {
 
     public static void main(String[] args) {

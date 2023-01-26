@@ -31,9 +31,6 @@ public class Report {
     public Report() {
     }
 
-    public Boolean getApprove() {
-        return isApprove;
-    }
 
     public Shelter getShelter() {
         return shelter;
