@@ -1,9 +1,6 @@
 package pro.sky.animalshelter4.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity(name = "telegram_chat")
@@ -13,17 +10,18 @@ public class Chat {
     private String userNameTelegram;
     private String firstNameUser;
     private String lastNameUser;
-    private LocalDateTime last_activity;
+    @Column(name= "last_activity")
+    private LocalDateTime lastActivity;
 
     public Chat() {
     }
 
-    public Chat(Long id, String userNameTelegram, String firstNameUser, String lastNameUser, LocalDateTime last_activity) {
+    public Chat(Long id, String userNameTelegram, String firstNameUser, String lastNameUser, LocalDateTime lastActivity) {
         this.id = id;
         this.userNameTelegram = userNameTelegram;
         this.firstNameUser = firstNameUser;
         this.lastNameUser = lastNameUser;
-        this.last_activity = last_activity;
+        this.lastActivity = lastActivity;
     }
 
     public Long getId() {
@@ -58,12 +56,12 @@ public class Chat {
         this.lastNameUser = lastNameUser;
     }
 
-    public LocalDateTime getLast_activity() {
-        return last_activity;
+    public LocalDateTime getLastActivity() {
+        return lastActivity;
     }
 
-    public void setLast_activity(LocalDateTime last_activity) {
-        this.last_activity = last_activity;
+    public void setLastActivity(LocalDateTime lastActivity) {
+        this.lastActivity = lastActivity;
     }
 
     @Override
@@ -80,8 +78,8 @@ public class Chat {
         if (lastNameUser != null) {
             sb.append("\nlast name: " + lastNameUser);
         }
-        if (last_activity != null) {
-            sb.append("\nlast activity: " + last_activity);
+        if (lastActivity != null) {
+            sb.append("\nlast activity: " + lastActivity);
         }
         return sb.toString();
     }

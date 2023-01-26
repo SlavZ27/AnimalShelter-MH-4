@@ -200,6 +200,7 @@ public class TelegramBotUpdatesService {
 
     }
 
+
     /**
      * The method is needed for detection of the command {@link Command#EMPTY_CALLBACK_DATA_FOR_BUTTON}
      * for which the bot will do nothing.

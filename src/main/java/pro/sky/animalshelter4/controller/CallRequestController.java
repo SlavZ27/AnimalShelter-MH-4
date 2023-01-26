@@ -27,7 +27,7 @@ public class CallRequestController {
     }
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "201",
                     description = "Creates call requests.",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,

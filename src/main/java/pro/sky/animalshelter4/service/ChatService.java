@@ -57,7 +57,7 @@ public class ChatService {
         chat.setUserNameTelegram(updateDPO.getUserName());
         chat.setFirstNameUser(updateDPO.getFirstName());
         chat.setLastNameUser(updateDPO.getLastName());
-        chat.setLast_activity(LocalDateTime.now());
+        chat.setLastActivity(LocalDateTime.now());
         return addChat(chat);
     }
 
@@ -148,7 +148,7 @@ public class ChatService {
         oldChat.setFirstNameUser(newChat.getFirstNameUser());
         oldChat.setLastNameUser(newChat.getLastNameUser());
         oldChat.setUserNameTelegram(newChat.getUserNameTelegram());
-        oldChat.setLast_activity(newChat.getLast_activity());
+        oldChat.setLastActivity(newChat.getLastActivity());
         return dtoMapperService.toDto(chatRepository.save(oldChat));
     }
 
@@ -1038,46 +1038,85 @@ public class ChatService {
         }
     }
 
+    /**
+     * This method send info dogs disabilities
+     *
+     * @param updateDpo is not null
+     */
     public void sendInfoDogsDisabilities(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoDogsWithDisabilities.getInfoEn());
     }
-
+    /**
+     * This method send info list documents
+     *
+     * @param updateDpo is not null
+     */
     public void sendInfoListDocuments(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoListOfDocuments.getInfoEn());
     }
-
+    /**
+     * This method send info recommend home dog
+     *
+     * @param updateDpo is not null
+     */
     public void sendInfoRecommendHomeDog(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoRecommendationsHomeDog.getInfoEn());
     }
-
+    /**
+     * This method send info recommend home dog small
+     *
+     * @param updateDpo is not null
+     */
     public void sendInfoRecommendHomeDogSmall(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoRecommendationsHomeSmallDog.getInfoEn());
     }
-
+    /**
+     * This method send info refuse
+     *
+     * @param updateDpo is not null
+     */
     public void sendInfoRefuse(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoRefuseDogFromShelter.getInfoEn());
     }
-
+    /**
+     * This method send info tips
+     *
+     * @param updateDpo is not null
+     */
     public void sendInfoTips(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoTipsFromDogHandler.getInfoEn());
     }
-
+    /**
+     * This method send info transportation
+     *
+     * @param updateDpo is not null
+     */
     public void sendInfoTransportation(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoTransportationAnimals.getInfoEn());
     }
 
+    /**
+     * This method send info need handler
+     *
+     * @param updateDpo is not null
+     */
     public void sendInfoNeedHandler(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoWhyDoYouNeedDogHandler.getInfoEn());
     }
 
+    /**
+     * This method send info get dog
+     *
+     * @param updateDpo is not null
+     */
     public void sendInfoGetDog(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatByIdOrNew(updateDpo.getIdChat());
         telegramBotSenderService.sendMessage(chatVolunteer.getId(), InfoGettingKnowDog.getInfoEn());
