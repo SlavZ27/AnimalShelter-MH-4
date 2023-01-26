@@ -7,11 +7,19 @@ import java.time.LocalDateTime;
 public class Chat {
     @Id
     private Long id;
+    @Column(name = "user_name_telegram")
     private String userNameTelegram;
+    @Column(name = "first_name_user")
     private String firstNameUser;
+    @Column(name = "last_name_user")
     private String lastNameUser;
-    @Column(name= "last_activity")
+    @Column(name = "last_activity")
     private LocalDateTime lastActivity;
+    @Column(name = "index_menu")
+    private Integer indexMenu;
+    @OneToOne
+    @JoinColumn(name = "id_shelter")
+    private Shelter shelter;
 
     public Chat() {
     }
@@ -22,6 +30,22 @@ public class Chat {
         this.firstNameUser = firstNameUser;
         this.lastNameUser = lastNameUser;
         this.lastActivity = lastActivity;
+    }
+
+    public Integer getIndexMenu() {
+        return indexMenu;
+    }
+
+    public void setIndexMenu(Integer indexMenu) {
+        this.indexMenu = indexMenu;
+    }
+
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
     }
 
     public Long getId() {

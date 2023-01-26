@@ -3,13 +3,13 @@ package pro.sky.animalshelter4.entity;
 import javax.persistence.*;
 import java.time.LocalDate;
 
-@Entity(name = "animal_ownership")
+@Entity
 public class AnimalOwnership {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @OneToOne
     @JoinColumn(name = "id_user")
+    @OneToOne
     private User owner;
     @OneToOne
     @JoinColumn(name = "id_animal")
@@ -22,12 +22,23 @@ public class AnimalOwnership {
     private Boolean isApprove;
     @Column(name = "is_open")
     private boolean isOpen;
+    @OneToOne
+    @JoinColumn(name = "id_shelter")
+    private Shelter shelter;
 
     public AnimalOwnership() {
     }
 
     public Boolean getApprove() {
         return isApprove;
+    }
+
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
     }
 
     public Boolean isApprove() {

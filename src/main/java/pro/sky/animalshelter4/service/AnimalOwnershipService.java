@@ -5,12 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.AnimalOwnership;
 import pro.sky.animalshelter4.entity.Report;
+import pro.sky.animalshelter4.entity.Shelter;
 import pro.sky.animalshelter4.entity.User;
 import pro.sky.animalshelter4.entityDto.AnimalOwnershipDto;
-import pro.sky.animalshelter4.exception.AnimalOwnershipAlreadyCloseException;
-import pro.sky.animalshelter4.exception.AnimalOwnershipNotFoundException;
+import pro.sky.animalshelter4.exception.*;
 import pro.sky.animalshelter4.repository.AnimalOwnershipRepository;
 import pro.sky.animalshelter4.repository.AnimalRepository;
+import pro.sky.animalshelter4.repository.ShelterRepository;
+import pro.sky.animalshelter4.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,14 +38,21 @@ public class AnimalOwnershipService {
     private final AnimalOwnershipRepository animalOwnershipRepository;
     private final ReportService reportService;
     private final DtoMapperService dtoMapperService;
+    private final ShelterRepository shelterRepository;
+    private final AnimalRepository animalRepository;
+    private final UserRepository userRepository;
+
 
     private final Logger logger = LoggerFactory.getLogger(AnimalOwnershipService.class);
 
 
-    public AnimalOwnershipService(AnimalOwnershipRepository animalOwnershipRepository, ReportService reportService, DtoMapperService dtoMapperService) {
+    public AnimalOwnershipService(AnimalOwnershipRepository animalOwnershipRepository, ReportService reportService, DtoMapperService dtoMapperService, ShelterRepository shelterRepository, AnimalRepository animalRepository, UserRepository userRepository) {
         this.animalOwnershipRepository = animalOwnershipRepository;
         this.reportService = reportService;
         this.dtoMapperService = dtoMapperService;
+        this.shelterRepository = shelterRepository;
+        this.animalRepository = animalRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -63,9 +72,11 @@ public class AnimalOwnershipService {
      * @param animalOwnershipDto is not null
      * @return animalOwnershipDto
      */
-    public AnimalOwnershipDto createAnimalOwnership(AnimalOwnershipDto animalOwnershipDto) {
+    public AnimalOwnershipDto createAnimalOwnership(AnimalOwnershipDto animalOwnershipDto, String shelterDesignation) {
         logger.info("Method createAnimalOwnership was start for create new animalOwnership");
-        return dtoMapperService.toDto(animalOwnershipRepository.save(dtoMapperService.toEntity(animalOwnershipDto)));
+        AnimalOwnership animalOwnership = dtoMapperService.toEntity(animalOwnershipDto, shelterDesignation);
+        animalOwnership.setId(null);
+        return dtoMapperService.toDto(animalOwnershipRepository.save(animalOwnership));
     }
 
     /**
@@ -74,10 +85,12 @@ public class AnimalOwnershipService {
      * @param id is not null
      * @return AnimalOwnershipDto
      */
-    public AnimalOwnershipDto readAnimalOwnership(Long id) {
+    public AnimalOwnershipDto readAnimalOwnership(Long id, String shelterDesignation) {
         logger.info("Method readAnimalOwnershipDto was start for find animalOwnership by id");
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
         return dtoMapperService.toDto(
-                animalOwnershipRepository.findById(id).
+                animalOwnershipRepository.getByIdWithIdShelter(id, shelter.getId()).
                         orElseThrow(() -> new AnimalOwnershipNotFoundException(String.valueOf(id))));
     }
 
@@ -86,9 +99,11 @@ public class AnimalOwnershipService {
      *
      * @return List<AnimalOwnershipDto>
      */
-    public List<AnimalOwnershipDto> getAll() {
+    public List<AnimalOwnershipDto> getAll(String shelterDesignation) {
         logger.info("Method getAll was start for get all AnimalOwnership");
-        return animalOwnershipRepository.findAll().stream().
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
+        return animalOwnershipRepository.getAllWithIdShelter(shelter.getId()).stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
@@ -98,9 +113,9 @@ public class AnimalOwnershipService {
      * @param id is not null
      * @return AnimalOwnershipDto
      */
-    public AnimalOwnership findAnimalOwnership(Long id) {
+    private AnimalOwnership findAnimalOwnershipWithShelter(Long id, Shelter shelter) {
         logger.info("Method findAnimal was start for find AnimalOwnership by id");
-        return animalOwnershipRepository.findById(id).
+        return animalOwnershipRepository.getByIdWithIdShelter(id, shelter.getId()).
                 orElseThrow(() -> new AnimalOwnershipNotFoundException(String.valueOf(id)));
     }
 
@@ -110,10 +125,12 @@ public class AnimalOwnershipService {
      * @param animalOwnershipDto is not null
      * @return animalOwnershipDto
      */
-    public AnimalOwnershipDto updateAnimalOwnership(AnimalOwnershipDto animalOwnershipDto) {
+    public AnimalOwnershipDto updateAnimalOwnership(AnimalOwnershipDto animalOwnershipDto, String shelterDesignation) {
         logger.info("Method updateAnimalOwnership was start for update AnimalOwnership");
-        AnimalOwnership newAnimalOwnership = dtoMapperService.toEntity(animalOwnershipDto);
-        AnimalOwnership oldAnimalOwnership = findAnimalOwnership(newAnimalOwnership.getId());
+        AnimalOwnership newAnimalOwnership = dtoMapperService.toEntity(animalOwnershipDto, shelterDesignation);
+        AnimalOwnership oldAnimalOwnership = findAnimalOwnershipWithShelter(
+                newAnimalOwnership.getId(),
+                newAnimalOwnership.getShelter());
         if (oldAnimalOwnership == null) {
             throw new AnimalOwnershipNotFoundException(String.valueOf(newAnimalOwnership.getId()));
         }
@@ -131,10 +148,12 @@ public class AnimalOwnershipService {
      * @param id is not null
      * @return animalOwnershipDto
      */
-    public AnimalOwnershipDto deleteAnimalOwnership(Long id) {
+    public AnimalOwnershipDto deleteAnimalOwnership(Long id, String shelterDesignation) {
         AnimalOwnership animalOwnership = new AnimalOwnership();
         animalOwnership.setId(id);
-        return dtoMapperService.toDto(deleteAnimalOwnership(animalOwnership));
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
+        return dtoMapperService.toDto(deleteAnimalOwnership(animalOwnership, shelter));
     }
     /**
      * This method using method repository allows del AnimalOwnership
@@ -142,12 +161,14 @@ public class AnimalOwnershipService {
      * @param animalOwnership is not null
      * @return animalOwnershipDto
      */
-    public AnimalOwnership deleteAnimalOwnership(AnimalOwnership animalOwnership) {
+    public AnimalOwnership deleteAnimalOwnership(AnimalOwnership animalOwnership, Shelter shelter) {
         logger.info("Method deleteAnimalOwnership was start for delete AnimalOwnership");
         if (animalOwnership.getId() == null) {
             throw new IllegalArgumentException("Incorrect id of AnimalOwnership");
         }
-        AnimalOwnership animalOwnershipFound = animalOwnershipRepository.findById(animalOwnership.getId()).
+        AnimalOwnership animalOwnershipFound = animalOwnershipRepository.getByIdWithIdShelter(
+                        animalOwnership.getId(),
+                        shelter.getId()).
                 orElseThrow(() -> new AnimalOwnershipNotFoundException(String.valueOf(animalOwnership.getId())));
         animalOwnershipRepository.delete(animalOwnershipFound);
         return animalOwnershipFound;
@@ -158,8 +179,10 @@ public class AnimalOwnershipService {
      * @param userOwner is not null
      * @return AnimalOwnership
      */
-    public AnimalOwnership getActualAnimalOwnership(User userOwner) {
-        return animalOwnershipRepository.getActualAnimalOwnership(userOwner.getId(), LocalDate.now());
+    public AnimalOwnership getActualAnimalOwnershipWithShelter(User userOwner) {
+        return animalOwnershipRepository.getActualAnimalOwnershipWithIdShelter(
+                userOwner.getShelter().getId(),
+                userOwner.getId(), LocalDate.now());
     }
 
     /**
@@ -168,12 +191,12 @@ public class AnimalOwnershipService {
      * @param userOwner is not null
      * @return animalOwnership
      */
-    public Report findOrCreateActualReport(User userOwner) {
-        AnimalOwnership animalOwnership = getActualAnimalOwnership(userOwner);
+    public Report findOrCreateTodayReportWithOwner(User userOwner) {
+        AnimalOwnership animalOwnership = getActualAnimalOwnershipWithShelter(userOwner);
         if (animalOwnership == null) {
-            throw new AnimalOwnershipNotFoundException("Actual");
+            throw new AnimalOwnershipNotFoundException("");
         }
-        return reportService.findOrCreateActualReport(animalOwnership);
+        return reportService.findOrCreateActualReportWithOwnership(animalOwnership);
     }
 
     /**
@@ -182,12 +205,12 @@ public class AnimalOwnershipService {
      * @param userOwner is not null
      * @return animalOwnership, diet, feeling, behavior, idMedia
      */
-    public Report createReport(User userOwner, String diet, String feeling, String behavior, String idMedia) {
-        AnimalOwnership animalOwnership = getActualAnimalOwnership(userOwner);
+    public Report updateReportWithOwner(User userOwner, String diet, String feeling, String behavior, String idMedia) {
+        AnimalOwnership animalOwnership = getActualAnimalOwnershipWithShelter(userOwner);
         if (animalOwnership == null) {
-            throw new AnimalOwnershipNotFoundException("Actual");
+            throw new AnimalOwnershipNotFoundException("");
         }
-        return reportService.createUpdateReport(animalOwnership, diet, feeling, behavior, idMedia);
+        return reportService.updateReportWithAnimalOwnership(animalOwnership, diet, feeling, behavior, idMedia);
     }
 
     /**
@@ -195,8 +218,8 @@ public class AnimalOwnershipService {
      *
      * @return animalOwnership
      */
-    public Report getOpenAndNotApproveReport() {
-        return reportService.getOpenAndNotApproveReport();
+    public Report getOpenAndNotApproveReportWithShelter(Shelter shelter) {
+        return reportService.getOpenAndNotApproveReportWithShelter(shelter);
     }
 
     /**
@@ -206,8 +229,8 @@ public class AnimalOwnershipService {
      * @param approve is not null
      * @return idReport, approve
      */
-    public Report approveReport(Long idReport, boolean approve) {
-        return reportService.approveReport(idReport, approve);
+    public Report approveReportWithShelter(Long idReport, Shelter shelter, boolean approve) {
+        return reportService.approveReport(shelter, idReport, approve);
     }
 
     /**
@@ -215,9 +238,9 @@ public class AnimalOwnershipService {
      *
      * @return getOneNotApproveOpenAnimalOwnershipWithNotTrial(localDateNow)
      */
-    public AnimalOwnership getOneNotApproveOpenAnimalOwnershipWithNotTrial() {
+    public AnimalOwnership getOneNotApproveOpenAnimalOwnershipWithNotTrialWithShelter(Shelter shelter) {
         LocalDate localDateNow = LocalDate.now();
-        return animalOwnershipRepository.getOneNotApproveOpenAnimalOwnershipWithNotTrial(localDateNow);
+        return animalOwnershipRepository.getOneNotApproveOpenAnimalOwnershipWithNotTrialWithIdShelter(shelter.getId(), localDateNow);
     }
 
     /**
@@ -227,11 +250,10 @@ public class AnimalOwnershipService {
      * @param approve is not null
      * @return animalOwnership
      */
-    public AnimalOwnership approveAnimalOwnership(Long idAnimalOwnership, boolean approve) {
-        AnimalOwnership animalOwnership = findAnimalOwnership(idAnimalOwnership);
-        if (animalOwnership == null) {
-            throw new AnimalOwnershipNotFoundException(idAnimalOwnership.toString());
-        }
+    public AnimalOwnership approveAnimalOwnershipWithShelter(Shelter shelter, Long idAnimalOwnership, boolean approve) {
+        AnimalOwnership animalOwnership = animalOwnershipRepository.
+                getByIdWithIdShelter(shelter.getId(), idAnimalOwnership).
+                orElseThrow(() -> new AnimalOwnershipNotFoundException(idAnimalOwnership.toString()));
         if (!animalOwnership.isOpen()) {
             throw new AnimalOwnershipAlreadyCloseException(idAnimalOwnership.toString());
         }
@@ -246,12 +268,11 @@ public class AnimalOwnershipService {
      * @param idAnimalOwnership is not null
      * @return animalOwnership
      */
-    public AnimalOwnership extendTrialAnimalOwnershipForAWeek(Long idAnimalOwnership) {
-        AnimalOwnership animalOwnership = findAnimalOwnership(idAnimalOwnership);
-        if (animalOwnership == null) {
-            throw new AnimalOwnershipNotFoundException(idAnimalOwnership.toString());
-        }
-        animalOwnership.setDateEndTrial(animalOwnership.getDateEndTrial().plusDays(count_extended_days));
+    public AnimalOwnership extendTrialAnimalOwnershipWithShelter(Shelter shelter, Long idAnimalOwnership, int countDays) {
+        AnimalOwnership animalOwnership = animalOwnershipRepository.
+                getByIdWithIdShelter(shelter.getId(), idAnimalOwnership).
+                orElseThrow(() -> new AnimalOwnershipNotFoundException(idAnimalOwnership.toString()));
+        animalOwnership.setDateEndTrial(animalOwnership.getDateEndTrial().plusDays(countDays));
         return animalOwnershipRepository.save(animalOwnership);
     }
 }

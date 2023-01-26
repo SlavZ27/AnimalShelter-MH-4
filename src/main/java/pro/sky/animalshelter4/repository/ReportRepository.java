@@ -11,15 +11,23 @@ import java.util.Optional;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
 
-    @Query(value = "select * from report where report.id_animal_ownership = :idAnimalOwnership and report.report_date = :localDate"
+    @Query(value = "select * from report where report.id_animal_ownership=:idAnimalOwnership and report.report_date = :localDate and report.id_shelter=:idShelter"
             , nativeQuery = true)
-    Report findReportByIdAnimalOwnershipAndDate(Long idAnimalOwnership, LocalDate localDate);
+    Report findReportByIdAnimalOwnershipAndDateWithShelter(Long idAnimalOwnership, LocalDate localDate, Long idShelter);
 
-    @Query(value = "select * from report where report.is_approve is null limit 1"
+    @Query(value = "select report.* from report where report.id_shelter=:idShelter and report.is_approve is null limit 1"
             , nativeQuery = true)
-    Report getOpenAndNotApproveReport();
+    Report getOpenAndNotApproveReportWithShelter(Long idShelter);
 
-    @Query(value = "SELECT DISTINCT on (report.id_animal_ownership) report.* FROM report,animal_ownership where animal_ownership.is_open=true and  animal_ownership.id=report.id_animal_ownership order by report.id_animal_ownership, report.report_date desc"
+    @Query(value = "select report.* from report where report.id_shelter=:idShelter and report.id=:id"
             , nativeQuery = true)
-    List<Report> getLatestUniqueOwnerReportWithOpenAnimalOwnership();
+    Optional<Report> getByIdWithShelter(Long id, Long idShelter);
+
+    @Query(value = "SELECT DISTINCT on (report.id_animal_ownership) report.* FROM report,animal_ownership where report.id_shelter=:idShelter and animal_ownership.is_open=true and  animal_ownership.id=report.id_animal_ownership order by report.id_animal_ownership, report.report_date desc"
+            , nativeQuery = true)
+    List<Report> getLatestUniqueOwnerReportWithOpenAnimalOwnershipWithShelter(Long idShelter);
+
+    @Query(value = "select report.* from report where report.id_shelter=:idShelter"
+            , nativeQuery = true)
+    List<Report> getAllWithShelter(Long idShelter);
 }

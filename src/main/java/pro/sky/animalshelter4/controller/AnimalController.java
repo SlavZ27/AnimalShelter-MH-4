@@ -17,7 +17,7 @@ import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("animal")
+@RequestMapping("{shelterDesignation}/animal")
 public class AnimalController {
     private final AnimalService animalService;
 
@@ -37,8 +37,9 @@ public class AnimalController {
             )
     })
     @PostMapping                //POST http://localhost:8080/animal
-    public ResponseEntity<AnimalDto> createAnimal(@RequestBody @Valid AnimalDto animalDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(animalService.createAnimalDto(animalDto));
+    public ResponseEntity<AnimalDto> createAnimal(@RequestBody @Valid AnimalDto animalDto,
+                                                  @PathVariable String shelterDesignation) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(animalService.createAnimalWithShelterDto(animalDto, shelterDesignation));
     }
 
 
@@ -53,8 +54,10 @@ public class AnimalController {
             )
     })
     @GetMapping("{id}")  //GET http://localhost:8080/animal/1
-    public ResponseEntity<AnimalDto> readAnimal(@Parameter(description = "Animal id") @PathVariable Long id) {
-        return ResponseEntity.ok(animalService.readAnimal(id));
+    public ResponseEntity<AnimalDto> readAnimal(
+            @Parameter(description = "Animal id") @PathVariable Long id,
+            @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(animalService.readAnimalWithShelter(id, shelterDesignation));
     }
 
 
@@ -69,8 +72,9 @@ public class AnimalController {
             )
     })
     @PutMapping()               //PUT http://localhost:8080/animal/
-    public ResponseEntity<AnimalDto> updateAnimal(@RequestBody @Valid AnimalDto animalDto) {
-        return ResponseEntity.ok(animalService.updateAnimal(animalDto));
+    public ResponseEntity<AnimalDto> updateAnimal(@RequestBody @Valid AnimalDto animalDto,
+                                                  @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(animalService.updateAnimalWithShelter(animalDto, shelterDesignation));
     }
 
 
@@ -85,8 +89,9 @@ public class AnimalController {
             )
     })
     @DeleteMapping("{id}")    //DELETE http://localhost:8080/animal/1
-    public ResponseEntity<AnimalDto> deleteAnimal(@Parameter(description = "Animal id") @PathVariable Long id) {
-        return ResponseEntity.ok(animalService.deleteAnimal(id));
+    public ResponseEntity<AnimalDto> deleteAnimal(@Parameter(description = "Animal id") @PathVariable Long id,
+                                                  @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(animalService.deleteAnimalWithShelter(id, shelterDesignation));
     }
 
 
@@ -101,10 +106,9 @@ public class AnimalController {
             )
     })
     @GetMapping()  //GET http://localhost:8080/animal/
-    public ResponseEntity<Collection<AnimalDto>> getAllAnimals() {
-        return ResponseEntity.ok(animalService.getAll());
+    public ResponseEntity<Collection<AnimalDto>> getAllAnimals(@PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(animalService.getAllWithShelter(shelterDesignation));
     }
-
 
 
 }

@@ -16,7 +16,7 @@ import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("{db}/user")
+@RequestMapping("{shelterDesignation}/user")
 public class UserController {
     private final UserService userService;
 
@@ -35,8 +35,9 @@ public class UserController {
             )
     })
     @PostMapping                //POST http://localhost:8080/user
-    public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserDto userDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userDto));
+    public ResponseEntity<UserDto> createUser(@RequestBody @Valid UserDto userDto,
+                                              @PathVariable String shelterDesignation) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userDto, shelterDesignation));
     }
 
     @ApiResponses({
@@ -50,8 +51,9 @@ public class UserController {
             )
     })
     @GetMapping("{id}")  //GET http://localhost:8080/user/1
-    public ResponseEntity<UserDto> readUser(@Parameter(description = "user Id") @PathVariable Long id) {
-        return ResponseEntity.ok(userService.readUser(id));
+    public ResponseEntity<UserDto> readUser(@Parameter(description = "user Id") @PathVariable Long id,
+                                            @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(userService.readUser(id, shelterDesignation));
     }
 
     @ApiResponses({
@@ -65,8 +67,9 @@ public class UserController {
             )
     })
     @PutMapping()               //PUT http://localhost:8080/user/
-    public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto userDto) {
-        return ResponseEntity.ok(userService.updateUser(userDto));
+    public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto userDto,
+                                              @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(userService.updateUser(userDto, shelterDesignation));
     }
 
     @ApiResponses({
@@ -80,25 +83,11 @@ public class UserController {
             )
     })
     @DeleteMapping("{id}")    //DELETE http://localhost:8080/user/1
-    public ResponseEntity<UserDto> deleteUser(@Parameter(description = "user Id") @PathVariable Long id) {
-        return ResponseEntity.ok(userService.deleteUser(id));
+    public ResponseEntity<UserDto> deleteUser(@Parameter(description = "user Id") @PathVariable Long id,
+                                              @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(userService.deleteUser(id, shelterDesignation));
     }
 
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Getting all users with data according to UserDto.",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UserDto[].class)
-                    )}
-            )
-    })
-    @GetMapping()  //GET http://localhost:8080/user/
-    public ResponseEntity<Collection<UserDto>> getAllUsers(@PathVariable String db) {
-        System.out.println("Detected DB = " + db);
-        return ResponseEntity.ok(userService.getAll());
-    }
 
     @ApiResponses({
             @ApiResponse(
@@ -111,8 +100,8 @@ public class UserController {
             )
     })
     @GetMapping("volunteers")  //GET http://localhost:8080/user/volunteers
-    public ResponseEntity<Collection<UserDto>> getAllVolunteers() {
-        return ResponseEntity.ok(userService.getAllVolunteers());
+    public ResponseEntity<Collection<UserDto>> getAllVolunteers(@PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(userService.getAllVolunteers( shelterDesignation));
     }
 
     @ApiResponses({
@@ -126,8 +115,8 @@ public class UserController {
             )
     })
     @GetMapping("clients")  //GET http://localhost:8080/user/clients
-    public ResponseEntity<Collection<UserDto>> getAllClients() {
-        return ResponseEntity.ok(userService.getAllClientsDto());
+    public ResponseEntity<Collection<UserDto>> getAllClients(@PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(userService.getAllClientsDto( shelterDesignation));
     }
 
 }

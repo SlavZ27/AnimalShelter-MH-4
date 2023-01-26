@@ -26,8 +26,19 @@ public class CallRequest {
     private LocalDateTime localDateTimeOpen;
     @Column(name = "local_date_time_close")
     private LocalDateTime localDateTimeClose;
+    @OneToOne
+    @JoinColumn(name = "id_shelter")
+    private Shelter shelter;
 
     public CallRequest() {
+    }
+
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
     }
 
     public Long getId() {

@@ -11,10 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.info.InfoAboutShelter;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.info.InfoTakeADog;
-import pro.sky.animalshelter4.configuration.DataSourceType;
 
 import java.io.IOException;
 import java.net.URI;
@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * The class is needed for the simplicity of sending a message to telegram chats using {@link TelegramBot#execute(BaseRequest)}.
@@ -52,10 +51,12 @@ public class TelegramBotSenderService {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotSenderService.class);
     private final TelegramBot telegramBot;
     private final CommandService commandService;
+    private final ShelterService shelterService;
 
-    public TelegramBotSenderService(TelegramBot telegramBot, CommandService commandService) {
+    public TelegramBotSenderService(TelegramBot telegramBot, CommandService commandService, ShelterService shelterService) {
         this.telegramBot = telegramBot;
         this.commandService = commandService;
+        this.shelterService = shelterService;
     }
 
     /**
@@ -82,18 +83,6 @@ public class TelegramBotSenderService {
         }
     }
 
-    /**
-     * A method with a prepared message to send a message about receiving an unknown command
-     * using {@link TelegramBotSenderService#MESSAGE_SORRY_I_DONT_KNOW_COMMAND}
-     * using {@link TelegramBotSenderService#sendMessage(Long, String)}
-     *
-     * @param idChat must be not null
-     */
-    public void sendUnknownProcess(Long idChat) {
-        logger.info("ChatId={}; Method sendUnknownProcess was started for send a message about unknown command",
-                idChat);
-        sendMessage(idChat, MESSAGE_SORRY_I_DONT_KNOW_COMMAND);
-    }
 
     /**
      * A method with a prepared message for sending a welcome message
@@ -110,7 +99,7 @@ public class TelegramBotSenderService {
     }
 
     public void sendSelectShelter(Long idChat) {
-        List<String> nameDataButtons = Arrays.stream(DataSourceType.values()).map(Enum::toString).collect(Collectors.toList());
+        List<String> nameDataButtons = shelterService.getAllshelterDesignation();
         Pair<Integer, Integer> widthAndHeight = getTableSize(nameDataButtons.size());
         sendButtonsWithOneData(idChat,
                 MESSAGE_SELECT_SHELTER,
@@ -120,42 +109,6 @@ public class TelegramBotSenderService {
                 widthAndHeight.getFirst(), widthAndHeight.getSecond());
     }
 
-    /**
-     * A method with a prepared message to send an alert about an unknown action
-     * using {@link TelegramBotSenderService#MESSAGE_SORRY_I_KNOW_THIS}
-     * using {@link TelegramBotSenderService#sendMessage(Long, String)}
-     *
-     * @param idChat must be not null
-     */
-    public void sendSorryIKnowThis(Long idChat) {
-        logger.info("ChatId={}; Method processWhatICan was started for send ability", idChat);
-        sendMessage(idChat, MESSAGE_SORRY_I_KNOW_THIS);
-        sendButtonsCommandForChat(idChat);
-    }
-
-    /**
-     * A method with a prepared message for sending a message with information about the shelter
-     * using {@link InfoAboutShelter#getInfoEn()}
-     * using {@link TelegramBotSenderService#sendMessage(Long, String)}
-     *
-     * @param idChat must be not null
-     */
-    public void sendInfoAboutShelter(Long idChat) {
-        logger.info("ChatId={}; Method sendInfoAboutShelter was started for send info about shelter", idChat);
-        sendMessage(idChat, InfoAboutShelter.getInfoEn());
-    }
-
-    /**
-     * A method with a prepared message for sending a message with information about how to take a dog from a shelter
-     * using {@link InfoTakeADog#getInfoEn()}
-     * using {@link TelegramBotSenderService#sendMessage(Long, String)}
-     *
-     * @param idChat must be not null
-     */
-    public void sendHowTakeDog(Long idChat) {
-        logger.info("ChatId={}; Method sendHowTakeDog was started for send how take a dog", idChat);
-        sendMessage(idChat, InfoTakeADog.getInfoEn());
-    }
 
     /**
      * A method for sending a set of buttons to a telegram chat with the same first value and different second values <br>
@@ -276,14 +229,14 @@ public class TelegramBotSenderService {
 
     /**
      * The method sends the string value of all available commands to idChat as a list.
-     * The provision of the list, using idChat, is handled by {@link CommandService#getAllTitlesAsListExcludeHide(Long)}
+     * The provision of the list, using idChat, is handled by {@link CommandService#getAllTitlesAsListExcludeHide(Chat)}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
      *
-     * @param idChat must be not null
+     * @param chat must be not null
      */
-    public void sendListCommandForChat(Long idChat) {
-        logger.info("ChatId={}; Method sendListCommandForChat was started for send list of command", idChat);
-        sendMessage(idChat, commandService.getAllTitlesAsListExcludeHide(idChat));
+    public void sendListCommandForChat(Chat chat) {
+        logger.info("ChatId={}; Method sendListCommandForChat was started for send list of command", chat.getId());
+        sendMessage(chat.getId(), commandService.getAllTitlesAsListExcludeHide(chat));
     }
 
 
@@ -322,30 +275,30 @@ public class TelegramBotSenderService {
 
     /**
      * The method receives a pair of lists of button names and button data from
-     * {@link CommandService#getPairListsForButtonExcludeHide(Long)},
+     * {@link CommandService#getPairListsForButtonExcludeHide(Chat)}
      * receives a pair of values width and height from {@link TelegramBotSenderService#getTableSize(int)},
      * forms a request and starts sending buttons to the chat
      * using {@link TelegramBotSenderService#sendButtonsWithDifferentData(Long, String, List, List, int, int)}
      *
-     * @param idChat must be not null
+     * @param chat must be not null
      */
-    public void sendButtonsCommandForChat(Long idChat) {
-        logger.info("ChatId={}; Method sendListCommandForChat was started for send list of command", idChat);
-        Pair<List<String>, List<String>> nameAndDataOfButtons = commandService.getPairListsForButtonExcludeHide(idChat);
+    public void sendButtonsCommandForChat(Chat chat) {
+        logger.info("ChatId={}; Method sendListCommandForChat was started for send list of command", chat.getId());
+        Pair<List<String>, List<String>> nameAndDataOfButtons = commandService.getPairListsForButtonExcludeHide(chat);
 
         List<String> nameList = nameAndDataOfButtons.getFirst();
         List<String> dataList = nameAndDataOfButtons.getSecond();
         int countButtons = nameList.size();
 
         if (countButtons == 0) {
-            logger.debug("ChatId={}; Method sendButtonsCommandForChat detected count of command = 0", idChat);
+            logger.debug("ChatId={}; Method sendButtonsCommandForChat detected count of command = 0", chat.getId());
             return;
         }
         Pair<Integer, Integer> widthAndHeight = getTableSize(countButtons);
         int width = widthAndHeight.getFirst();
         int height = widthAndHeight.getSecond();
         sendButtonsWithDifferentData(
-                idChat,
+                chat.getId(),
                 MESSAGE_SELECT_COMMAND,
                 nameList,
                 dataList,
@@ -383,6 +336,17 @@ public class TelegramBotSenderService {
                 message,
                 Collections.singletonList(nameButton),
                 Collections.singletonList(Command.CLOSE_UNFINISHED_REQUEST.getTextCommand()),
+                1, 1
+        );
+    }
+
+
+    public void sendMessageWithOneButton(Long idChat, String message, String nameButton, String dataButton) {
+        sendButtonsWithDifferentData(
+                idChat,
+                message,
+                Collections.singletonList(nameButton),
+                Collections.singletonList(dataButton),
                 1, 1
         );
     }

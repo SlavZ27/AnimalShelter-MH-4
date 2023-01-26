@@ -10,7 +10,11 @@ public class Animal {
     private Long id;
     @Column(name = "name_animal")
     private String nameAnimal;
+    @Column(name = "born")
     private LocalDate born;
+    @OneToOne
+    @JoinColumn(name = "id_shelter")
+    private Shelter shelter;
 
     public Animal() {
     }
@@ -21,6 +25,14 @@ public class Animal {
 
     public void setBorn(LocalDate born) {
         this.born = born;
+    }
+
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
     }
 
     public Long getId() {
@@ -41,7 +53,11 @@ public class Animal {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Animal ");
+        StringBuilder sb = new StringBuilder("Animal of shelter '");
+        if (shelter != null) {
+            sb.append(shelter.getNameShelter());
+            sb.append("' ");
+        }
         sb.append(nameAnimal);
         sb.append(" ");
         if (born != null) {

@@ -4,8 +4,6 @@ import com.pengrad.telegrambot.model.Update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import pro.sky.animalshelter4.configuration.DataSourceType;
-import pro.sky.animalshelter4.configuration.DatabaseContextHolder;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.exception.ChatDontHaveShelterIndex;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
@@ -24,12 +22,10 @@ import java.util.List;
 public class TelegramBotUpdatesService {
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesService.class);
     private final TelegramMapperService telegramMapperService;
-    private final CommandService commandService;
     private final ChatService chatService;
 
-    public TelegramBotUpdatesService(TelegramMapperService telegramMapperService, CommandService commandService, ChatService chatService) {
+    public TelegramBotUpdatesService(TelegramMapperService telegramMapperService, ChatService chatService) {
         this.telegramMapperService = telegramMapperService;
-        this.commandService = commandService;
         this.chatService = chatService;
     }
 
@@ -63,13 +59,12 @@ public class TelegramBotUpdatesService {
             logger.debug("Method processUpdate detected null updateDpo.getInteractionUnit()");
             return;
         }
-        DatabaseContextHolder.set(DataSourceType.PUBLIC);
         switch (updateDpo.getInteractionUnit()) {
             case PHOTO:
                 logger.debug("ChatId={}; Method processUpdate detected photo in message()", updateDpo.getIdChat());
                 Command command = chatService.getUnfinishedRequestForChat(updateDpo);
                 if (command == null) {
-                    chatService.sendSorryIKnowThis(updateDpo.getIdChat());
+                    chatService.sendSorryIKnowThis(updateDpo);
                     return;
                 } else {
                     updateDpo.setInteractionUnit(InteractionUnit.COMMAND);
@@ -80,7 +75,7 @@ public class TelegramBotUpdatesService {
             case MESSAGE:
                 command = chatService.getUnfinishedRequestForChat(updateDpo);
                 if (command == null) {
-                    chatService.sendSorryIKnowThis(updateDpo.getIdChat());
+                    chatService.sendSorryIKnowThis(updateDpo);
                     return;
                 } else {
                     updateDpo.setInteractionUnit(InteractionUnit.COMMAND);
@@ -110,26 +105,24 @@ public class TelegramBotUpdatesService {
      */
     public void processUpdateDpoWithCommand(UpdateDPO updateDpo) {
         if (updateDpo.getCommand() == null) {
-            chatService.sendUnknownProcess(updateDpo.getIdChat());
+            chatService.sendUnknownProcess(updateDpo);
         } else {
-            Chat chat = null;
-            if (!updateDpo.getCommand().equals(Command.SET_SHELTER)) {
+            if (!updateDpo.getCommand().equals(Command.SET_SHELTER) &&
+                    !updateDpo.getCommand().equals(Command.START)) {
                 try {
-                    chat = chatService.checkShelterIndexOfChatFromUpdateDPO(updateDpo);
+                    chatService.checkShelterIndexOfChatFromUpdateDPO(updateDpo);
                 } catch (ChatDontHaveShelterIndex chatDontHaveShelterIndex) {
                     updateDpo.setCommand(Command.SET_SHELTER);
                 }
-            }
-            if (!updateDpo.getCommand().equals(Command.SET_SHELTER) && !updateDpo.getCommand().equals(Command.START)) {
-                if (chat != null && chat.getShelter() != null &&
-                        !commandService.approveLaunchCommand(
-                                updateDpo.getCommand(),
-                                updateDpo.getIdChat(),
-                                DataSourceType.valueOf(chat.getShelter()))) {
-                    logger.debug("ChatId={}; Method processUpdate detected no rights to execute command = {} ",
-                            updateDpo.getIdChat(), updateDpo.getCommand());
-                    chatService.sendSorryIKnowThis(updateDpo.getIdChat());
-                    return;
+                if (!updateDpo.getCommand().equals(Command.SET_SHELTER)) {
+                    if (!chatService.approveLaunchCommand(
+                            updateDpo.getCommand(),
+                            updateDpo.getIdChat())) {
+                        logger.debug("ChatId={}; Method processUpdate detected no rights to execute command = {} ",
+                                updateDpo.getIdChat(), updateDpo.getCommand());
+                        chatService.sendSorryIKnowThis(updateDpo);
+                        return;
+                    }
                 }
             }
             switch (updateDpo.getCommand()) {
@@ -140,10 +133,10 @@ public class TelegramBotUpdatesService {
                     chatService.setShelter(updateDpo);
                     break;
                 case INFO:
-                    chatService.sendInfoAboutShelter(updateDpo.getIdChat());
+                    chatService.sendInfoAboutShelter(updateDpo);
                     break;
                 case HOW:
-                    chatService.sendHowTakeDog(updateDpo.getIdChat());
+                    chatService.sendHowTakeDog(updateDpo);
                     break;
                 case INFO_DISABILITIES:
                     chatService.sendInfoDogsDisabilities(updateDpo);

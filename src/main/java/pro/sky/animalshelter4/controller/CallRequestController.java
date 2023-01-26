@@ -17,7 +17,7 @@ import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("call_request")
+@RequestMapping("{shelterDesignation}/call_request")
 public class CallRequestController {
 
     private final CallRequestService callRequestService;
@@ -25,6 +25,7 @@ public class CallRequestController {
     public CallRequestController(CallRequestService callRequestService) {
         this.callRequestService = callRequestService;
     }
+
     @ApiResponses({
             @ApiResponse(
                     responseCode = "201",
@@ -36,8 +37,11 @@ public class CallRequestController {
             )
     })
     @PostMapping                //POST http://localhost:8080/call_request
-    public ResponseEntity<CallRequestDto> createCallRequest(@RequestBody @Valid CallRequestDto callRequestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(callRequestService.createCallRequest(callRequestDto));
+    public ResponseEntity<CallRequestDto> createCallRequest(@RequestBody @Valid CallRequestDto callRequestDto,
+                                                            @PathVariable String shelterDesignation) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(callRequestService.createCallRequest(
+                callRequestDto,
+                shelterDesignation));
     }
 
     @ApiResponses({
@@ -51,8 +55,9 @@ public class CallRequestController {
             )
     })
     @GetMapping("{id}")  //GET http://localhost:8080/call_request/1
-    public ResponseEntity<CallRequestDto> readCallRequest(@Parameter(description = "user id")@PathVariable Long id) {
-        return ResponseEntity.ok(callRequestService.readCallRequest(id));
+    public ResponseEntity<CallRequestDto> readCallRequest(@Parameter(description = "user id") @PathVariable Long id,
+                                                          @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(callRequestService.readCallRequest(id, shelterDesignation));
     }
 
     @ApiResponses({
@@ -66,8 +71,9 @@ public class CallRequestController {
             )
     })
     @PutMapping()               //PUT http://localhost:8080/call_request/
-    public ResponseEntity<CallRequestDto> updateCallRequest(@RequestBody @Valid CallRequestDto callRequestDto) {
-        return ResponseEntity.ok(callRequestService.updateCallRequest(callRequestDto));
+    public ResponseEntity<CallRequestDto> updateCallRequest(@RequestBody @Valid CallRequestDto callRequestDto,
+                                                            @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(callRequestService.updateCallRequest(callRequestDto, shelterDesignation));
     }
 
     @ApiResponses({
@@ -81,24 +87,11 @@ public class CallRequestController {
             )
     })
     @DeleteMapping("{id}")    //DELETE http://localhost:8080/call_request/1
-    public ResponseEntity<CallRequestDto> deleteCallRequest(@Parameter(description = "user id")@PathVariable Long id) {
-        return ResponseEntity.ok(callRequestService.deleteCallRequest(id));
+    public ResponseEntity<CallRequestDto> deleteCallRequest(@Parameter(description = "user id") @PathVariable Long id,
+                                                            @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(callRequestService.deleteCallRequest(id, shelterDesignation));
     }
 
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Receives all call requests.",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CallRequest[].class)
-                    )}
-            )
-    })
-    @GetMapping()  //GET http://localhost:8080/call_request/
-    public ResponseEntity<Collection<CallRequestDto>> getAllCallRequest() {
-        return ResponseEntity.ok(callRequestService.getAll());
-    }
 
     @ApiResponses({
             @ApiResponse(
@@ -111,8 +104,9 @@ public class CallRequestController {
             )
     })
     @GetMapping("volunteer/{id}")  //GET http://localhost:8080/call_request/volunteer/1
-    public ResponseEntity<Collection<CallRequestDto>> getAllCallRequestVolunteer(@Parameter(description = "user id")@PathVariable Long id) {
-        return ResponseEntity.ok(callRequestService.getAllOpenCallRequestVolunteer(id));
+    public ResponseEntity<Collection<CallRequestDto>> getAllCallRequestVolunteer(@Parameter(description = "user id") @PathVariable Long id,
+                                                                                 @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(callRequestService.getAllOpenCallRequestVolunteer(id, shelterDesignation));
     }
 
 
@@ -121,14 +115,15 @@ public class CallRequestController {
                     responseCode = "200",
                     description = "Receives all open client requests for a call by client id.",
                     content = {@Content(
-                    mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = CallRequest[].class)
-            )}
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CallRequest[].class)
+                    )}
             )
     })
     @GetMapping("client/{id}")  //GET http://localhost:8080/call_request/client/1
-    public ResponseEntity<Collection<CallRequestDto>> getAllCallRequestClient(@PathVariable Long id) {
-        return ResponseEntity.ok(callRequestService.getAllOpenCallRequestClient(id));
+    public ResponseEntity<Collection<CallRequestDto>> getAllCallRequestClient(@PathVariable Long id,
+                                                                              @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(callRequestService.getAllOpenCallRequestClient(id, shelterDesignation));
     }
 
     @ApiResponses({
@@ -142,8 +137,8 @@ public class CallRequestController {
             )
     })
     @GetMapping("open")  //GET http://localhost:8080/call_request/open/
-    public ResponseEntity<Collection<CallRequestDto>> getAllOpenCallRequest() {
-        return ResponseEntity.ok(callRequestService.getAllOpenCallRequest());
+    public ResponseEntity<Collection<CallRequestDto>> getAllOpenCallRequest(@PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(callRequestService.getAllOpenCallRequest(shelterDesignation));
     }
 
     @ApiResponses({
@@ -158,7 +153,7 @@ public class CallRequestController {
     })
 
     @GetMapping("close")  //GET http://localhost:8080/call_request/close/
-    public ResponseEntity<Collection<CallRequestDto>> getAllCloseCallRequest() {
-        return ResponseEntity.ok(callRequestService.getAllCloseCallRequest());
+    public ResponseEntity<Collection<CallRequestDto>> getAllCloseCallRequest(@PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(callRequestService.getAllCloseCallRequest(shelterDesignation));
     }
 }

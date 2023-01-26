@@ -1,17 +1,14 @@
 package pro.sky.animalshelter4.entityDto;
 
+import pro.sky.animalshelter4.entity.Shelter;
 
-
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.time.LocalDate;
 
 public class AnimalDto {
-
     private Long id;
     private String nameAnimal;
     private LocalDate born;
-
     public Long getId() {
         return id;
     }
@@ -35,5 +32,5 @@ public class AnimalDto {
     public void setBorn(LocalDate born) {
         this.born = born;
     }
-    
+
 }

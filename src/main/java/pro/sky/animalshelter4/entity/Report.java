@@ -13,16 +13,34 @@ public class Report {
     private AnimalOwnership animalOwnership;
     @Column(name = "report_date")
     private LocalDate reportDate;
+    @Column(name = "diet")
     private String diet;
+    @Column(name = "feeling")
     private String feeling;
+    @Column(name = "behavior")
     private String behavior;
     @OneToOne
     @JoinColumn(name = "id_photo")
     private Photo photo;
     @Column(name = "is_approve")
     private Boolean isApprove;
+    @OneToOne
+    @JoinColumn(name = "id_shelter")
+    private Shelter shelter;
 
     public Report() {
+    }
+
+    public Boolean getApprove() {
+        return isApprove;
+    }
+
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
     }
 
     public Boolean isApprove() {

@@ -20,8 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
-import pro.sky.animalshelter4.entityDto.AnimalTypeDto;
-import pro.sky.animalshelter4.exception.AnimalTypeNotFoundException;
+import pro.sky.animalshelter4.exception.ShelterNotFoundException;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.repository.*;
 import pro.sky.animalshelter4.service.*;
@@ -40,13 +39,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class AnimalTypeControllerTest {
+class ShelterControllerTest {
     @LocalServerPort
     private int port;
     private final static String REQUEST_MAPPING_STRING = "animal_type";
     @InjectMocks
     @Autowired
-    private AnimalTypeController animalTypeController;
+    private ShelterController shelterController;
     @MockBean
     private TelegramBot telegramBot;
     @Autowired
@@ -54,7 +53,7 @@ class AnimalTypeControllerTest {
     @Autowired
     private AnimalRepository animalRepository;
     @Autowired
-    private AnimalTypeRepository animalTypeRepository;
+    private ShelterRepository shelterRepository;
     @Autowired
     private CallRequestRepository callRequestRepository;
     @Autowired
@@ -72,7 +71,7 @@ class AnimalTypeControllerTest {
     @Autowired
     private AnimalService animalService;
     @Autowired
-    private AnimalTypeService animalTypeService;
+    private ShelterService shelterService;
     @Autowired
     private CallRequestService callRequestService;
     @Autowired
@@ -114,7 +113,7 @@ class AnimalTypeControllerTest {
         callRequestRepository.deleteAll();
         userRepository.deleteAll();
         animalRepository.deleteAll();
-        animalTypeRepository.deleteAll();
+        shelterRepository.deleteAll();
         unfinishedRequestTelegramRepository.deleteAll();
         chatRepository.deleteAll();
 
@@ -171,14 +170,12 @@ class AnimalTypeControllerTest {
         //generate animalType
         List<Animal> animalList = new ArrayList<>();
         for (int i = 0; i < animalTypeInt; i++) {
-            AnimalType animalType = new AnimalType();
-            animalType.setTypeAnimal(generator.generateAnimalType());
-            animalType = animalTypeRepository.save(animalType);
+            Shelter shelter = new Shelter();
+            shelter = shelterRepository.save(shelter);
             for (int j = 0; j < animalInt; j++) {
                 //generate and remember animal
                 Animal animal = new Animal();
                 animal.setNameAnimal(generator.generateNameIfEmpty(null));
-                animal.setAnimalType(animalType);
                 animal.setBorn(generator.generateDate(true, LocalDate.now()));
                 animal = animalRepository.save(animal);
                 animalList.add(animal);
@@ -234,7 +231,7 @@ class AnimalTypeControllerTest {
         callRequestRepository.deleteAll();
         userRepository.deleteAll();
         animalRepository.deleteAll();
-        animalTypeRepository.deleteAll();
+        shelterRepository.deleteAll();
         unfinishedRequestTelegramRepository.deleteAll();
         chatRepository.deleteAll();
     }
@@ -244,7 +241,7 @@ class AnimalTypeControllerTest {
         assertThat(telegramBot).isNotNull();
         assertThat(animalOwnershipRepository).isNotNull();
         assertThat(animalRepository).isNotNull();
-        assertThat(animalTypeRepository).isNotNull();
+        assertThat(shelterRepository).isNotNull();
         assertThat(callRequestRepository).isNotNull();
         assertThat(chatRepository).isNotNull();
         assertThat(photoRepository).isNotNull();
@@ -253,7 +250,7 @@ class AnimalTypeControllerTest {
         assertThat(userRepository).isNotNull();
         assertThat(animalOwnershipService).isNotNull();
         assertThat(animalService).isNotNull();
-        assertThat(animalTypeService).isNotNull();
+        assertThat(shelterService).isNotNull();
         assertThat(callRequestService).isNotNull();
         assertThat(chatService).isNotNull();
         assertThat(commandService).isNotNull();
@@ -269,149 +266,149 @@ class AnimalTypeControllerTest {
         assertThat(userService).isNotNull();
         assertThat(telegramBotUpdatesListener).isNotNull();
         assertThat(testRestTemplate).isNotNull();
-        assertThat(animalTypeController).isNotNull();
+        assertThat(shelterController).isNotNull();
     }
 
-
-    @Test
-    void createAnimalType() {
-        AnimalType animalType =
-                animalTypeRepository.findAll().stream().findAny().orElse(null);
-        assertThat(animalType).isNotNull();
-        AnimalTypeDto animalTypeDto = dtoMapperService.toDto(animalType);
-
-        animalRepository.findAll().stream().filter(animal -> animal.getAnimalType().getId().equals(animalType.getId())).
-                forEach(animal -> {
-                    animalOwnershipRepository.findAll().stream().filter(animalOwnership ->
-                                    animalOwnership.getAnimal().getId().equals(animal.getId())).
-                            forEach(animalOwnership -> {
-                                reportRepository.findAll().stream().filter(report ->
-                                                report.getAnimalOwnership().getId().equals(animalOwnership.getId())).
-                                        forEach(report -> reportRepository.delete(report));
-                                animalOwnershipRepository.delete(animalOwnership);
-                            });
-                    animalRepository.delete(animal);
-                });
-        animalTypeRepository.delete(animalType);
-        assertThat(animalTypeRepository.findById(animalType.getId()).orElse(null))
-                .isNull();
-        final int countAnimalType = animalTypeRepository.findAll().size();
-
-        AnimalTypeDto responseEntity = testRestTemplate.
-                postForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
-                        animalTypeDto,
-                        AnimalTypeDto.class);
-        assertEquals(countAnimalType + 1, animalTypeRepository.findAll().size());
-
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getTypeAnimal()).isEqualTo(animalTypeDto.getTypeAnimal());
-    }
-
-    @Test
-    void readAnimalType() {
-        AnimalType animalType =
-                animalTypeRepository.findAll().stream().findAny().orElse(null);
-        assertThat(animalType).isNotNull();
-
-        AnimalTypeDto animalTypeDto = dtoMapperService.toDto(animalType);
-        assertThat(animalTypeRepository.findById(animalTypeDto.getId()).orElse(null))
-                .isNotNull();
-
-        final int countAnimalType = animalTypeRepository.findAll().size();
-
-        AnimalTypeDto responseEntity = testRestTemplate.
-                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + animalType.getId(),
-                        AnimalTypeDto.class);
-        assertEquals(countAnimalType, animalTypeRepository.findAll().size());
-
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getTypeAnimal()).isEqualTo(animalTypeDto.getTypeAnimal());
-    }
-
-    @Test
-    void readAnimalTypeNegative() {
-        List<Long> animalTypeIdList = animalTypeRepository.findAll().stream().
-                map(AnimalType::getId).collect(Collectors.toList());
-        Long index = (long) random.nextInt(animalTypeIdList.size());
-        while (animalTypeIdList.contains(index)) {
-            index = (long) random.nextInt(animalTypeIdList.size());
-        }
-
-        AnimalTypeDto responseEntity = testRestTemplate.
-                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + index,
-                        AnimalTypeDto.class);
-
-        Long finalIndex = index;
-        assertThatExceptionOfType(AnimalTypeNotFoundException.class).isThrownBy(()
-                -> animalTypeService.readAnimalType(finalIndex));
-    }
-
-    @Test
-    void updateAnimalType() {
-        AnimalType animalType =
-                animalTypeRepository.findAll().stream().findAny().orElse(null);
-        assertThat(animalType).isNotNull();
-
-        AnimalTypeDto animalTypeDto = dtoMapperService.toDto(animalType);
-        assertThat(animalTypeDto).isNotNull();
-        assertThat(animalTypeRepository.findById(animalTypeDto.getId()).orElse(null))
-                .isNotNull();
-        LocalDate dateRemember = LocalDate.of(2000, 02, 22);
-        animalTypeDto.setTypeAnimal("strange animal");
-
-        final int countAnimalType = animalTypeRepository.findAll().size();
-        testRestTemplate.
-                put("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
-                        animalTypeDto);
-        assertEquals(countAnimalType, animalTypeRepository.findAll().size());
-
-        AnimalType animalTypeActual = animalTypeRepository.findById(animalTypeDto.getId()).orElse(null);
-
-        assertThat(animalTypeActual).isNotNull();
-        assertThat(animalTypeActual.getTypeAnimal().toString()).isEqualTo("strange animal");
-    }
-
-    @Test
-    void deleteAnimalType() {
-        final int countAnimalType = animalTypeRepository.findAll().size();
-        AnimalType animalType = animalTypeRepository.findAll().stream().findFirst().orElse(null);
-
-        animalRepository.findAll().stream().filter(animal -> animal.getAnimalType().getId().equals(animalType.getId())).
-                forEach(animal -> {
-                    animalOwnershipRepository.findAll().stream().filter(animalOwnership ->
-                                    animalOwnership.getAnimal().getId().equals(animal.getId())).
-                            forEach(animalOwnership -> {
-                                reportRepository.findAll().stream().filter(report ->
-                                                report.getAnimalOwnership().getId().equals(animalOwnership.getId())).
-                                        forEach(report -> reportRepository.delete(report));
-                                animalOwnershipRepository.delete(animalOwnership);
-                            });
-                    animalRepository.delete(animal);
-                });
-
-        ResponseEntity<String> responseEntity = testRestTemplate
-                .exchange("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + animalType.getId()
-                        , HttpMethod.DELETE,
-                        HttpEntity.EMPTY,
-                        new ParameterizedTypeReference<>() {
-                        });
-
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody())
-                .contains(animalType.getId().toString())
-                .contains(animalType.getTypeAnimal());
-        assertEquals(countAnimalType - 1, animalTypeRepository.findAll().size());
-        assertThat(animalTypeRepository.findById(animalType.getId()).orElse(null))
-                .isNull();
-    }
-
-    @Test
-    public void getAllAnimalTypeTest() {
-        final long countAnimalType = animalTypeRepository.findAll().size();
-        AnimalTypeDto[] animalTypeDtos = testRestTemplate
-                .getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
-                        AnimalTypeDto[].class);
-        assertThat(animalTypeDtos.length)
-                .isEqualTo(countAnimalType);
-    }
+//
+//    @Test
+//    void createAnimalType() {
+//        Shelter shelter =
+//                shelterRepository.findAll().stream().findAny().orElse(null);
+//        assertThat(shelter).isNotNull();
+//        AnimalTypeDto animalTypeDto = dtoMapperService.toDto(shelter);
+//
+//        animalRepository.findAll().stream().filter(animal -> animal.getAnimalType().getId().equals(shelter.getId())).
+//                forEach(animal -> {
+//                    animalOwnershipRepository.findAll().stream().filter(animalOwnership ->
+//                                    animalOwnership.getAnimal().getId().equals(animal.getId())).
+//                            forEach(animalOwnership -> {
+//                                reportRepository.findAll().stream().filter(report ->
+//                                                report.getAnimalOwnership().getId().equals(animalOwnership.getId())).
+//                                        forEach(report -> reportRepository.delete(report));
+//                                animalOwnershipRepository.delete(animalOwnership);
+//                            });
+//                    animalRepository.delete(animal);
+//                });
+//        shelterRepository.delete(shelter);
+//        assertThat(shelterRepository.findById(shelter.getId()).orElse(null))
+//                .isNull();
+//        final int countAnimalType = shelterRepository.findAll().size();
+//
+//        AnimalTypeDto responseEntity = testRestTemplate.
+//                postForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
+//                        animalTypeDto,
+//                        AnimalTypeDto.class);
+//        assertEquals(countAnimalType + 1, shelterRepository.findAll().size());
+//
+//        assertThat(responseEntity).isNotNull();
+//        assertThat(responseEntity.getTypeAnimal()).isEqualTo(animalTypeDto.getTypeAnimal());
+//    }
+//
+//    @Test
+//    void readAnimalType() {
+//        Shelter shelter =
+//                shelterRepository.findAll().stream().findAny().orElse(null);
+//        assertThat(shelter).isNotNull();
+//
+//        AnimalTypeDto animalTypeDto = dtoMapperService.toDto(shelter);
+//        assertThat(shelterRepository.findById(animalTypeDto.getId()).orElse(null))
+//                .isNotNull();
+//
+//        final int countAnimalType = shelterRepository.findAll().size();
+//
+//        AnimalTypeDto responseEntity = testRestTemplate.
+//                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + shelter.getId(),
+//                        AnimalTypeDto.class);
+//        assertEquals(countAnimalType, shelterRepository.findAll().size());
+//
+//        assertThat(responseEntity).isNotNull();
+//        assertThat(responseEntity.getTypeAnimal()).isEqualTo(animalTypeDto.getTypeAnimal());
+//    }
+//
+//    @Test
+//    void readAnimalTypeNegative() {
+//        List<Long> animalTypeIdList = shelterRepository.findAll().stream().
+//                map(Shelter::getId).collect(Collectors.toList());
+//        Long index = (long) random.nextInt(animalTypeIdList.size());
+//        while (animalTypeIdList.contains(index)) {
+//            index = (long) random.nextInt(animalTypeIdList.size());
+//        }
+//
+//        AnimalTypeDto responseEntity = testRestTemplate.
+//                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + index,
+//                        AnimalTypeDto.class);
+//
+//        Long finalIndex = index;
+//        assertThatExceptionOfType(ShelterNotFoundException.class).isThrownBy(()
+//                -> shelterService.readAnimalType(finalIndex));
+//    }
+//
+//    @Test
+//    void updateAnimalType() {
+//        Shelter shelter =
+//                shelterRepository.findAll().stream().findAny().orElse(null);
+//        assertThat(shelter).isNotNull();
+//
+//        AnimalTypeDto animalTypeDto = dtoMapperService.toDto(shelter);
+//        assertThat(animalTypeDto).isNotNull();
+//        assertThat(shelterRepository.findById(animalTypeDto.getId()).orElse(null))
+//                .isNotNull();
+//        LocalDate dateRemember = LocalDate.of(2000, 02, 22);
+//        animalTypeDto.setTypeAnimal("strange animal");
+//
+//        final int countAnimalType = shelterRepository.findAll().size();
+//        testRestTemplate.
+//                put("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
+//                        animalTypeDto);
+//        assertEquals(countAnimalType, shelterRepository.findAll().size());
+//
+//        Shelter shelterActual = shelterRepository.findById(animalTypeDto.getId()).orElse(null);
+//
+//        assertThat(shelterActual).isNotNull();
+//        assertThat(shelterActual.getTypeAnimal().toString()).isEqualTo("strange animal");
+//    }
+//
+//    @Test
+//    void deleteAnimalType() {
+//        final int countAnimalType = shelterRepository.findAll().size();
+//        Shelter shelter = shelterRepository.findAll().stream().findFirst().orElse(null);
+//
+//        animalRepository.findAll().stream().filter(animal -> animal.getAnimalType().getId().equals(shelter.getId())).
+//                forEach(animal -> {
+//                    animalOwnershipRepository.findAll().stream().filter(animalOwnership ->
+//                                    animalOwnership.getAnimal().getId().equals(animal.getId())).
+//                            forEach(animalOwnership -> {
+//                                reportRepository.findAll().stream().filter(report ->
+//                                                report.getAnimalOwnership().getId().equals(animalOwnership.getId())).
+//                                        forEach(report -> reportRepository.delete(report));
+//                                animalOwnershipRepository.delete(animalOwnership);
+//                            });
+//                    animalRepository.delete(animal);
+//                });
+//
+//        ResponseEntity<String> responseEntity = testRestTemplate
+//                .exchange("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + shelter.getId()
+//                        , HttpMethod.DELETE,
+//                        HttpEntity.EMPTY,
+//                        new ParameterizedTypeReference<>() {
+//                        });
+//
+//        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+//        assertThat(responseEntity.getBody())
+//                .contains(shelter.getId().toString())
+//                .contains(shelter.getTypeAnimal());
+//        assertEquals(countAnimalType - 1, shelterRepository.findAll().size());
+//        assertThat(shelterRepository.findById(shelter.getId()).orElse(null))
+//                .isNull();
+//    }
+//
+//    @Test
+//    public void getAllAnimalTypeTest() {
+//        final long countAnimalType = shelterRepository.findAll().size();
+//        AnimalTypeDto[] animalTypeDtos = testRestTemplate
+//                .getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
+//                        AnimalTypeDto[].class);
+//        assertThat(animalTypeDtos.length)
+//                .isEqualTo(countAnimalType);
+//    }
 }

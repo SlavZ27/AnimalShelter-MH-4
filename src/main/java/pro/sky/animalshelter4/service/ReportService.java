@@ -6,12 +6,13 @@ import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.AnimalOwnership;
 import pro.sky.animalshelter4.entity.Photo;
 import pro.sky.animalshelter4.entity.Report;
-import pro.sky.animalshelter4.entityDto.AnimalDto;
-import pro.sky.animalshelter4.entityDto.ChatDto;
+import pro.sky.animalshelter4.entity.Shelter;
 import pro.sky.animalshelter4.entityDto.ReportDto;
 import pro.sky.animalshelter4.exception.ReportNotFoundException;
+import pro.sky.animalshelter4.exception.ShelterNotFoundException;
 import pro.sky.animalshelter4.repository.PhotoRepository;
 import pro.sky.animalshelter4.repository.ReportRepository;
+import pro.sky.animalshelter4.repository.ShelterRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -42,19 +43,22 @@ public class ReportService {
     private final Logger logger = LoggerFactory.getLogger(ReportService.class);
     private final PhotoRepository photoRepository;
     private final DtoMapperService dtoMapperService;
+    private final ShelterRepository shelterRepository;
 
 
     public ReportService(ReportRepository reportRepository, PhotoService photoService,
-                         PhotoRepository photoRepository, DtoMapperService dtoMapperService) {
+                         PhotoRepository photoRepository, DtoMapperService dtoMapperService, ShelterRepository shelterRepository) {
         this.reportRepository = reportRepository;
         this.photoService = photoService;
         this.photoRepository = photoRepository;
         this.dtoMapperService = dtoMapperService;
+        this.shelterRepository = shelterRepository;
     }
 
     /**
      * This method, using the method repository, allows you to create a new report
      * Using{@link ReportRepository#save(Object)}
+     *
      * @param report is not null
      * @return new report
      */
@@ -66,80 +70,71 @@ public class ReportService {
     /**
      * This method, using the method repository, allows you to create a new report
      * Using{@link ReportRepository#save(Object)}
+     *
      * @param reportDto is not null
      * @return new report
      */
-    public ReportDto createReport(ReportDto reportDto) {
+    public ReportDto createReport(ReportDto reportDto, String shelterDesignation) {
         logger.info("Method createReport was start for create new report");
-        return dtoMapperService.toDto(reportRepository.save(dtoMapperService.toEntity(reportDto)));
+        Report report = dtoMapperService.toEntity(reportDto, shelterDesignation);
+        report.setId(null);
+        return dtoMapperService.toDto(reportRepository.save(report));
     }
 
     /**
      * This method, using the method class, allows find report by id
-     * Using{@link ReportService#findReport(Long)}
+     * Using{@link ReportService#findReport(Long, Shelter)}
+     *
      * @param id is not null
      * @return report
      */
-    public ReportDto readReport(Long id) {
+    public ReportDto readReport(Long id, String shelterDesignation) {
         logger.info("Method readReport was start for find report by id");
-        return dtoMapperService.toDto(findReport(id));
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
+        return dtoMapperService.toDto(findReport(id, shelter));
     }
 
 
     /**
      * This method, using the method repository, allows find report by id
      * Using {@link ReportRepository#findById(Object)}
+     *
      * @param id is not null
      * @return report
      */
-    public Report findReport(Long id) {
+    public Report findReport(Long id, Shelter shelter) {
         logger.info("Method findReport was start for find Report by id");
-        return reportRepository.findById(id).
+        return reportRepository.getByIdWithShelter(id, shelter.getId()).
                 orElseThrow(() -> new ReportNotFoundException(String.valueOf(id)));
     }
 
     /**
      * This method, using the method repository, finds all report
      * Using {@link ReportRepository#findAll()}
+     *
      * @return list report
      */
-    public List<ReportDto> getAll() {
+    public List<ReportDto> getAll(String shelterDesignation) {
         logger.info("Method getAll was start for get all Report");
-        return reportRepository.findAll().stream().
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
+        return reportRepository.getAllWithShelter(shelter.getId()).stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
     /**
-     * This method, using the method repository, find or create new report by id Ownership animal
-     * Using {@link ReportRepository#findReportByIdAnimalOwnershipAndDate(Long, LocalDate)}
-     * Using {@link ReportRepository#save(Object)}
-     * @param animalOwnership is not null
-     * @return report
-     */
-    public Report findOrCreateActualReport(AnimalOwnership animalOwnership) {
-        logger.info("Method findOrCreateActualReport was start");
-        LocalDate localDate = LocalDate.now();
-        Report report = reportRepository.findReportByIdAnimalOwnershipAndDate(animalOwnership.getId(), localDate);
-        if (report == null) {
-            report = new Report();
-            report.setAnimalOwnership(animalOwnership);
-            report.setReportDate(LocalDate.now());
-            return reportRepository.save(report);
-        }
-        return report;
-    }
-
-    /**
      * This method,using the method repository and dto class dtoMapperService , allows update old report by reportDto
-     * Using {@link DtoMapperService#toEntity(ReportDto)}
+     * Using {@link DtoMapperService#toEntity(ReportDto, String)}
      * Using {@link ReportRepository#save(Object)}
+     *
      * @param reportDto is not null
      * @return new report
      */
-    public ReportDto updateReport(ReportDto reportDto) {
+    public ReportDto updateReport(ReportDto reportDto, String shelterDesignation) {
         logger.info("Method updateCallRequest was start for update callRequest");
-        Report newReport = dtoMapperService.toEntity(reportDto);
-        Report oldReport = findReport(newReport.getId());
+        Report newReport = dtoMapperService.toEntity(reportDto, shelterDesignation);
+        Report oldReport = findReport(newReport.getId(), newReport.getShelter());
         if (oldReport == null) {
             throw new ReportNotFoundException(String.valueOf(newReport.getId()));
         }
@@ -156,31 +151,59 @@ public class ReportService {
     /**
      * This method,using  the method class, allows del finished report by id
      * Using{@link DtoMapperService#toDto(Report)}
+     *
      * @param id is not null
      * @return del report
      */
-    public ReportDto deleteReport(Long id) {
+    public ReportDto deleteReport(Long id, String shelterDesignation) {
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
         Report report = new Report();
         report.setId(id);
-        return dtoMapperService.toDto(deleteReport(report));
+        return dtoMapperService.toDto(deleteReport(report, shelter));
     }
 
     /**
      * This method,using  the method repository, allows del finished report by report
      * Using{@link ReportRepository#findById(Object)}
      * Using{@link ReportRepository#delete(Object)}
+     *
      * @param report is not null
      * @return del report
      */
-    public Report deleteReport(Report report) {
+    public Report deleteReport(Report report, Shelter shelter) {
         logger.info("Method deleteReport was start for delete Report");
         if (report.getId() == null) {
             throw new IllegalArgumentException("Incorrect id of Report");
         }
-        Report reportFound = reportRepository.findById(report.getId()).
+        Report reportFound = reportRepository.getByIdWithShelter(report.getId(), shelter.getId()).
                 orElseThrow(() -> new ReportNotFoundException(String.valueOf(report.getId())));
         reportRepository.delete(reportFound);
         return reportFound;
+    }
+
+    /**
+     * This method, using the method repository, find or create new report by id Ownership animal
+     * Using {@link ReportRepository#findReportByIdAnimalOwnershipAndDateWithShelter(Long, LocalDate, Long)}
+     * Using {@link ReportRepository#save(Object)}
+     *
+     * @param animalOwnership is not null
+     * @return report
+     */
+    public Report findOrCreateActualReportWithOwnership(AnimalOwnership animalOwnership) {
+        logger.info("Method findOrCreateActualReportWithOwnership was start");
+        LocalDate localDate = LocalDate.now();
+        Report report = reportRepository.findReportByIdAnimalOwnershipAndDateWithShelter(
+                animalOwnership.getId(),
+                localDate,
+                animalOwnership.getShelter().getId());
+        if (report == null) {
+            report = new Report();
+            report.setAnimalOwnership(animalOwnership);
+            report.setReportDate(LocalDate.now());
+            return reportRepository.save(report);
+        }
+        return report;
     }
 
     /**
@@ -188,15 +211,16 @@ public class ReportService {
      * Using{@link PhotoRepository#findByIdPhoto(String)}
      * Using{@link PhotoService#addPhoto(Photo)}
      * Using{@link ReportRepository#save(Object)}
+     *
      * @param animalOwnership
      * @param diet
      * @param feeling
      * @param behavior
-     * @param idMedia is not null
+     * @param idMedia         is not null
      * @return report
      */
-    public Report createUpdateReport(AnimalOwnership animalOwnership, String diet, String feeling, String behavior, String idMedia) {
-        Report report = findOrCreateActualReport(animalOwnership);
+    public Report updateReportWithAnimalOwnership(AnimalOwnership animalOwnership, String diet, String feeling, String behavior, String idMedia) {
+        Report report = findOrCreateActualReportWithOwnership(animalOwnership);
 
         report.setAnimalOwnership(animalOwnership);
         if (diet != null) {
@@ -223,23 +247,25 @@ public class ReportService {
 
     /**
      * This method, using the method repository , allow find open and not approve report
-     * Using{@link ReportRepository#getOpenAndNotApproveReport()}
+     * Using{@link ReportRepository#getOpenAndNotApproveReportWithShelter(Long)}
+     *
      * @return report
      */
-    public Report getOpenAndNotApproveReport() {
-        return reportRepository.getOpenAndNotApproveReport();
+    public Report getOpenAndNotApproveReportWithShelter(Shelter shelter) {
+        return reportRepository.getOpenAndNotApproveReportWithShelter(shelter.getId());
     }
 
     /**
      * This method, using the methods repository, allows you to approve a report by the report ID
      * Using{@link ReportRepository#findById(Object)}
      * Using{@link ReportRepository#save(Object)}
+     *
      * @param idReport is not null
-     * @param approve is not null
+     * @param approve  is not null
      * @return report
      */
-    public Report approveReport(Long idReport, boolean approve) {
-        Report report = reportRepository.findById(idReport).orElseThrow(() ->
+    public Report approveReport(Shelter shelter, Long idReport, boolean approve) {
+        Report report = reportRepository.getByIdWithShelter(idReport, shelter.getId()).orElseThrow(() ->
                 new ReportNotFoundException(idReport.toString()));
         report.setApprove(approve);
         return reportRepository.save(report);

@@ -16,8 +16,9 @@ public class UnfinishedRequestTelegram {
     @OneToOne
     @JoinColumn(name = "id_chat_telegram")
     private Chat chat;
-
+    @Column(name = "command")
     private String command;
+
 
     public UnfinishedRequestTelegram() {
     }
