@@ -298,6 +298,7 @@ public class UserService {
         user.setNameUser(chat.getFirstNameUser() + " " + chat.getLastNameUser());
         user.setChatTelegram(chat);
         user.setVolunteer(false);
+        user.setShelter(chat.getShelter());
         return addUser(user);
     }
 

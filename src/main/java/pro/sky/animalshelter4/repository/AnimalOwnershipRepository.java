@@ -14,45 +14,45 @@ public interface AnimalOwnershipRepository extends JpaRepository<AnimalOwnership
 
     @Query(value = "select animal_ownership.* from animal_ownership where " +
             "animal_ownership.id_user=:idUserOwner and " +
-            "animal_ownership.idShelter=:idShelter and " +
+            "animal_ownership.id_shelter=:id_shelter and " +
             "is_open=true and " +
             "animal_ownership.date_end_trial>:localDateNow"
             , nativeQuery = true)
-    AnimalOwnership getActualAnimalOwnershipWithIdShelter(Long idShelter, Long idUserOwner, LocalDate localDateNow);
+    AnimalOwnership getActualAnimalOwnershipWithIdShelter(Long id_shelter, Long idUserOwner, LocalDate localDateNow);
 
     @Query(value = "SELECT animal_ownership.* FROM animal_ownership where " +
-            "animal_ownership.idShelter=:idShelter and " +
+            "animal_ownership.id_shelter=:id_shelter and " +
             "animal_ownership.is_open=true and " +
             "animal_ownership.id not in " +
             "(select distinct report.id_animal_ownership from report)"
             , nativeQuery = true)
-    List<AnimalOwnership> getAllOpenAnimalOwnershipWithoutReportsWithIdShelter(Long idShelter);
+    List<AnimalOwnership> getAllOpenAnimalOwnershipWithoutReportsWithIdShelter(Long id_shelter);
 
     @Query(value = "SELECT animal_ownership.* FROM animal_ownership where " +
-            "animal_ownership.idShelter=:idShelter and " +
+            "animal_ownership.id_shelter=:id_shelter and " +
             "is_approve is null and is_open=true and " +
             "animal_ownership.date_end_trial<:localDateNow"
             , nativeQuery = true)
-    List<AnimalOwnership> getNotApproveOpenAnimalOwnershipWithNotTrialWithIdShelter(Long idShelter, LocalDate localDateNow);
+    List<AnimalOwnership> getNotApproveOpenAnimalOwnershipWithNotTrialWithIdShelter(Long id_shelter, LocalDate localDateNow);
 
     @Query(value = "SELECT animal_ownership.* FROM animal_ownership where " +
-            "animal_ownership.idShelter=:idShelter and " +
+            "animal_ownership.id_shelter=:id_shelter and " +
             "is_approve is null and " +
             "is_open=true and " +
             "animal_ownership.date_end_trial<:localDateNow limit 1"
             , nativeQuery = true)
-    AnimalOwnership getOneNotApproveOpenAnimalOwnershipWithNotTrialWithIdShelter(Long idShelter, LocalDate localDateNow);
+    AnimalOwnership getOneNotApproveOpenAnimalOwnershipWithNotTrialWithIdShelter(Long id_shelter, LocalDate localDateNow);
 
     @Query(value = "SELECT animal_ownership.* FROM animal_ownership where " +
-            "animal_ownership.idShelter=:idShelter and " +
+            "animal_ownership.id_shelter=:id_shelter and " +
             "animal_ownership.id=:id"
             , nativeQuery = true)
-    Optional<AnimalOwnership> getByIdWithIdShelter(Long idShelter, Long id);
+    Optional<AnimalOwnership> getByIdWithIdShelter(Long id_shelter, Long id);
 
     @Query(value = "SELECT animal_ownership.* FROM animal_ownership where " +
-            "animal_ownership.idShelter=:idShelter"
+            "animal_ownership.id_shelter=:id_shelter"
             , nativeQuery = true)
-    List<AnimalOwnership> getAllWithIdShelter(Long idShelter);
+    List<AnimalOwnership> getAllWithIdShelter(Long id_shelter);
 
 
 }

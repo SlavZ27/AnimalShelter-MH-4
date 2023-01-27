@@ -9,6 +9,7 @@ import pro.sky.animalshelter4.entity.Shelter;
 import pro.sky.animalshelter4.model.Command;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,7 @@ public class CommandService {
      * using {@link ShelterService#isUserWithTelegramChatIdOwnerInCurrentShelter(Chat)}
      *
      * @param command must be not null
-     * @param chat  must be not null
+     * @param chat    must be not null
      * @return true if the command is available to the user, else false
      */
     public boolean approveLaunchCommand(Command command, Chat chat) {
@@ -75,10 +76,10 @@ public class CommandService {
      * The method outputs Pair<List<String>, List<String>>. First list contain names for the buttons,
      * second contain data for the buttons. <br>
      * For example, this use when sending buttons available to the user in the method
-     * {@link TelegramBotSenderService#sendButtonsCommandForChat(Long)} <br>
+     * {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      * if the id of the volunteer using
-     * {@link CommandService#getListsNameButtonAndListsDataButtonForVolunteerExcludeHide()}  <br>
-     * if else using {@link CommandService#getListsNameButtonAndListsDataButtonForClientExcludeHide()}  <br>
+     * {@link CommandService#getListsNameButtonAndListsDataButtonForVolunteerExcludeHide(String, int)}
+     * if else using {@link CommandService#getListsNameButtonAndListsDataButtonForClientExcludeHide(String, int)}
      * using {@link ShelterService#isUserWithTelegramChatIdVolunteerInCurrentShelter(Chat)}
      * using {@link ShelterService#isUserWithTelegramChatIdOwnerInCurrentShelter(Chat)}
      *
@@ -86,12 +87,14 @@ public class CommandService {
      * @return Pair<List < nameButtons>, List<dataButtons>>
      */
     public Pair<List<String>, List<String>> getPairListsForButtonExcludeHide(Chat chat) {
+        String shelterDesignation = chat.getShelter().getshelterDesignation();
+        int indexMen = chat.getIndexMenu();
         if (shelterService.isUserWithTelegramChatIdVolunteerInCurrentShelter(chat)) {
-            return getListsNameButtonAndListsDataButtonForVolunteerExcludeHide();
+            return getListsNameButtonAndListsDataButtonForVolunteerExcludeHide(shelterDesignation, indexMen);
         } else if (shelterService.isUserWithTelegramChatIdOwnerInCurrentShelter(chat)) {
-            return getListsNameButtonAndListsDataButtonForOwnerExcludeHide();
+            return getListsNameButtonAndListsDataButtonForOwnerExcludeHide(shelterDesignation, indexMen);
         } else {
-            return getListsNameButtonAndListsDataButtonForClientExcludeHide();
+            return getListsNameButtonAndListsDataButtonForClientExcludeHide(shelterDesignation, indexMen);
         }
     }
 
@@ -189,14 +192,19 @@ public class CommandService {
      * First list contains the names of the buttons {@link Command#getNameButton()},
      * second one contains data for buttons {@link Command#getTextCommand()}
      */
-    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForClientExcludeHide() {
+    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForClientExcludeHide(
+            String shelterDesignation,
+            int indexMenu) {
         List<String> nameButton = new ArrayList<>();
         List<String> dataButton = new ArrayList<>();
         List<Command> commandList = getOnlyShowCommandForClient();
         for (int i = 0; i < commandList.size(); i++) {
             Command tCom = commandList.get(i);
-            nameButton.add(tCom.getNameButton());
-            dataButton.add(tCom.getTextCommand());
+            boolean contains = Arrays.asList(tCom.getShelterDesignation()).contains(shelterDesignation);
+            if (tCom.getIndexMenu() == indexMenu && contains) {
+                nameButton.add(tCom.getNameButton());
+                dataButton.add(tCom.getTextCommand());
+            }
         }
         return Pair.of(nameButton, dataButton);
     }
@@ -208,14 +216,19 @@ public class CommandService {
      * First list contains the names of the buttons {@link Command#getNameButton()},
      * second one contains data for buttons {@link Command#getTextCommand()}
      */
-    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForOwnerExcludeHide() {
+    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForOwnerExcludeHide(
+            String shelterDesignation,
+            int indexMenu) {
         List<String> nameButton = new ArrayList<>();
         List<String> dataButton = new ArrayList<>();
         List<Command> commandList = getOnlyShowCommandForOwner();
         for (int i = 0; i < commandList.size(); i++) {
             Command tCom = commandList.get(i);
-            nameButton.add(tCom.getNameButton());
-            dataButton.add(tCom.getTextCommand());
+            boolean contains = Arrays.asList(tCom.getShelterDesignation()).contains(shelterDesignation);
+            if (tCom.getIndexMenu() == indexMenu && contains) {
+                nameButton.add(tCom.getNameButton());
+                dataButton.add(tCom.getTextCommand());
+            }
         }
         return Pair.of(nameButton, dataButton);
     }
@@ -227,14 +240,19 @@ public class CommandService {
      * First list contains the names of the buttons {@link Command#getNameButton()},
      * second one contains data for buttons {@link Command#getTextCommand()}
      */
-    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForVolunteerExcludeHide() {
+    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForVolunteerExcludeHide(
+            String shelterDesignation,
+            int indexMenu) {
         List<String> nameButton = new ArrayList<>();
         List<String> dataButton = new ArrayList<>();
         List<Command> commandList = getOnlyShowCommandForVolunteer();
         for (int i = 0; i < commandList.size(); i++) {
             Command tCom = commandList.get(i);
-            nameButton.add(tCom.getNameButton());
-            dataButton.add(tCom.getTextCommand());
+            boolean contains = Arrays.asList(tCom.getShelterDesignation()).contains(shelterDesignation);
+            if (tCom.getIndexMenu() == indexMenu && contains) {
+                nameButton.add(tCom.getNameButton());
+                dataButton.add(tCom.getTextCommand());
+            }
         }
         return Pair.of(nameButton, dataButton);
     }

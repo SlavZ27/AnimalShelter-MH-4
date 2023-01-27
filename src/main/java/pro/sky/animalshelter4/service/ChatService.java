@@ -54,9 +54,7 @@ public class ChatService {
         chat.setFirstNameUser(updateDpo.getFirstName());
         chat.setLastNameUser(updateDpo.getLastName());
         chat.setLastActivity(LocalDateTime.now());
-        if (chat.getIndexMenu() == null) {
-            chat.setIndexMenu(0);
-        }
+        chat.setIndexMenu(0);
         String message = updateDpo.getMessage();
         if (message != null && message.length() > 0) {
             try {
@@ -104,7 +102,7 @@ public class ChatService {
         }
         chat = addChat(chat);
         List<String> shelterIndexList = shelterService.getAllshelterDesignation();
-        if (chat.getShelter() == null || !shelterIndexList.contains(chat.getShelter())) {
+        if (chat.getShelter() == null || !shelterIndexList.contains(chat.getShelter().getshelterDesignation())) {
             throw new ChatDontHaveShelterIndex(updateDpo.getIdChat().toString());
         }
         return chat;
@@ -984,6 +982,7 @@ public class ChatService {
         String message = shelterService.getInfoDogsWithDisabilities(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
     }
+
     /**
      * This method send info list documents
      *
@@ -994,6 +993,7 @@ public class ChatService {
         String message = shelterService.getInfoListOfDocuments(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
     }
+
     /**
      * This method send info recommend home dog
      *
@@ -1004,6 +1004,7 @@ public class ChatService {
         String message = shelterService.getInfoRecommendationsHomeDog(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
     }
+
     /**
      * This method send info recommend home dog small
      *
@@ -1014,6 +1015,7 @@ public class ChatService {
         String message = shelterService.getInfoRecommendationsHomeSmallDog(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
     }
+
     /**
      * This method send info refuse
      *
@@ -1024,6 +1026,7 @@ public class ChatService {
         String message = shelterService.getInfoRefuseDogFromShelter(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
     }
+
     /**
      * This method send info tips
      *
@@ -1034,6 +1037,7 @@ public class ChatService {
         String message = shelterService.getInfoTipsFromDogHandler(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
     }
+
     /**
      * This method send info transportation
      *
@@ -1103,5 +1107,26 @@ public class ChatService {
             chat.setId(idChat);
         }
         return commandService.approveLaunchCommand(command, chat);
+    }
+
+    public void setMenuInfo(UpdateDPO updateDpo) {
+        Chat chat = getChatFromUpdateDPO(updateDpo);
+        chat.setIndexMenu(2);
+        chat = chatRepository.save(chat);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
+    }
+
+    public void setMenuAction(UpdateDPO updateDpo) {
+        Chat chat = getChatFromUpdateDPO(updateDpo);
+        chat.setIndexMenu(3);
+        chat = chatRepository.save(chat);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
+    }
+
+    public void setMenu0(UpdateDPO updateDpo) {
+        Chat chat = getChatFromUpdateDPO(updateDpo);
+        chat.setIndexMenu(0);
+        chat = chatRepository.save(chat);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 }

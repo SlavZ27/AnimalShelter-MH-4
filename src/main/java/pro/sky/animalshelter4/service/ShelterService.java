@@ -10,6 +10,7 @@ import pro.sky.animalshelter4.exception.ShelterNotFoundException;
 import pro.sky.animalshelter4.info.*;
 import pro.sky.animalshelter4.repository.ShelterRepository;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ public class ShelterService {
     /**
      * This method using method repository, allows create AnimalTypeDto
      *
-     * @param animalTypeDto is not null
+     * @param shelterDto is not null
      * @return AnimalTypeDto
      */
     public ShelterDto createShelter(ShelterDto shelterDto) {
@@ -167,7 +168,7 @@ public class ShelterService {
     /**
      * This method using method repository, allows update  AnimalTypeDto
      *
-     * @param animalTypeDto is not null
+     * @param shelterDto is not null
      * @return AnimalTypeDto
      */
     public ShelterDto updateShelter(ShelterDto shelterDto) {
@@ -186,7 +187,11 @@ public class ShelterService {
 
     /**
      * This method using method repository, allows del AnimalTypeDto
-     * @param id is not null
+     * @param chatOwner is not null
+     * @param diet
+     * @param feeling
+     * @param behavior
+     * @param idMedia
      * @return AnimalTypeDto
      */
     public Report updateReportWithChatOwnerAndCurrentShelter(
@@ -208,7 +213,9 @@ public class ShelterService {
     /**
      * This method using method repository, allows del AnimalType
      *
-     * @param animalType is not null
+     * @param chatVolunteer is not null
+     * @param idReport is not null
+     * @param approve is not null
      * @return AnimalType
      */
 
@@ -230,7 +237,7 @@ public class ShelterService {
     /**
      * This method using method repository, allows find AnimalType
      *
-     * @param id is not null
+     * @param chatVolunteer is not null
      * @return AnimalType
      */
     public List<Animal> getAllNotBusyAnimalsWithCurrentShelter(Chat chatVolunteer) {
@@ -241,7 +248,9 @@ public class ShelterService {
     /**
      * This method using method repository, allows find AnimalType
      *
-     * @param nameType is not null
+     * @param chatVolunteer is not null
+     * @param idUserClient is not null
+     * @param idAnimal is not null
      * @return AnimalType
      */
 
@@ -417,6 +426,25 @@ public class ShelterService {
                 return null;
             default:
                 return InfoTakeADog.getInfoEn();
+        }
+    }
+
+    @PostConstruct
+    private void addDogAndCatShelter() {
+            List<Shelter> shelterList = shelterRepository.findAll();
+        if (shelterList.size() == 0) {
+            Shelter shelterDog = new Shelter();
+            shelterDog.setNameShelter("Shelter of dog");
+            shelterDog.setPhone("123456789");
+            shelterDog.setAddress("123 123 123");
+            shelterDog.setshelterDesignation("DOG");
+            Shelter shelterCat = new Shelter();
+            shelterCat.setNameShelter("Shelter of cat");
+            shelterCat.setPhone("987654321");
+            shelterCat.setAddress("456 4564 45");
+            shelterCat.setshelterDesignation("CAT");
+            shelterRepository.save(shelterDog);
+            shelterRepository.save(shelterCat);
         }
     }
 
