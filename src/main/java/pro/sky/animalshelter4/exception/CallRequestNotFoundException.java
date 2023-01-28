@@ -10,8 +10,6 @@ import pro.sky.animalshelter4.service.ChatService;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class CallRequestNotFoundException extends RuntimeException{
     public CallRequestNotFoundException(String message) {
-        super(message);
-        Logger logger = LoggerFactory.getLogger(CallRequestService.class);
-        logger.error("CallRequest with id = " + message + " not found");
+        super("CallRequest with id = " + message + " not found");
     }
 }

@@ -17,7 +17,7 @@ import javax.validation.Valid;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("report")
+@RequestMapping("{shelterDesignation}/report")
 public class ReportController {
     
     private final ReportService reportService;
@@ -38,8 +38,9 @@ public class ReportController {
             )
     })
     @PostMapping                //POST http://localhost:8080/report
-    public ResponseEntity<ReportDto> createReport(@RequestBody @Valid ReportDto reportDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(reportService.createReport(reportDto));
+    public ResponseEntity<ReportDto> createReport(@RequestBody @Valid ReportDto reportDto,
+                                                  @PathVariable String shelterDesignation) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(reportService.createReport(reportDto, shelterDesignation));
     }
 
     @ApiResponses({
@@ -53,8 +54,9 @@ public class ReportController {
             )
     })
     @GetMapping("{id}")  //GET http://localhost:8080/report/1
-    public ResponseEntity<ReportDto> readReport(@Parameter(description = "Report id") @PathVariable Long id) {
-        return ResponseEntity.ok(reportService.readReport(id));
+    public ResponseEntity<ReportDto> readReport(@Parameter(description = "Report id") @PathVariable Long id,
+                                                @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(reportService.readReport(id, shelterDesignation));
     }
 
 
@@ -69,8 +71,9 @@ public class ReportController {
             )
     })
     @PutMapping()               //PUT http://localhost:8080/report/
-    public ResponseEntity<ReportDto> updateReport(@RequestBody @Valid ReportDto reportDto) {
-        return ResponseEntity.ok(reportService.updateReport(reportDto));
+    public ResponseEntity<ReportDto> updateReport(@RequestBody @Valid ReportDto reportDto,
+                                                  @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(reportService.updateReport(reportDto, shelterDesignation));
     }
 
 
@@ -85,8 +88,9 @@ public class ReportController {
             )
     })
     @DeleteMapping("{id}")    //DELETE http://localhost:8080/report/1
-    public ResponseEntity<ReportDto> deleteReport(@Parameter(description = "Report id") @PathVariable Long id) {
-        return ResponseEntity.ok(reportService.deleteReport(id));
+    public ResponseEntity<ReportDto> deleteReport(@Parameter(description = "Report id") @PathVariable Long id,
+                                                  @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(reportService.deleteReport(id, shelterDesignation));
     }
 
     @ApiResponses({
@@ -100,8 +104,8 @@ public class ReportController {
             )
     })
     @GetMapping()  //GET http://localhost:8080/report/
-    public ResponseEntity<Collection<ReportDto>> getAllReports() {
-        return ResponseEntity.ok(reportService.getAll());
+    public ResponseEntity<Collection<ReportDto>> getAllReports(            @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(reportService.getAll( shelterDesignation));
     }
 
 

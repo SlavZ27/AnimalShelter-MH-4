@@ -18,7 +18,10 @@ public class User {
     private String phone;
     private String address;
     boolean isVolunteer;
-    @JoinColumn(name = "date_last_notification")
+    @OneToOne
+    @JoinColumn(name = "id_shelter")
+    private Shelter shelter;
+    @Column(name = "date_last_notification")
     LocalDateTime dateLastNotification;
 
     public User() {
@@ -101,19 +104,30 @@ public class User {
         isVolunteer = volunteer;
     }
 
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
+    }
+
     @Override
     public String toString() {
-        String isVolunteerStr;
+        StringBuilder sb = new StringBuilder();
         if (this.isVolunteer) {
-            isVolunteerStr = "is Volunteer";
+            sb.append("Volunteer of shelter '");
         } else {
-            isVolunteerStr = "is not Volunteer";
+            sb.append("Client of shelter '");
         }
-        return "User\n" +
-                "Named: " + nameUser +
-                "\nchatTelegram: " + chatTelegram +
-                "\nphone: " + phone +
-                "\naddress: " + address +
-                isVolunteerStr;
+        if (shelter != null) {
+            sb.append(shelter.getNameShelter());
+            sb.append("' ");
+        }
+        sb.append(nameUser);
+        sb.append(" .\nchatTelegram: " + chatTelegram);
+        sb.append("\nphone: " + phone);
+        sb.append("\naddress: " + address);
+        return sb.toString();
     }
 }

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import pro.sky.animalshelter4.entity.User;
 
 import java.util.List;
+import java.util.Optional;
+
 /**
  * This class was created to use the database to create methods used in the class UserService
  */
@@ -13,24 +15,28 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
 
-    @Query(value = "select users.* from users where users.id_telegram_chat=:idChat and users.is_volunteer=true"
+    @Query(value = "select users.* from users where users.id_telegram_chat=:idChatTelegram and users.id_shelter=:idShelter limit 1"
             , nativeQuery = true)
-    User getByIdTelegramChatAndVolunteer(Long idChat);
+    User findUserWithTelegramChatIdAndShelterId(Long idChatTelegram, Long idShelter);
 
-    @Query(value = "select users.* from users where users.id_telegram_chat=:idChat and users.id in (SELECT animal_ownership.id_user from animal_ownership)"
+    @Query(value = "select users.* from users where users.id_telegram_chat=:idChatTelegram and users.id_shelter=:idShelter and users.id in (SELECT animal_ownership.id_user from animal_ownership) limit 1"
             , nativeQuery = true)
-    User getByIdTelegramChatAndOwner(Long idChat);
+    User findUserWithShelterIdAndTelegramChatIdInAnimalOwnership(Long idChatTelegram, Long idShelter);
 
-    @Query(value = "select users.* from users,telegram_chat where users.id_telegram_chat=:idChat"
+    @Query(value = "select users.* from users where users.id=:id and id_shelter=:id_shelter limit 1"
             , nativeQuery = true)
-    User getByIdTelegramChat(Long idChat);
+    Optional<User> getUserByIdAndShelter(Long id, Long id_shelter);
 
-    @Query(value = "select * from users where users.is_volunteer=true"
+    @Query(value = "select * from users where users.is_volunteer=true and id_shelter=:id_shelter"
             , nativeQuery = true)
-    List<User> getAllVolunteers();
+    List<User> getAllVolunteersWithShelter(Long id_shelter);
 
-    @Query(value = "select * from users where is_volunteer=false"
+    @Query(value = "select * from users where is_volunteer=false and id_shelter=:id_shelter"
             , nativeQuery = true)
-    List<User> getAllClients();
+    List<User> getAllClientsWithShelter(Long id_shelter);
+
+    @Query(value = "select users.* from users,report,animal_ownership where id_shelter=:id_shelter and users.id=animal_ownership.id_user and animal_ownership.id=report.id_animal_ownership and report.id=:id_report limit 1"
+            , nativeQuery = true)
+    User getUserOwnerReportWithShelter(Long id_report, Long id_shelter);
 
 }

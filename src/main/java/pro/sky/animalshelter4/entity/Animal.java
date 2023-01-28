@@ -8,12 +8,13 @@ public class Animal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @JoinColumn(name = "name_animal")
+    @Column(name = "name_animal")
     private String nameAnimal;
+    @Column(name = "born")
     private LocalDate born;
     @OneToOne
-    @JoinColumn(name = "id_animal_type")
-    private AnimalType animalType;
+    @JoinColumn(name = "id_shelter")
+    private Shelter shelter;
 
     public Animal() {
     }
@@ -26,12 +27,12 @@ public class Animal {
         this.born = born;
     }
 
-    public AnimalType getAnimalType() {
-        return animalType;
+    public Shelter getShelter() {
+        return shelter;
     }
 
-    public void setAnimalType(AnimalType animalType) {
-        this.animalType = animalType;
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
     }
 
     public Long getId() {
@@ -52,10 +53,10 @@ public class Animal {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Animal ");
-        if (animalType != null) {
-            sb.append(animalType.getTypeAnimal());
-            sb.append(" ");
+        StringBuilder sb = new StringBuilder("Animal of shelter '");
+        if (shelter != null) {
+            sb.append(shelter.getNameShelter());
+            sb.append("' ");
         }
         sb.append(nameAnimal);
         sb.append(" ");

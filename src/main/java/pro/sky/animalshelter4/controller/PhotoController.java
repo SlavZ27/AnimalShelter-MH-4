@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Collection;
 
 @RestController
-@RequestMapping("photo")
+@RequestMapping("{shelterDesignation}/photo")
 public class PhotoController {
 
     private final PhotoService photoService;
@@ -39,8 +39,9 @@ public class PhotoController {
             )
     })
     @GetMapping("{id}")  //GET http://localhost:8080/photo/1
-    public ResponseEntity<byte[]> readPhoto(@Parameter(description = "Photo id") @PathVariable Long id) throws IOException {
-        Pair<byte[], String> pair = photoService.readPhotoFromTelegram(id);
+    public ResponseEntity<byte[]> readPhoto(@Parameter(description = "Photo id") @PathVariable Long id,
+                                            @PathVariable String shelterDesignation) throws IOException {
+        Pair<byte[], String> pair = photoService.readPhotoFromTelegram(id, shelterDesignation);
         return readPair(pair);
     }
 
@@ -62,10 +63,9 @@ public class PhotoController {
             )
     })
     @GetMapping()  //GET http://localhost:8080/photo/
-    public ResponseEntity<Collection<Long>> getAllId() {
-        return ResponseEntity.ok(photoService.getAllId());
+    public ResponseEntity<Collection<Long>> getAllId(@PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(photoService.getAllId(shelterDesignation));
     }
-
 
 
     @ApiResponses({
@@ -79,8 +79,9 @@ public class PhotoController {
             )
     })
     @DeleteMapping("{id}")    //DELETE http://localhost:8080/photo/1
-    public ResponseEntity<Long> deletePhoto(@Parameter(description = "Photo id") @PathVariable Long id) {
-        return ResponseEntity.ok(photoService.deletePhoto(id));
+    public ResponseEntity<Long> deletePhoto(@Parameter(description = "Photo id") @PathVariable Long id,
+                                            @PathVariable String shelterDesignation) {
+        return ResponseEntity.ok(photoService.deletePhoto(id, shelterDesignation));
     }
 
 }

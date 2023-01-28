@@ -1,10 +1,5 @@
 package pro.sky.animalshelter4.entityDto;
 
-import pro.sky.animalshelter4.entity.Animal;
-import pro.sky.animalshelter4.entity.User;
-
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import java.time.LocalDate;
 
 public class AnimalOwnershipDto {

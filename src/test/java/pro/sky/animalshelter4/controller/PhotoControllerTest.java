@@ -1,8 +1,6 @@
 package pro.sky.animalshelter4.controller;
 
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.File;
-import com.pengrad.telegrambot.response.GetFileResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,17 +13,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.util.Pair;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
-import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.repository.*;
 import pro.sky.animalshelter4.service.*;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,7 +31,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
@@ -56,7 +50,7 @@ class PhotoControllerTest {
     @Autowired
     private AnimalRepository animalRepository;
     @Autowired
-    private AnimalTypeRepository animalTypeRepository;
+    private ShelterRepository shelterRepository;
     @Autowired
     private CallRequestRepository callRequestRepository;
     @Autowired
@@ -76,7 +70,7 @@ class PhotoControllerTest {
     @Autowired
     private AnimalService animalService;
     @Autowired
-    private AnimalTypeService animalTypeService;
+    private ShelterService shelterService;
     @Autowired
     private CallRequestService callRequestService;
     @Autowired
@@ -116,7 +110,7 @@ class PhotoControllerTest {
         callRequestRepository.deleteAll();
         userRepository.deleteAll();
         animalRepository.deleteAll();
-        animalTypeRepository.deleteAll();
+        shelterRepository.deleteAll();
         unfinishedRequestTelegramRepository.deleteAll();
         chatRepository.deleteAll();
 
@@ -173,14 +167,12 @@ class PhotoControllerTest {
         //generate animalType
         List<Animal> animalList = new ArrayList<>();
         for (int i = 0; i < animalTypeInt; i++) {
-            AnimalType animalType = new AnimalType();
-            animalType.setTypeAnimal(generator.generateAnimalType());
-            animalType = animalTypeRepository.save(animalType);
+            Shelter shelter = new Shelter();
+            shelter = shelterRepository.save(shelter);
             for (int j = 0; j < animalInt; j++) {
                 //generate and remember animal
                 Animal animal = new Animal();
                 animal.setNameAnimal(generator.generateNameIfEmpty(null));
-                animal.setAnimalType(animalType);
                 animal.setBorn(generator.generateDate(true, LocalDate.now()));
                 animal = animalRepository.save(animal);
                 animalList.add(animal);
@@ -236,7 +228,7 @@ class PhotoControllerTest {
         callRequestRepository.deleteAll();
         userRepository.deleteAll();
         animalRepository.deleteAll();
-        animalTypeRepository.deleteAll();
+        shelterRepository.deleteAll();
         unfinishedRequestTelegramRepository.deleteAll();
         chatRepository.deleteAll();
     }
@@ -246,7 +238,7 @@ class PhotoControllerTest {
         assertThat(telegramBot).isNotNull();
         assertThat(animalOwnershipRepository).isNotNull();
         assertThat(animalRepository).isNotNull();
-        assertThat(animalTypeRepository).isNotNull();
+        assertThat(shelterRepository).isNotNull();
         assertThat(callRequestRepository).isNotNull();
         assertThat(chatRepository).isNotNull();
         assertThat(photoRepository).isNotNull();
@@ -255,7 +247,7 @@ class PhotoControllerTest {
         assertThat(userRepository).isNotNull();
         assertThat(animalOwnershipService).isNotNull();
         assertThat(animalService).isNotNull();
-        assertThat(animalTypeService).isNotNull();
+        assertThat(shelterService).isNotNull();
         assertThat(callRequestService).isNotNull();
         assertThat(chatService).isNotNull();
         assertThat(commandService).isNotNull();
