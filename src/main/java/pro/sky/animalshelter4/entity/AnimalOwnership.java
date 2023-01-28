@@ -1,5 +1,7 @@
 package pro.sky.animalshelter4.entity;
 
+import pro.sky.animalshelter4.exception.AnimalOwnershipBadParameterException;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
@@ -38,6 +40,19 @@ public class AnimalOwnership {
     }
 
     public void setShelter(Shelter shelter) {
+        if (shelter == null || shelter.getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getOwner() != null &&
+                getOwner().getShelter() != null && getOwner().getShelter().getId() != null &&
+                !getOwner().getShelter().getId().equals(shelter.getId())) {
+            throw new AnimalOwnershipBadParameterException();
+        }
+        if (getAnimal() != null &&
+                getAnimal().getShelter() != null && getAnimal().getShelter().getId() != null &&
+                !getAnimal().getShelter().getId().equals(shelter.getId())) {
+            throw new AnimalOwnershipBadParameterException();
+        }
         this.shelter = shelter;
     }
 
@@ -70,6 +85,19 @@ public class AnimalOwnership {
     }
 
     public void setOwner(User owner) {
+        if (owner == null || owner.getId() == null ||
+                owner.getShelter() == null || owner.getShelter().getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getShelter() != null && getShelter().getId() != null &&
+                !getShelter().getId().equals(owner.getShelter().getId())) {
+            throw new AnimalOwnershipBadParameterException();
+        }
+        if (getAnimal() != null &&
+                getAnimal().getShelter() != null && getAnimal().getShelter().getId() != null &&
+                !getAnimal().getShelter().getId().equals(owner.getShelter().getId())) {
+            throw new AnimalOwnershipBadParameterException();
+        }
         this.owner = owner;
     }
 
@@ -78,6 +106,19 @@ public class AnimalOwnership {
     }
 
     public void setAnimal(Animal animal) {
+        if (animal == null || animal.getId() == null ||
+                animal.getShelter() == null || animal.getShelter().getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getShelter() != null && getShelter().getId() != null &&
+                !getShelter().getId().equals(animal.getShelter().getId())) {
+            throw new AnimalOwnershipBadParameterException();
+        }
+        if (getOwner() != null &&
+                getOwner().getShelter() != null && getOwner().getShelter().getId() != null &&
+                !getOwner().getShelter().getId().equals(animal.getShelter().getId())) {
+            throw new AnimalOwnershipBadParameterException();
+        }
         this.animal = animal;
     }
 

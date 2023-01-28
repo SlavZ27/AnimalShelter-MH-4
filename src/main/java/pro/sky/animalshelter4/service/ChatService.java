@@ -2,7 +2,6 @@ package pro.sky.animalshelter4.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.*;
 import pro.sky.animalshelter4.entityDto.ChatDto;
@@ -10,7 +9,6 @@ import pro.sky.animalshelter4.exception.*;
 import pro.sky.animalshelter4.info.*;
 import pro.sky.animalshelter4.model.Command;
 import pro.sky.animalshelter4.model.UpdateDPO;
-import pro.sky.animalshelter4.repository.CallRequestRepository;
 import pro.sky.animalshelter4.repository.ChatRepository;
 
 import java.time.LocalDateTime;
@@ -981,6 +979,7 @@ public class ChatService {
         Chat chat = getChatFromUpdateDPO(updateDpo);
         String message = shelterService.getInfoDogsWithDisabilities(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
     /**
@@ -992,6 +991,7 @@ public class ChatService {
         Chat chat = getChatFromUpdateDPO(updateDpo);
         String message = shelterService.getInfoListOfDocuments(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
     /**
@@ -1003,6 +1003,7 @@ public class ChatService {
         Chat chat = getChatFromUpdateDPO(updateDpo);
         String message = shelterService.getInfoRecommendationsHomeDog(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
     /**
@@ -1014,6 +1015,7 @@ public class ChatService {
         Chat chat = getChatFromUpdateDPO(updateDpo);
         String message = shelterService.getInfoRecommendationsHomeSmallDog(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
     /**
@@ -1025,6 +1027,7 @@ public class ChatService {
         Chat chat = getChatFromUpdateDPO(updateDpo);
         String message = shelterService.getInfoRefuseDogFromShelter(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
     /**
@@ -1036,6 +1039,7 @@ public class ChatService {
         Chat chat = getChatFromUpdateDPO(updateDpo);
         String message = shelterService.getInfoTipsFromDogHandler(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
     /**
@@ -1047,6 +1051,7 @@ public class ChatService {
         Chat chat = getChatFromUpdateDPO(updateDpo);
         String message = shelterService.getInfoTransportationAnimals(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
     /**
@@ -1058,6 +1063,7 @@ public class ChatService {
         Chat chat = getChatFromUpdateDPO(updateDpo);
         String message = shelterService.getInfoWhyDoYouNeedDogHandler(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
     /**
@@ -1069,12 +1075,13 @@ public class ChatService {
         Chat chat = getChatFromUpdateDPO(updateDpo);
         String message = shelterService.getInfoGettingKnowDog(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
 
     /**
      * A method with a prepared message for sending a message with information about the shelter
-     * using {@link InfoAboutShelter#getInfoEn()}
+     * using {@link InfoAboutShelterCat#getInfoEn()}
      * using {@link TelegramBotSenderService#sendMessage(Long, String)}
      *
      * @param updateDpo must be not null

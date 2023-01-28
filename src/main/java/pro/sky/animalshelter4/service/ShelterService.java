@@ -11,7 +11,6 @@ import pro.sky.animalshelter4.info.*;
 import pro.sky.animalshelter4.repository.ShelterRepository;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -297,7 +296,7 @@ public class ShelterService {
             case "DOG":
                 return InfoDogsWithDisabilities.getInfoEn();
             case "CAT":
-                return null;
+                return InfoCatWithDisabilities.getInfoEn();
             default:
                 return InfoDogsWithDisabilities.getInfoEn();
         }
@@ -309,7 +308,7 @@ public class ShelterService {
             case "DOG":
                 return InfoListOfDocuments.getInfoEn();
             case "CAT":
-                return null;
+                return InfoListOfDocumentsCat.getInfoEn();
             default:
                 return InfoListOfDocuments.getInfoEn();
         }
@@ -321,7 +320,7 @@ public class ShelterService {
             case "DOG":
                 return InfoRecommendationsHomeDog.getInfoEn();
             case "CAT":
-                return null;
+                return InfoRecommendationsHomeCat.getInfoEn();
             default:
                 return InfoRecommendationsHomeDog.getInfoEn();
         }
@@ -333,7 +332,7 @@ public class ShelterService {
             case "DOG":
                 return InfoRecommendationsHomeSmallDog.getInfoEn();
             case "CAT":
-                return null;
+                return InfoRecommendationsHomeSmallCat.getInfoEn();
             default:
                 return InfoRecommendationsHomeSmallDog.getInfoEn();
         }
@@ -345,7 +344,7 @@ public class ShelterService {
             case "DOG":
                 return InfoRefuseDogFromShelter.getInfoEn();
             case "CAT":
-                return null;
+                return "";
             default:
                 return InfoRefuseDogFromShelter.getInfoEn();
         }
@@ -357,7 +356,7 @@ public class ShelterService {
             case "DOG":
                 return InfoTipsFromDogHandler.getInfoEn();
             case "CAT":
-                return null;
+                return "";
             default:
                 return InfoTipsFromDogHandler.getInfoEn();
         }
@@ -369,7 +368,7 @@ public class ShelterService {
             case "DOG":
                 return InfoTransportationAnimals.getInfoEn();
             case "CAT":
-                return null;
+                return "";
             default:
                 return InfoTransportationAnimals.getInfoEn();
         }
@@ -381,7 +380,7 @@ public class ShelterService {
             case "DOG":
                 return InfoWhyDoYouNeedDogHandler.getInfoEn();
             case "CAT":
-                return null;
+                return "";
             default:
                 return InfoWhyDoYouNeedDogHandler.getInfoEn();
         }
@@ -393,7 +392,7 @@ public class ShelterService {
             case "DOG":
                 return InfoGettingKnowDog.getInfoEn();
             case "CAT":
-                return null;
+                return InfoGettingKnowCat.getInfoEn();
             default:
                 return InfoGettingKnowDog.getInfoEn();
         }
@@ -403,11 +402,11 @@ public class ShelterService {
         Shelter shelter = getShelterOfChat(chat);
         switch (shelter.getshelterDesignation()) {
             case "DOG":
-                return InfoAboutShelter.getInfoEn();
+                return InfoAboutShelterDog.getInfoEn();
             case "CAT":
-                return null;
+                return InfoAboutShelterCat.getInfoEn();
             default:
-                return InfoAboutShelter.getInfoEn();
+                return InfoAboutShelterDog.getInfoEn();
         }
     }
 
@@ -423,7 +422,7 @@ public class ShelterService {
             case "DOG":
                 return InfoTakeADog.getInfoEn();
             case "CAT":
-                return null;
+                return "";
             default:
                 return InfoTakeADog.getInfoEn();
         }

@@ -12,16 +12,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.Chat;
-import pro.sky.animalshelter4.info.InfoAboutShelter;
 import pro.sky.animalshelter4.model.Command;
-import pro.sky.animalshelter4.info.InfoTakeADog;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

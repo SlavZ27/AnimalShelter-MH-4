@@ -2,17 +2,15 @@ package pro.sky.animalshelter4.info;
 
 import org.springframework.stereotype.Component;
 
-
 /**
  * This class was created to respond to the INFO command request.
- * This object is used in class {@link pro.sky.animalshelter4.service.TelegramBotSenderService#sendInfoAboutShelter(Long)}
  * The class has getters.
  */
 @Component
-public class InfoAboutShelter {
+public class InfoAboutShelterDog {
 
     private final static String infoRu =
-            "Мы-негосударственный приют для кошек Астана.\n\n" +
+            "Мы-негосударственный приют для собак Астана.\n\n" +
                     "Приют был открыт 15 октября 2013 года неравнодушными девушками.\n" +
                     "Существует исключительно за счет добровольных пожертвований людей, любящих животных.\n" +
                     "В данный момент мы не имеем своего собственного помещения под приют. Арендуем небольшой домик в частном секторе.\n" +
@@ -20,7 +18,7 @@ public class InfoAboutShelter {
 
 
     private final static String infoEn =
-            "We are a non-governmental shelter for cats in Astana.\n\n" +
+            "We are a non-governmental shelter for dogs in Astana.\n\n" +
                     "The shelter was opened on October 15, 2013 by caring girls.\n" +
                     "It exists solely through voluntary donations from people who love animals.\n" +
                     "If you want to help the shelter, then we always need help.\n\n";

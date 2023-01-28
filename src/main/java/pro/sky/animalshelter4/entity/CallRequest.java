@@ -1,5 +1,8 @@
 package pro.sky.animalshelter4.entity;
 
+import pro.sky.animalshelter4.exception.AnimalOwnershipBadParameterException;
+import pro.sky.animalshelter4.exception.CallRequestBadParameterException;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -38,6 +41,19 @@ public class CallRequest {
     }
 
     public void setShelter(Shelter shelter) {
+        if (shelter == null || shelter.getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getClient() != null &&
+                getClient().getShelter() != null && getClient().getShelter().getId() != null &&
+                !getClient().getShelter().getId().equals(shelter.getId())) {
+            throw new CallRequestBadParameterException();
+        }
+        if (getVolunteer() != null &&
+                getVolunteer().getShelter() != null && getVolunteer().getShelter().getId() != null &&
+                !getVolunteer().getShelter().getId().equals(shelter.getId())) {
+            throw new CallRequestBadParameterException();
+        }
         this.shelter = shelter;
     }
 
@@ -54,6 +70,19 @@ public class CallRequest {
     }
 
     public void setClient(User client) {
+        if (client == null || client.getId() == null ||
+                client.getShelter() == null || client.getShelter().getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getShelter() != null && getShelter().getId() != null &&
+                !getShelter().getId().equals(client.getShelter().getId())) {
+            throw new CallRequestBadParameterException();
+        }
+        if (getVolunteer() != null &&
+                getVolunteer().getShelter() != null && getVolunteer().getShelter().getId() != null &&
+                !getVolunteer().getShelter().getId().equals(client.getShelter().getId())) {
+            throw new CallRequestBadParameterException();
+        }
         this.client = client;
     }
 
@@ -62,6 +91,19 @@ public class CallRequest {
     }
 
     public void setVolunteer(User volunteer) {
+        if (volunteer == null || volunteer.getId() == null ||
+                volunteer.getShelter() == null || volunteer.getShelter().getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getShelter() != null && getShelter().getId() != null &&
+                !getShelter().getId().equals(volunteer.getShelter().getId())) {
+            throw new CallRequestBadParameterException();
+        }
+        if (getClient() != null &&
+                getClient().getShelter() != null && getClient().getShelter().getId() != null &&
+                !getClient().getShelter().getId().equals(volunteer.getShelter().getId())) {
+            throw new CallRequestBadParameterException();
+        }
         this.volunteer = volunteer;
     }
 

@@ -1,5 +1,8 @@
 package pro.sky.animalshelter4.entity;
 
+import pro.sky.animalshelter4.exception.AnimalOwnershipBadParameterException;
+import pro.sky.animalshelter4.exception.ReportBadParameterException;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
@@ -37,6 +40,14 @@ public class Report {
     }
 
     public void setShelter(Shelter shelter) {
+        if (shelter == null || shelter.getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getAnimalOwnership() != null &&
+                getAnimalOwnership().getShelter() != null && getAnimalOwnership().getShelter().getId() != null &&
+                !getAnimalOwnership().getShelter().getId().equals(shelter.getId())) {
+            throw new ReportBadParameterException();
+        }
         this.shelter = shelter;
     }
 
@@ -62,6 +73,15 @@ public class Report {
     }
 
     public void setAnimalOwnership(AnimalOwnership animalOwnership) {
+        if (animalOwnership == null || animalOwnership.getId() == null ||
+                animalOwnership.getShelter() == null &&
+                        animalOwnership.getShelter().getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getShelter() != null && getShelter().getId() != null &&
+                !getShelter().getId().equals(animalOwnership.getShelter().getId())) {
+            throw new ReportBadParameterException();
+        }
         this.animalOwnership = animalOwnership;
     }
 
