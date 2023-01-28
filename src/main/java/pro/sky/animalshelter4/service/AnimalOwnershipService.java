@@ -7,6 +7,7 @@ import pro.sky.animalshelter4.entity.AnimalOwnership;
 import pro.sky.animalshelter4.entity.Report;
 import pro.sky.animalshelter4.entity.Shelter;
 import pro.sky.animalshelter4.entity.User;
+import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.entityDto.AnimalOwnershipDto;
 import pro.sky.animalshelter4.exception.*;
 import pro.sky.animalshelter4.repository.AnimalOwnershipRepository;
