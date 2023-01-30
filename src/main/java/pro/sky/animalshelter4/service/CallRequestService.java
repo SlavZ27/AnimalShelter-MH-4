@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CallRequestService {
-    public final static String MESSAGE_YOU_HAVE_CALL_REQUEST = "You have call request by ";
+    public final static String MESSAGE_YOU_HAVE_CALL_REQUEST = "You have call request ";
     public final static String MESSAGE_YOU_DONT_HAVE_CALL_REQUEST = "You don't have any call request by ";
     public final static String MESSAGE_SUCCESSFUL_CREATION = "OK. Volunteer will call you";
     public final static String MESSAGE_YOU_CAN_CLOSE_CALL_REQUEST = "Press button with ID for close";
@@ -65,6 +65,7 @@ public class CallRequestService {
             callRequest.setLocalDateTimeOpen(LocalDateTime.now());
             callRequest.setClient(userClient);
             callRequest.setVolunteer(userVolunteer);
+            callRequest.setShelter(userClient.getShelter());
             return addCallRequest(callRequest);
         }
     }
@@ -237,8 +238,8 @@ public class CallRequestService {
                 "Method getAllOpenCallRequestVolunteer was start for return all CallRequest Volunteer with id = {}"
                 , userVolunteer.getId());
         return callRequestRepository.getOpenByUserIdForVolunteerWithShelter(
-                userVolunteer.getShelter().getId(),
-                userVolunteer.getId());
+                userVolunteer.getId(),
+                userVolunteer.getShelter().getId());
     }
 
     /**

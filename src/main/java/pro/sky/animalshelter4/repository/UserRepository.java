@@ -35,7 +35,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             , nativeQuery = true)
     List<User> getAllClientsWithShelter(Long id_shelter);
 
-    @Query(value = "select users.* from users,report,animal_ownership where id_shelter=:id_shelter and users.id=animal_ownership.id_user and animal_ownership.id=report.id_animal_ownership and report.id=:id_report limit 1"
+    @Query(value = "select users.* from users,report,animal_ownership where users.id_shelter=:id_shelter and users.id=animal_ownership.id_user and animal_ownership.id=report.id_animal_ownership and report.id=:id_report limit 1"
             , nativeQuery = true)
     User getUserOwnerReportWithShelter(Long id_report, Long id_shelter);
 

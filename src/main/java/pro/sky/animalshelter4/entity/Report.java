@@ -1,6 +1,7 @@
 package pro.sky.animalshelter4.entity;
 
 import pro.sky.animalshelter4.exception.AnimalOwnershipBadParameterException;
+import pro.sky.animalshelter4.exception.PhotoBadParameterException;
 import pro.sky.animalshelter4.exception.ReportBadParameterException;
 
 import javax.persistence.*;
@@ -122,6 +123,15 @@ public class Report {
     }
 
     public void setPhoto(Photo photo) {
+        if (photo == null || photo.getId() == null ||
+                photo.getShelter() == null &&
+                        photo.getShelter().getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getShelter() != null && getShelter().getId() != null &&
+                !getShelter().getId().equals(photo.getShelter().getId())) {
+            throw new PhotoBadParameterException();
+        }
         this.photo = photo;
     }
 

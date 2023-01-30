@@ -47,7 +47,7 @@ public interface AnimalOwnershipRepository extends JpaRepository<AnimalOwnership
             "animal_ownership.id_shelter=:id_shelter and " +
             "animal_ownership.id=:id"
             , nativeQuery = true)
-    Optional<AnimalOwnership> getByIdWithIdShelter(Long id_shelter, Long id);
+    Optional<AnimalOwnership> getByIdWithIdShelter(Long id, Long id_shelter);
 
     @Query(value = "SELECT animal_ownership.* FROM animal_ownership where " +
             "animal_ownership.id_shelter=:id_shelter"

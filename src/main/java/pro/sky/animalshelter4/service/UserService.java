@@ -427,7 +427,7 @@ public class UserService {
      */
     public Report approveReportWithIdReportWithShelter(Shelter shelter, Long idReport, boolean approve) {
         User userOwner = userRepository.getUserOwnerReportWithShelter(idReport, shelter.getId());
-        if (userOwner == null || userOwner.getShelter() == null || !userOwner.getShelter().equals(shelter)) {
+        if (userOwner == null || userOwner.getShelter() == null || !userOwner.getShelter().getId().equals(shelter.getId())) {
             return null;
         }
         return animalOwnershipService.approveReportWithShelter(idReport, shelter, approve);

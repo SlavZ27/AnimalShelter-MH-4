@@ -27,7 +27,7 @@ public enum Command {
      * A command to greet the user and familiarize them with the available functions
      */
     START(0, "/start", "START", false, true, true, true, 0, new String[]{"CAT", "DOG"}),
-    SET_SHELTER(23, "/SET_SHELTER", "Set shelter", false, true, true, false, 0, new String[]{"CAT", "DOG"}),
+    SET_SHELTER(1, "/SET_SHELTER", "Set shelter", true, true, true, false, 0, new String[]{"CAT", "DOG"}),
     MENU_INFO(23, "/MENU_INFO", "INFO",true, true, true, true, 0, new String[]{"CAT", "DOG"}),
     MENU_ACTION(23, "/MENU_ACTION", "ACTION",true, true, true, true, 0, new String[]{"CAT", "DOG"}),
     MENU_BACK1(23, "/MENU_BACK1", "BACK",true, true, true, true, 1, new String[]{"CAT", "DOG"}),

@@ -356,3 +356,8 @@ alter table call_request
 --onFail=MARK_RAN
 alter table call_request
     add CONSTRAINT unique_id_shelter_id_client_local_date_time_open UNIQUE (id_shelter, id_client, local_date_time_open);
+--changeset zaytsev:49
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='telegram_chat'
+--onFail=MARK_RAN
+alter table telegram_chat
+    alter column id_shelter drop not null;

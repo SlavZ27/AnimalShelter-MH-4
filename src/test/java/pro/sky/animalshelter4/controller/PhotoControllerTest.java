@@ -39,7 +39,8 @@ class PhotoControllerTest {
     @LocalServerPort
     private int port;
     private final static String REQUEST_MAPPING_STRING = "photo";
-
+    private final static String SHELTER1 = "DOG";
+    private final static String SHELTER2 = "CAT";
     @InjectMocks
     @Autowired
     private PhotoController photoController;
@@ -110,113 +111,140 @@ class PhotoControllerTest {
         callRequestRepository.deleteAll();
         userRepository.deleteAll();
         animalRepository.deleteAll();
-        shelterRepository.deleteAll();
         unfinishedRequestTelegramRepository.deleteAll();
         chatRepository.deleteAll();
+        shelterRepository.deleteAll();
 
+//        int shelterInt = CAT DOG;
+        // count of all other entities = count * shelterInt
         int userVolunteerInt = 5;
         int userClientInt = 100;
         int chatInt = userClientInt + userVolunteerInt;
-        int callRequestInt = 40;                       // callRequest < chat
+        int callRequestInt = 40;                            // callRequest < chat
         int animalInt = 50;
-        int animalOwnershipInt = 30;                   // animal > animalOwnership
+        int animalOwnershipInt = 30;                        // animal > animalOwnership
         int animalTypeInt = 6;
         int reportInt = 30;
         int photoInt = reportInt;
 
 
-        //generate and remember userVolunteer with chat
-        List<User> userVolunteerList = new ArrayList<>();
-        List<Chat> chatVolunteerList = new ArrayList<>();
-        for (int i = 0; i < userVolunteerInt; i++) {
-            //generate chat
-            Chat chatV = generator.generateChat(-1L, "", "", "", null, true);
-            chatV = chatRepository.save(chatV);
-            //generate userVolunteer with chatV
-            User userVolunteer = generator.generateUser(null, null, chatV, null, null, true, null, true);
-            userVolunteer = userRepository.save(userVolunteer);
-            userVolunteerList.add(userVolunteer);
-            chatVolunteerList.add(chatV);
-        }
-        //generate and remember userClient with chat
-        List<User> userClientList = new ArrayList<>();
-        List<Chat> chatClientList = new ArrayList<>();
-        for (int j = 0; j < userClientInt; j++) {
-            //generate chatC
-            Chat chatC = generator.generateChat(-1L, "", "", "", null, true);
-            chatC = chatRepository.save(chatC);
-            //generate userClient with chatC
-            User userClient = generator.generateUser(null, null, chatC, null, null, false, null, true);
-            userClient = userRepository.save(userClient);
-            userClientList.add(userClient);
-            chatClientList.add(chatC);
-        }
-        //generate callRequest
-        List<User> userClientList2 = new ArrayList<>(userClientList);
-        for (int i = 0; i < callRequestInt; i++) {
-            CallRequest callRequest = new CallRequest();
-            callRequest.setVolunteer(userVolunteerList.get(random.nextInt(userVolunteerList.size())));
-            int index = random.nextInt(userClientList2.size());
-            callRequest.setClient(userClientList2.get(i));
-            userClientList2.remove(index);
-            callRequest.setOpen(generator.generateBool());
-            callRequest.setLocalDateTimeClose(generator.generateDateTime(true, LocalDateTime.now()));
-            callRequest.setLocalDateTimeOpen(generator.generateDateTime(true, callRequest.getLocalDateTimeClose()));
-            callRequestRepository.save(callRequest);
-        }
-        //generate animalType
-        List<Animal> animalList = new ArrayList<>();
-        for (int i = 0; i < animalTypeInt; i++) {
-            Shelter shelter = new Shelter();
-            shelter = shelterRepository.save(shelter);
+        //generate and remember shelter
+        Shelter shelterDog = new Shelter();
+        shelterDog.setNameShelter("Shelter of dog");
+        shelterDog.setPhone("123456789");
+        shelterDog.setAddress("123 123 123");
+        shelterDog.setshelterDesignation("DOG");
+        Shelter shelterCat = new Shelter();
+        shelterCat.setNameShelter("Shelter of cat");
+        shelterCat.setPhone("987654321");
+        shelterCat.setAddress("456 4564 45");
+        shelterCat.setshelterDesignation("CAT");
+        shelterRepository.save(shelterDog);
+        shelterRepository.save(shelterCat);
+        List<Shelter> shelterList = new ArrayList<>();
+        shelterList.add(shelterDog);
+        shelterList.add(shelterCat);
+
+        for (int k = 0; k < shelterList.size(); k++) {
+            Shelter shelter = shelterList.get(k);
+            //generate and remember userVolunteer with chat
+            List<User> userVolunteerList = new ArrayList<>();
+            List<Chat> chatVolunteerList = new ArrayList<>();
+            for (int i = 0; i < userVolunteerInt; i++) {
+                //generate chat
+                Chat chatV = generator.generateChat(-1L, "", "", "", null, true);
+                chatV.setShelter(shelter);
+                chatV = chatRepository.save(chatV);
+                //generate userVolunteer with chatV
+                User userVolunteer = generator.generateUser(null, null, chatV, null, null, true, null, true);
+                userVolunteer.setShelter(shelter);
+                userVolunteer = userRepository.save(userVolunteer);
+                userVolunteerList.add(userVolunteer);
+                chatVolunteerList.add(chatV);
+            }
+            //generate and remember userClient with chat
+            List<User> userClientList = new ArrayList<>();
+            List<Chat> chatClientList = new ArrayList<>();
+            for (int j = 0; j < userClientInt; j++) {
+                //generate chatC
+                Chat chatC = generator.generateChat(-1L, "", "", "", null, true);
+                chatC.setShelter(shelter);
+                chatC = chatRepository.save(chatC);
+                //generate userClient with chatC
+                User userClient = generator.generateUser(null, null, chatC, null, null, false, null, true);
+                userClient.setShelter(shelter);
+                userClient = userRepository.save(userClient);
+                userClientList.add(userClient);
+                chatClientList.add(chatC);
+            }
+            //generate callRequest
+            List<User> userClientList2 = new ArrayList<>(userClientList);
+            for (int i = 0; i < callRequestInt; i++) {
+                CallRequest callRequest = new CallRequest();
+                callRequest.setVolunteer(userVolunteerList.get(random.nextInt(userVolunteerList.size())));
+                int index = random.nextInt(userClientList2.size());
+                callRequest.setClient(userClientList2.get(i));
+                userClientList2.remove(index);
+                callRequest.setOpen(generator.generateBool());
+                callRequest.setLocalDateTimeClose(generator.generateDateTime(true, LocalDateTime.now()));
+                callRequest.setLocalDateTimeOpen(generator.generateDateTime(true, callRequest.getLocalDateTimeClose()));
+                callRequest.setShelter(shelter);
+                callRequestRepository.save(callRequest);
+            }
+            //generate animalType
+            List<Animal> animalList = new ArrayList<>();
             for (int j = 0; j < animalInt; j++) {
                 //generate and remember animal
                 Animal animal = new Animal();
                 animal.setNameAnimal(generator.generateNameIfEmpty(null));
                 animal.setBorn(generator.generateDate(true, LocalDate.now()));
+                animal.setShelter(shelter);
                 animal = animalRepository.save(animal);
                 animalList.add(animal);
             }
-        }
-        //generate and remember animalOwnership
-        List<AnimalOwnership> animalOwnershipList = new ArrayList<>();
-        for (int i = 0; i < animalOwnershipInt; i++) {
-            AnimalOwnership animalOwnership = new AnimalOwnership();
-            int index = random.nextInt(userClientList.size());
-            animalOwnership.setOwner(userClientList.get(index));
-            userClientList.remove(index);
-            index = random.nextInt(animalList.size());
-            animalOwnership.setAnimal(animalList.get(index));
-            animalList.remove(index);
-            Boolean b = generator.generateBoolWithNull();
-            if (b != null) {
-                animalOwnership.setApprove(b);
+            //generate and remember animalOwnership
+            List<AnimalOwnership> animalOwnershipList = new ArrayList<>();
+            for (int i = 0; i < animalOwnershipInt; i++) {
+                AnimalOwnership animalOwnership = new AnimalOwnership();
+                int index = random.nextInt(userClientList.size());
+                animalOwnership.setOwner(userClientList.get(index));
+                userClientList.remove(index);
+                index = random.nextInt(animalList.size());
+                animalOwnership.setAnimal(animalList.get(index));
+                animalList.remove(index);
+                Boolean b = generator.generateBoolWithNull();
+                if (b != null) {
+                    animalOwnership.setApprove(b);
+                }
+                animalOwnership.setOpen(generator.generateBool());
+                animalOwnership.setDateEndTrial(generator.generateDate(false, LocalDate.now()));
+                animalOwnership.setDateStartOwn(generator.generateDate(true, animalOwnership.getDateEndTrial()));
+                animalOwnership.setShelter(shelter);
+                animalOwnership = animalOwnershipRepository.save(animalOwnership);
+                animalOwnershipList.add(animalOwnership);
             }
-            animalOwnership.setOpen(generator.generateBool());
-            animalOwnership.setDateEndTrial(generator.generateDate(false, LocalDate.now()));
-            animalOwnership.setDateStartOwn(generator.generateDate(true, animalOwnership.getDateEndTrial()));
-            animalOwnership = animalOwnershipRepository.save(animalOwnership);
-            animalOwnershipList.add(animalOwnership);
-        }
-        //generate report and photo
-        for (int i = 0; i < reportInt; i++) {
-            Photo photo = new Photo();
-            photo.setIdMedia(generator.generateMessageIfEmpty(null));
-            photo = photoRepository.save(photo);
-            Report report = new Report();
-            report.setReportDate(generator.generateDate(true, LocalDate.now()));
-            report.setPhoto(photo);
-            int index = random.nextInt(animalOwnershipList.size());
-            report.setAnimalOwnership(animalOwnershipList.get(index));
-            animalOwnershipList.remove(index);
-            Boolean b = generator.generateBoolWithNull();
-            if (b != null) {
-                report.setApprove(b);
+            //generate report and photo
+            for (int i = 0; i < reportInt; i++) {
+                Photo photo = new Photo();
+                photo.setIdMedia(generator.generateMessageIfEmpty(null));
+                photo.setShelter(shelter);
+                photo = photoRepository.save(photo);
+                Report report = new Report();
+                report.setReportDate(generator.generateDate(true, LocalDate.now()));
+                report.setPhoto(photo);
+                int index = random.nextInt(animalOwnershipList.size());
+                report.setAnimalOwnership(animalOwnershipList.get(index));
+                animalOwnershipList.remove(index);
+                Boolean b = generator.generateBoolWithNull();
+                if (b != null) {
+                    report.setApprove(b);
+                }
+                report.setDiet(generator.generateMessageIfEmpty(null));
+                report.setBehavior(generator.generateMessageIfEmpty(null));
+                report.setFeeling(generator.generateMessageIfEmpty(null));
+                report.setShelter(shelter);
+                reportRepository.save(report);
             }
-            report.setDiet(generator.generateMessageIfEmpty(null));
-            report.setBehavior(generator.generateMessageIfEmpty(null));
-            report.setFeeling(generator.generateMessageIfEmpty(null));
-            reportRepository.save(report);
         }
     }
 
@@ -228,9 +256,9 @@ class PhotoControllerTest {
         callRequestRepository.deleteAll();
         userRepository.deleteAll();
         animalRepository.deleteAll();
-        shelterRepository.deleteAll();
         unfinishedRequestTelegramRepository.deleteAll();
         chatRepository.deleteAll();
+        shelterRepository.deleteAll();
     }
 
     @Test
@@ -262,36 +290,58 @@ class PhotoControllerTest {
         assertThat(telegramUnfinishedRequestService).isNotNull();
         assertThat(userService).isNotNull();
         assertThat(telegramBotUpdatesListener).isNotNull();
-        assertThat(testRestTemplate).isNotNull();
-        assertThat(photoController).isNotNull();
     }
 
     @Test
     void deletePhoto() {
         final int countPhoto = photoRepository.findAll().size();
-        Photo photo = photoRepository.findAll().stream().findFirst().orElse(null);
-        reportRepository.findAll().stream().filter(report -> report.getPhoto().getId().equals(photo.getId())).
+        Photo photoDog = photoRepository.findAll().stream().
+                filter(photo1 -> photo1.getShelter().getshelterDesignation().equals("DOG")).
+                findFirst().orElse(null);
+        Photo photoCat = photoRepository.findAll().stream().
+                filter(photo1 -> photo1.getShelter().getshelterDesignation().equals("CAT")).
+                findFirst().orElse(null);
+        reportRepository.findAll().stream().
+                filter(report -> report.getPhoto().getId().equals(photoDog.getId()) ||
+                        report.getPhoto().getId().equals(photoCat.getId())).
                 forEach(report -> reportRepository.delete(report));
-        ResponseEntity<String> responseEntity = testRestTemplate
-                .exchange("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + photo.getId()
+
+        ResponseEntity<String> responseEntity1 = testRestTemplate
+                .exchange("http://localhost:" + port + "/" + SHELTER1 + "/" + REQUEST_MAPPING_STRING + "/" + photoDog.getId()
                         , HttpMethod.DELETE,
                         HttpEntity.EMPTY,
                         new ParameterizedTypeReference<>() {
                         });
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).
-                contains(photo.getId().toString());
-        assertEquals(countPhoto - 1, photoRepository.findAll().size());
-        assertThat(photoRepository.findById(photo.getId()).orElse(null)).isNull();
+        ResponseEntity<String> responseEntity2 = testRestTemplate
+                .exchange("http://localhost:" + port + "/" + SHELTER2 + "/" + REQUEST_MAPPING_STRING + "/" + photoCat.getId()
+                        , HttpMethod.DELETE,
+                        HttpEntity.EMPTY,
+                        new ParameterizedTypeReference<>() {
+                        });
+
+        assertEquals(countPhoto - 2, photoRepository.findAll().size());
+
+        assertThat(responseEntity1.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity1.getBody()).
+                contains(photoDog.getId().toString());
+        assertThat(photoRepository.findById(photoDog.getId()).orElse(null)).isNull();
+
+        assertThat(responseEntity2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity2.getBody()).
+                contains(photoCat.getId().toString());
+        assertThat(photoRepository.findById(photoCat.getId()).orElse(null)).isNull();
     }
 
     @Test
     public void getAllIdPhotoTest() {
         final long countPhoto = photoRepository.findAll().size();
-        Long[] idPhotoMas = testRestTemplate
-                .getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
+        Long[] idPhotoMas1 = testRestTemplate
+                .getForObject("http://localhost:" + port + "/" + SHELTER1 + "/" + REQUEST_MAPPING_STRING,
                         Long[].class);
-        assertThat(idPhotoMas.length)
+        Long[] idPhotoMas2 = testRestTemplate
+                .getForObject("http://localhost:" + port + "/" + SHELTER2 + "/" + REQUEST_MAPPING_STRING,
+                        Long[].class);
+        assertThat(idPhotoMas1.length + idPhotoMas2.length)
                 .isEqualTo(countPhoto);
     }
 }

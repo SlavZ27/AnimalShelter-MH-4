@@ -101,6 +101,7 @@ public class ChatService {
         chat = addChat(chat);
         List<String> shelterIndexList = shelterService.getAllshelterDesignation();
         if (chat.getShelter() == null || !shelterIndexList.contains(chat.getShelter().getshelterDesignation())) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
             throw new ChatDontHaveShelterIndex(updateDpo.getIdChat().toString());
         }
         return chat;
@@ -296,6 +297,7 @@ public class ChatService {
      */
     public void sendUnknownProcess(UpdateDPO updateDpo) {
         Chat chat = getChatFromUpdateDPO(updateDpo);
+
         telegramBotSenderService.sendMessage(chat.getId(),
                 TelegramBotSenderService.MESSAGE_SORRY_I_DONT_KNOW_COMMAND);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -371,8 +373,8 @@ public class ChatService {
         if (callRequest != null) {
             StringBuilder sb = new StringBuilder();
             sb.append(CallRequestService.MESSAGE_YOU_HAVE_CALL_REQUEST);
-            sb.append("\n");
             sb.append(callRequest.getId());
+            sb.append("\n");
             sb.append(" ");
             sb.append(callRequest.getClient().getChatTelegram().getFirstNameUser());
             sb.append(" ");
@@ -386,7 +388,6 @@ public class ChatService {
             }
             sb.append("\n");
 
-            telegramBotSenderService.sendMessage(chatVolunteer.getId(), sb.toString());
             telegramBotSenderService.sendMessageWithOneButton(
                     chatVolunteer.getId(),
                     sb.toString(),
@@ -870,6 +871,7 @@ public class ChatService {
                     shelterService.getOneNotApproveOpenAnimalOwnershipWithNotTrialWithCurrentShelter(chatVolunteer);
             if (animalOwnership == null) {
                 telegramBotSenderService.sendMessage(chatVolunteer.getId(), AnimalOwnershipService.MESSAGE_ALL_ANIMAL_OWNERSHIP_ARE_APPROVE);
+                telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer);
             } else {
                 List<String> nameButtons = new ArrayList<>();
                 List<String> dataButtons = new ArrayList<>();
@@ -879,7 +881,12 @@ public class ChatService {
                 dataButtons.add(animalOwnership.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL + false);
                 nameButtons.add("+week");
                 dataButtons.add(Command.EXTEND_TRIAL.getTextCommand() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                        animalOwnership.getId());
+                        animalOwnership.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                        AnimalOwnershipService.COUNT_EXTENDED_DAYS_1);
+                nameButtons.add("+month");
+                dataButtons.add(Command.EXTEND_TRIAL.getTextCommand() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                        animalOwnership.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                        AnimalOwnershipService.COUNT_EXTENDED_DAYS_2);
                 telegramBotSenderService.sendMessage(chatVolunteer.getId(), animalOwnership.toString());
                 telegramBotSenderService.sendButtonsWithOneData(
                         chatVolunteer.getId(),
@@ -949,23 +956,29 @@ public class ChatService {
     public void extendTrial(UpdateDPO updateDpo) {
         Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
         String message = updateDpo.getMessage();
-        if (message != null && message.length() > 0 && !message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
-            Long idAnimalOwnership = telegramMapperService.mapStringToLong(message);
-            AnimalOwnership animalOwnership = null;
-            try {
-                int countDays = AnimalOwnershipService.count_extended_days;
-                animalOwnership = shelterService.extendAnimalOwnershipWithCurrentShelter(chatVolunteer, idAnimalOwnership, countDays);
-            } catch (AnimalOwnershipNotFoundException e) {
-                //don't do anything
-                return;
-            }
-            if (animalOwnership != null) {
-                telegramBotSenderService.sendMessage(chatVolunteer.getId(),
-                        animalOwnership.toString());
-                telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer);
-                telegramBotSenderService.sendMessage(animalOwnership.getOwner().getChatTelegram().getId(),
-                        animalOwnership.toString());
+        if (message != null && message.length() > 0 && message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
+            String[] messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
+            if (messageMas.length == 2) {
+                Long idAnimalOwnership = telegramMapperService.mapStringToLong(messageMas[0]);
+                int count_extended_days = telegramMapperService.mapStringToInt(messageMas[1]);
+                AnimalOwnership animalOwnership = null;
+                try {
+                    animalOwnership = shelterService.extendAnimalOwnershipWithCurrentShelter(
+                            chatVolunteer,
+                            idAnimalOwnership,
+                            count_extended_days);
+                } catch (AnimalOwnershipNotFoundException e) {
+                    //don't do anything
+                    return;
+                }
+                if (animalOwnership != null) {
+                    telegramBotSenderService.sendMessage(chatVolunteer.getId(),
+                            animalOwnership.toString());
+                    telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer);
+                    telegramBotSenderService.sendMessage(animalOwnership.getOwner().getChatTelegram().getId(),
+                            animalOwnership.toString());
 
+                }
             }
         }
     }
