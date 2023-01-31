@@ -192,6 +192,11 @@ public class TelegramMapperService {
         return Long.parseLong(message, 10);
     }
 
+    /**
+     * This method juxtapose string to long
+     * @param message is not null
+     * @return Long message
+     */
     public Integer mapStringToInt(String message) {
         if (!StringUtils.isNumeric(message)) {
             throw new IllegalArgumentException(message);
