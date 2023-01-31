@@ -216,6 +216,12 @@ public class CallRequestService {
     }
 
 
+    /**
+     * This method, using method repository allow get all open call request volunter
+     * Using: {@link CallRequestRepository#getAllOpenByUserIdForVolunteerWithShelter(Long, Long)}
+     *
+     * @return List<CallRequestDto>
+     */
     public List<CallRequestDto> getAllOpenCallRequestVolunteer(Long id, String shelterDesignation) {
         logger.info(
                 "Method getAllOpenCallRequestVolunteer was start for return all CallRequest Volunteer with id = {}"

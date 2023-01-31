@@ -42,6 +42,10 @@ public class ChatService {
         this.commandService = commandService;
     }
 
+    /**
+     * This methop allows give animals shelter
+     * @param updateDpo is not null
+     */
     public void setShelter(UpdateDPO updateDpo) {
         Chat chat = chatRepository.getChatById(updateDpo.getIdChat());
         if (chat == null) {
@@ -65,6 +69,10 @@ public class ChatService {
         }
     }
 
+    /** THis method aloows sheck Shelter using index chat
+     * @param updateDpo is not null
+     * @return Chat by id
+     */
     public boolean checkShelterIndexOfChatFromUpdateDPO(UpdateDPO updateDpo) {
         logger.info("Method checkShelterIndexOfChatFromUpdateDPO was start for find ShelterIndex Of Chat by id = {}",
                 updateDpo.getIdChat());
@@ -1079,6 +1087,8 @@ public class ChatService {
 
     /**
      * This method send info dogs disabilities
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
@@ -1097,6 +1107,8 @@ public class ChatService {
 
     /**
      * This method send info list documents
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
@@ -1115,6 +1127,8 @@ public class ChatService {
 
     /**
      * This method send info recommend home dog
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
@@ -1133,6 +1147,8 @@ public class ChatService {
 
     /**
      * This method send info recommend home dog small
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
@@ -1151,6 +1167,8 @@ public class ChatService {
 
     /**
      * This method send info refuse
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
@@ -1169,6 +1187,8 @@ public class ChatService {
 
     /**
      * This method send info tips
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
@@ -1187,6 +1207,8 @@ public class ChatService {
 
     /**
      * This method send info transportation
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
@@ -1205,6 +1227,8 @@ public class ChatService {
 
     /**
      * This method send info need handler
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
@@ -1223,6 +1247,8 @@ public class ChatService {
 
     /**
      * This method send info get dog
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
@@ -1242,8 +1268,8 @@ public class ChatService {
 
     /**
      * A method with a prepared message for sending a message with information about the shelter
-     * using {@link InfoAboutShelterCat#getInfoEn()}
-     * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo must be not null
      */
@@ -1262,8 +1288,8 @@ public class ChatService {
 
     /**
      * A method with a prepared message for sending a message with information about how to take a dog from a shelter
-     * using {@link InfoTakeADog#getInfoEn()}
-     * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo must be not null
      */
@@ -1280,6 +1306,14 @@ public class ChatService {
         telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
+    /**
+     * The method approves the startup command
+     * Using {@link ChatRepository#findById(Object)}
+     * Using {@link CommandService#approveLaunchCommand(Command, Chat)}
+     *
+     * @param command must be not null
+     * @param idChat must be not null
+     */
     public boolean approveLaunchCommand(Command command, Long idChat) {
         Chat chat = chatRepository.findById(idChat).orElse(null);
         if (chat == null) {
@@ -1289,6 +1323,13 @@ public class ChatService {
         return commandService.approveLaunchCommand(command, chat);
     }
 
+    /**
+     * The method displays information about the network menu
+     * Using {@link ChatRepository#save(Object)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
+     *
+     * @param updateDpo is not null
+     */
     public void setMenuInfo(UpdateDPO updateDpo) {
         Chat chat;
         try {
@@ -1302,6 +1343,13 @@ public class ChatService {
         telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
+    /**
+     * Method set menu action
+     * Using {@link ChatRepository#save(Object)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
+     *
+     * @param updateDpo is not null
+     */
     public void setMenuAction(UpdateDPO updateDpo) {
         Chat chat;
         try {
@@ -1315,6 +1363,12 @@ public class ChatService {
         telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
+    /**
+     * Method set menu 0
+     * Using {@link ChatRepository#save(Object)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
+     * @param updateDpo is not null
+     */
     public void setMenu0(UpdateDPO updateDpo) {
         Chat chat;
         try {

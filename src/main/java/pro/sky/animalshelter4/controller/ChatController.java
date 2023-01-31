@@ -79,7 +79,7 @@ public class ChatController {
                     description = "Delete the data in UserDto by id",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = UserDto.class)
+                            schema = @Schema(implementation = ChatDto.class)
                     )}
             )
     })
