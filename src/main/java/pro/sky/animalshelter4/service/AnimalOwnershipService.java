@@ -68,7 +68,7 @@ public class AnimalOwnershipService {
     }
 
     /**
-     * This method using method repository, allows create AnimalOwnership
+     * This method using method repository, allows create AnimalOwnershipDto
      *
      * @param animalOwnershipDto is not null
      * @return animalOwnershipDto
