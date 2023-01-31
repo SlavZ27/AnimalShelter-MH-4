@@ -192,4 +192,11 @@ public class TelegramMapperService {
         return Long.parseLong(message, 10);
     }
 
+    public Integer mapStringToInt(String message) {
+        if (!StringUtils.isNumeric(message)) {
+            throw new IllegalArgumentException(message);
+        }
+        return Integer.parseInt(message, 10);
+    }
+
 }

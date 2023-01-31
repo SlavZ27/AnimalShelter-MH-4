@@ -4,11 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.Animal;
-import pro.sky.animalshelter4.entity.AnimalType;
+import pro.sky.animalshelter4.entity.Shelter;
 import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.exception.AnimalNotFoundException;
+import pro.sky.animalshelter4.exception.ShelterNotFoundException;
 import pro.sky.animalshelter4.repository.AnimalRepository;
-import pro.sky.animalshelter4.repository.AnimalTypeRepository;
+import pro.sky.animalshelter4.repository.ShelterRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,95 +31,124 @@ public class AnimalService {
     public final static String CAPTION_WRITE_NAME_OF_ANIMAL = "Write name of animal";
 
     private final AnimalRepository animalRepository;
-    private final AnimalTypeService animalTypeService;
     private final DtoMapperService dtoMapperService;
+    private final ShelterRepository shelterRepository;
     private final Logger logger = LoggerFactory.getLogger(AnimalService.class);
 
-    public AnimalService(AnimalRepository animalRepository, AnimalTypeService animalTypeService, DtoMapperService dtoMapperService) {
+    public AnimalService(AnimalRepository animalRepository, DtoMapperService dtoMapperService, ShelterRepository shelterRepository) {
         this.animalRepository = animalRepository;
-        this.animalTypeService = animalTypeService;
         this.dtoMapperService = dtoMapperService;
+        this.shelterRepository = shelterRepository;
     }
-
-    public Animal addAnimal(Animal animal) {
+    /**
+     * This method using method repository, allows adds Animal
+     *
+     * @param animal is not null
+     * @return Animal
+     */
+    public Animal addAnimalWithShelter(Animal animal, Shelter shelter) {
         logger.info("Method addAnimal was start for create new Animal");
+        animal.setShelter(shelter);
         return animalRepository.save(animal);
     }
 
-    public AnimalDto createAnimalDto(AnimalDto animalDto) {
-        logger.info("Method createAnimalDto was start for create new Animal");
-        return dtoMapperService.toDto(animalRepository.save(dtoMapperService.toEntity(animalDto)));
+    public Animal addAnimalWithShelter(String name, Shelter shelter) {
+        logger.info("Method addAnimal was start for create new Animal with name = {}", name);
+        Animal animal = new Animal();
+        animal.setNameAnimal(name);
+        return addAnimalWithShelter(animal, shelter);
     }
-
-    public AnimalDto readAnimal(Long id) {
+    /**
+     * This method using method repository, allows crate AnimalDto
+     * @param animalDto is not null
+     * @return AnimalDto
+     */
+    public AnimalDto createAnimalWithShelterDto(AnimalDto animalDto, String shelterDesignation) {
+        logger.info("Method createAnimalDto was start for create new Animal");
+        Animal animal = dtoMapperService.toEntity(animalDto, shelterDesignation);
+        animal.setId(null);
+        return dtoMapperService.toDto(animalRepository.save(animal));
+    }
+    /**
+     * This method using method repository, allows read AnimalDto
+     *
+     * @param id is not null
+     * @return AnimalDto
+     */
+    public AnimalDto readAnimalWithShelter(Long id, String shelterDesignation) {
         logger.info("Method readAnimal was start for find animal by id");
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
         return dtoMapperService.toDto(
-                animalRepository.findById(id).
+                animalRepository.findByIdAndIdShelter(id, shelter.getId()).
                         orElseThrow(() -> new AnimalNotFoundException(String.valueOf(id))));
     }
-
-    public List<AnimalDto> getAll() {
+    /**
+     * This method using method repository, allows get all AnimalDto
+     *
+     * @return List<AnimalDto>
+     */
+    public List<AnimalDto> getAllWithShelter(String shelterDesignation) {
         logger.info("Method getAllAnimals was start for get all animal");
-        return animalRepository.findAll().stream().
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
+        return animalRepository.findAllWithIdShelter(shelter.getId()).stream().
                 map(dtoMapperService::toDto).collect(Collectors.toList());
     }
 
-
-    public Animal findAnimal(Long id) {
+    public Animal findAnimalWithIdNotBusyWithShelter(Long id, Shelter shelter) {
         logger.info("Method findAnimal was start for find Animal by id");
-        return animalRepository.findById(id).
-                orElseThrow(() -> new AnimalNotFoundException(String.valueOf(id)));
+        return animalRepository.findAnimalWithIdNotBusyWithShelter(id, shelter.getId());
     }
-
-    public AnimalDto updateAnimal(AnimalDto animalDto) {
+    /**
+     * This method using method repository, allows update AnimalDto
+     *
+     * @param animalDto is not null
+     * @return AnimalDto
+     */
+    public AnimalDto updateAnimalWithShelter(AnimalDto animalDto, String shelterDesignation) {
         logger.info("Method updateAnimal was start for update Animal");
-        Animal newAnimal = dtoMapperService.toEntity(animalDto);
-        Animal oldAnimal = findAnimal(newAnimal.getId());
-        if (oldAnimal == null) {
-            throw new AnimalNotFoundException(String.valueOf(newAnimal.getId()));
-        }
+        Animal newAnimal = dtoMapperService.toEntity(animalDto, shelterDesignation);
+        Animal oldAnimal = animalRepository.findByIdAndIdShelter(
+                newAnimal.getId(),
+                newAnimal.getShelter().getId()).orElseThrow(
+                () -> new AnimalNotFoundException(String.valueOf(newAnimal.getId())));
         oldAnimal.setNameAnimal(newAnimal.getNameAnimal());
         oldAnimal.setBorn(newAnimal.getBorn());
-        oldAnimal.setAnimalType(newAnimal.getAnimalType());
+        oldAnimal.setShelter(newAnimal.getShelter());
         return dtoMapperService.toDto(animalRepository.save(oldAnimal));
     }
-
-    public AnimalDto deleteAnimal(Long id) {
+    /**
+     * This method using method repository, allows del AnimalDto
+     *
+     * @param id is not null
+     * @return AnimalDto
+     */
+    public AnimalDto deleteAnimalWithShelter(Long id, String shelterDesignation) {
         Animal animal = new Animal();
         animal.setId(id);
-        return dtoMapperService.toDto(deleteAnimal(animal));
-    }
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
+        return dtoMapperService.toDto(deleteAnimalWithShelter(animal, shelter));
+    }    /**
+     * This method using method repository, allows del Animal
+     *
+     * @param animal is not null
+     * @return Animal
+     */
 
-    public Animal deleteAnimal(Animal animal) {
+    public Animal deleteAnimalWithShelter(Animal animal, Shelter shelter) {
         logger.info("Method deleteAnimal was start for delete animal");
         if (animal.getId() == null) {
             throw new IllegalArgumentException("Incorrect id of animal");
         }
-        Animal animalFound = animalRepository.findById(animal.getId()).
+        Animal animalFound = animalRepository.findByIdAndIdShelter(animal.getId(), shelter.getId()).
                 orElseThrow(() -> new AnimalNotFoundException(String.valueOf(animal.getId())));
         animalRepository.delete(animalFound);
         return animalFound;
     }
 
-    public List<Animal> getAllNotBusyAnimals() {
-        return animalRepository.getAllNotBusyAnimals();
+    public List<Animal> getAllNotBusyAnimalsWithShelter(Shelter shelter) {
+        return animalRepository.getAllNotBusyAnimalsWithShelter(shelter.getId());
     }
-
-    public Animal getNotComplement() {
-        return animalRepository.getNotComplement();
-    }
-
-    public List<AnimalType> getAllAnimalType() {
-        return animalTypeService.getAll();
-    }
-
-
-    public Animal updateAnimal(Long idAnimal, Long idAnimalType) {
-        Animal animal = animalRepository.findById(idAnimal).orElseThrow(() ->
-                new AnimalNotFoundException(String.valueOf(idAnimal)));
-        AnimalType animalType = animalTypeService.findAnimalType(idAnimalType);
-        animal.setAnimalType(animalType);
-        return animalRepository.save(animal);
-    }
-
 }

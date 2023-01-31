@@ -6,8 +6,6 @@ import pro.sky.animalshelter4.service.AnimalService;
 
 public class ReportNotFoundException extends RuntimeException{
     public ReportNotFoundException(String message) {
-        super(message);
-        Logger logger = LoggerFactory.getLogger(AnimalService.class);
-        logger.error("Report with id = " + message + " not found");
+        super("Report with id = " + message + " not found");
     }
 }

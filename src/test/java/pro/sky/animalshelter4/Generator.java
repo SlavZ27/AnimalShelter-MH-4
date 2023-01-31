@@ -2,10 +2,8 @@ package pro.sky.animalshelter4;
 
 import com.github.javafaker.Faker;
 import com.pengrad.telegrambot.model.*;
-import com.pengrad.telegrambot.response.GetFileResponse;
-import org.apache.commons.lang3.StringUtils;
 import pro.sky.animalshelter4.entity.Chat;
-import pro.sky.animalshelter4.exception.BadPhoneNumberException;
+import pro.sky.animalshelter4.entity.User;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -118,7 +116,7 @@ public class Generator {
         return chat;
     }
 
-    public pro.sky.animalshelter4.entity.User generateUser(Long idUser, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer, LocalDateTime dateLastNotification, boolean needGenerate) {
+    public User generateUser(Long idUser, String nameUser, Chat chatTelegram, String phone, String address, boolean isVolunteer, LocalDateTime dateLastNotification, boolean needGenerate) {
         if (needGenerate) {
             idUser = generateIdIfEmpty(idUser);
             nameUser = generateNameIfEmpty(nameUser);
@@ -129,7 +127,7 @@ public class Generator {
             address = generateAddressIfEmpty(address);
             dateLastNotification = generateDateTime(true, LocalDateTime.now());
         }
-        return new pro.sky.animalshelter4.entity.User(
+        return new User(
                 idUser,
                 nameUser,
                 chatTelegram,
@@ -203,7 +201,7 @@ public class Generator {
 
         Update update = new Update();
         CallbackQuery callbackQuery = new CallbackQuery();
-        User user = new User(0L);
+        com.pengrad.telegrambot.model.User user = new com.pengrad.telegrambot.model.User(0L);
 
         try {
             Field userNameField = user.getClass().getDeclaredField("username");
@@ -272,7 +270,7 @@ public class Generator {
         Update update = new Update();
         Message message = new Message();
         com.pengrad.telegrambot.model.Chat chat = new com.pengrad.telegrambot.model.Chat();
-        User user = new User(0L);
+        com.pengrad.telegrambot.model.User user = new com.pengrad.telegrambot.model.User(0L);
 
         try {
             Field userNameField = user.getClass().getDeclaredField("username");
@@ -331,7 +329,7 @@ public class Generator {
         Update update = new Update();
         Message message = new Message();
         com.pengrad.telegrambot.model.Chat chat = new com.pengrad.telegrambot.model.Chat();
-        User user = new User(0L);
+        com.pengrad.telegrambot.model.User user = new com.pengrad.telegrambot.model.User(0L);
         PhotoSize[] photo = {new PhotoSize(), new PhotoSize(), new PhotoSize(), new PhotoSize()};
 
         try {

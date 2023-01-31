@@ -7,8 +7,6 @@ import pro.sky.animalshelter4.service.AnimalService;
 
 public class AnimalOwnershipAlreadyCloseException extends RuntimeException{
     public AnimalOwnershipAlreadyCloseException(String message) {
-        super(message);
-        Logger logger = LoggerFactory.getLogger(AnimalOwnershipService.class);
-        logger.error("AnimalOwnership with id = " + message + " already close");
+        super("AnimalOwnership with id = " + message + " already close");
     }
 }

@@ -10,13 +10,13 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.Photo;
-import pro.sky.animalshelter4.entityDto.AnimalDto;
+import pro.sky.animalshelter4.entity.Shelter;
 import pro.sky.animalshelter4.exception.PhotoNotFoundException;
+import pro.sky.animalshelter4.exception.ShelterNotFoundException;
 import pro.sky.animalshelter4.repository.PhotoRepository;
+import pro.sky.animalshelter4.repository.ShelterRepository;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,10 +26,12 @@ public class PhotoService {
     private final PhotoRepository photoRepository;
     private final Logger logger = LoggerFactory.getLogger(PhotoService.class);
     private final TelegramBot telegramBot;
+    private final ShelterRepository shelterRepository;
 
-    public PhotoService(PhotoRepository photoRepository, TelegramBot telegramBot) {
+    public PhotoService(PhotoRepository photoRepository, TelegramBot telegramBot, ShelterRepository shelterRepository) {
         this.photoRepository = photoRepository;
         this.telegramBot = telegramBot;
+        this.shelterRepository = shelterRepository;
     }
 
 
@@ -56,12 +58,14 @@ public class PhotoService {
      * <t>
      * @throws IOException
      */
-    public Pair<byte[], String> readPhotoFromTelegram(Long id) throws IOException {
-        Photo photo = findPhoto(id);
+    public Pair<byte[], String> readPhotoFromTelegram(Long id, String shelterDesignation) throws IOException {
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
+        Photo photo = findPhotoWithShelter(id, shelter);
         return Pair.of(getByteFromTelegram(photo.getIdMedia()), MediaType.IMAGE_JPEG_VALUE);
     }
 
-    public byte[] getByteFromTelegram(String idMedia) throws IOException {
+    private byte[] getByteFromTelegram(String idMedia) throws IOException {
         GetFile getFile = new GetFile(idMedia);
         GetFileResponse response = telegramBot.execute(getFile);
         File file = response.file();
@@ -80,26 +84,11 @@ public class PhotoService {
      * @throws IOException PhotoNotFoundException(id)
      *                     <r>
      */
-    public Photo findPhoto(Long id) {
+    public Photo findPhotoWithShelter(Long id, Shelter shelter) {
         logger.info("Method findPhoto was start for find Photo by id");
-        return photoRepository.findById(id).
+        return photoRepository.findByIdAndIdShelter(id, shelter.getId()).
                 orElseThrow(() -> new PhotoNotFoundException(String.valueOf(id)));
     }
-
-    /**
-     * This method locate photo by Photo id, using method repository
-     * Using{@link PhotoRepository#findByIdPhoto(String)}
-     * <p>
-     *
-     * @param idMedia is not null
-     *                <r></r>
-     * @return photo
-     */
-    public Photo findPhotoByIdPhoto(String idMedia) {
-        logger.info("Method findPhoto was start for find Photo by idPhoto");
-        return photoRepository.findByIdPhoto(idMedia);
-    }
-
 
     /**
      * This method delete photo by id
@@ -109,10 +98,12 @@ public class PhotoService {
      *           <r></r>
      * @return delete photo
      */
-    public Long deletePhoto(Long id) {
+    public Long deletePhoto(Long id, String shelterDesignation) {
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
         Photo photo = new Photo();
         photo.setId(id);
-        return deletePhoto(photo);
+        return deletePhoto(photo, shelter);
     }
 
     /**
@@ -121,12 +112,12 @@ public class PhotoService {
      * @param photo is not null
      * @return delete photo
      */
-    public Long deletePhoto(Photo photo) {
+    public Long deletePhoto(Photo photo, Shelter shelter) {
         logger.info("Method deletePhoto was start for delete Photo");
         if (photo.getId() == null) {
             throw new IllegalArgumentException("Incorrect id of Photo");
         }
-        Photo photoFound = photoRepository.findById(photo.getId()).
+        Photo photoFound = photoRepository.findByIdAndIdShelter(photo.getId(), shelter.getId()).
                 orElseThrow(() -> new PhotoNotFoundException(String.valueOf(photo.getId())));
         photoRepository.delete(photoFound);
         return photoFound.getId();
@@ -137,9 +128,11 @@ public class PhotoService {
      *
      * @return delete photo
      */
-    public List<Long> getAllId() {
+    public List<Long> getAllId(String shelterDesignation) {
         logger.info("Method getAllId was start for get all Id of photo");
-        return photoRepository.findAll().stream().
+        Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                new ShelterNotFoundException(shelterDesignation));
+        return photoRepository.findAllByIdShelter(shelter.getId()).stream().
                 map(Photo::getId).collect(Collectors.toList());
     }
 

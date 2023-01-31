@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Class contains a test for reliability and understanding of the method that outputs the dimensions of the button grid
  */
 class TelegramBotSenderServiceTest {
-    private final TelegramBotSenderService telegramBotSenderService = new TelegramBotSenderService(null, null);
+    private final TelegramBotSenderService telegramBotSenderService = new TelegramBotSenderService(null, null, null);
 
     /**
      * the test takes the number of objects to be placed in a rectangle and outputs a pair of height and width

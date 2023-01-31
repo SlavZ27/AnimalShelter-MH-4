@@ -7,8 +7,11 @@ public class Photo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @JoinColumn(name = "id_media")
+    @Column(name = "id_media")
     private String idMedia;
+    @OneToOne
+    @JoinColumn(name = "id_shelter")
+    private Shelter shelter;
 
     public Photo() {
     }
@@ -27,5 +30,13 @@ public class Photo {
 
     public void setIdMedia(String idMedia) {
         this.idMedia = idMedia;
+    }
+
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
     }
 }

@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import pro.sky.animalshelter4.entity.CallRequest;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class was created to use the database to create methods used in the class callRequestService
@@ -12,29 +13,37 @@ import java.util.List;
 public interface CallRequestRepository extends JpaRepository<CallRequest, Long> {
 
 
-
-    @Query(value = "select * from call_request where is_open=true and id_client=:idUser limit 1"
+    @Query(value = "select call_request.* from call_request where call_request.is_open=true and id_client=:idUser and call_request.id_shelter=:idShelter limit 1"
             , nativeQuery = true)
-    CallRequest getFirstOpenByUserIdForClient(Long idUser);
+    CallRequest getFirstOpenByUserIdForClientWithShelter(Long idShelter, Long idUser);
 
-    @Query(value = "select * from call_request where is_open=true and id_volunteer=:idUser"
+    @Query(value = "select call_request.* from call_request where call_request.is_open=true and id_volunteer=:idUser and call_request.id_shelter=:idShelter limit 1"
             , nativeQuery = true)
-    List<CallRequest> getAllOpenByUserIdForVolunteer(Long idUser);
+    CallRequest getOpenByUserIdForVolunteerWithShelter(Long idShelter, Long idUser);
 
-    @Query(value = "select * from call_request where is_open=true and id_client=:idUser"
+    @Query(value = "select call_request.* from call_request where call_request.is_open=true and id_volunteer=:idUser and call_request.id_shelter=:idShelter"
             , nativeQuery = true)
-    List<CallRequest> getAllOpenByUserIdForClient(Long idUser);
+    List<CallRequest> getAllOpenByUserIdForVolunteerWithShelter(Long idShelter, Long idUser);
 
-    @Query(value = "select * from call_request where id_volunteer=:idUser"
+    @Query(value = "select call_request.* from call_request where call_request.is_open=true and id_client=:idUser and call_request.id_shelter=:idShelter"
             , nativeQuery = true)
-    List<CallRequest> getAllCallRequestVolunteer(Long idUser);
+    List<CallRequest> getAllOpenByUserIdForClientWithShelter(Long idShelter, Long idUser);
 
-    @Query(value = "select * from call_request where is_open=true"
+    @Query(value = "select call_request.* from call_request where call_request.id_volunteer=:idUser and call_request.id_shelter=:idShelter"
             , nativeQuery = true)
-    List<CallRequest> getAllOpenCallRequest();
+    List<CallRequest> getAllCallRequestVolunteerWithShelter(Long idShelter, Long idUser);
 
-    @Query(value = "select * from call_request where is_open=false"
+    @Query(value = "select call_request.* from call_request where call_request.is_open=true and call_request.id_shelter=:idShelter"
             , nativeQuery = true)
-    List<CallRequest> getAllCloseCallRequest();
+    List<CallRequest> getAllOpenCallRequestWithShelter(Long idShelter);
+
+    @Query(value = "select call_request.* from call_request where call_request.is_open=false and call_request.id_shelter=:idShelter"
+            , nativeQuery = true)
+    List<CallRequest> getAllCloseCallRequestWithShelter(Long idShelter);
+
+    @Query(value = "select call_request.* from call_request where call_request.id=:id and call_request.id_shelter=:idShelter"
+            , nativeQuery = true)
+    Optional<CallRequest> getByIdWithShelter(Long id, Long idShelter);
+
 
 }

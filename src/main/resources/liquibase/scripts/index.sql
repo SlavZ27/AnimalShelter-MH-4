@@ -232,23 +232,127 @@ alter table users
 --changeset zaytsev:29
 --precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='photo'
 --onFail=MARK_RAN
-alter TABLE photo alter column id_media type text;
+alter TABLE photo
+    alter column id_media type text;
 --changeset zaytsev:30
 --precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='report'
 --onFail=MARK_RAN
-alter TABLE report add column is_approve boolean;
-alter TABLE report add column is_open boolean default true;
+alter TABLE report
+    add column is_approve boolean;
+alter TABLE report
+    add column is_open boolean default true;
 --changeset zaytsev:31
 --precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='animal_ownership'
 --onFail=MARK_RAN
-alter TABLE animal_ownership add column is_approve boolean;
-alter TABLE animal_ownership add column is_open boolean default true;
+alter TABLE animal_ownership
+    add column is_approve boolean;
+alter TABLE animal_ownership
+    add column is_open boolean default true;
 --changeset zaytsev:32
 --precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='report'
 --onFail=MARK_RAN
-alter TABLE report drop column is_open;
+alter TABLE report
+    drop column is_open;
 --changeset zaytsev:33
 --precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='users'
 --onFail=MARK_RAN
 alter table users
     add column date_last_notification TIMESTAMP;
+--changeset zaytsev:34
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='animal'
+--onFail=MARK_RAN
+alter TABLE animal
+    drop column id_animal_type;
+--changeset zaytsev:35
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='animal_type'
+--onFail=MARK_RAN
+drop TABLE animal_type;
+--changeset zaytsev:36
+--precondition-sql-check expectedResult:0 SELECT count(*) FROM pg_tables WHERE tablename='shelter'
+--onFail=MARK_RAN
+create TABLE shelter
+(
+    id               BIGINT PRIMARY KEY generated always as identity,
+    text_designation varchar(15),
+    name_shelter     TEXT,
+    address          text,
+    phone            varchar(15)
+);
+--changeset zaytsev:37
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='animal'
+--onFail=MARK_RAN
+alter TABLE animal
+    add column id_shelter BIGINT REFERENCES shelter (id);
+--changeset zaytsev:38
+--precondition-sql-check expectedResult:0 SELECT count(*) FROM pg_tables WHERE tablename='shelter_info'
+--onFail=MARK_RAN
+create TABLE shelter_info
+(
+    id               BIGINT PRIMARY KEY generated always as identity,
+    id_shelter       BIGINT REFERENCES shelter (id),
+    info_designation TEXT,
+    text             text
+);
+--changeset zaytsev:39
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='users'
+--onFail=MARK_RAN
+alter TABLE users
+    add column id_shelter BIGINT REFERENCES shelter (id);
+--changeset zaytsev:40
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='telegram_chat'
+--onFail=MARK_RAN
+alter table telegram_chat
+    add column index_menu int,
+    add column id_shelter BIGINT REFERENCES shelter (id);
+--changeset zaytsev:41
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='users'
+--onFail=MARK_RAN
+alter TABLE users
+    alter column id_shelter set NOT NULL;
+alter table users
+    add CONSTRAINT unique_id_and_shelter_id UNIQUE (id, id_shelter);
+--changeset zaytsev:42
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='telegram_chat'
+--onFail=MARK_RAN
+alter table telegram_chat
+    alter column id_shelter set NOT NULL;
+--changeset zaytsev:43
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='animal'
+--onFail=MARK_RAN
+alter TABLE animal
+    alter column id_shelter set NOT NULL;
+alter table animal
+    add CONSTRAINT animal_unique_id_and_shelter_id UNIQUE (id, id_shelter);
+--changeset zaytsev:44
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='animal_ownership'
+--onFail=MARK_RAN
+alter TABLE animal_ownership
+    add column id_shelter BIGINT REFERENCES shelter (id) NOT NULL;
+alter table animal_ownership
+    add CONSTRAINT animal_ownership_unique_id_and_shelter_id UNIQUE (id, id_shelter);
+--changeset zaytsev:45
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='report'
+--onFail=MARK_RAN
+alter TABLE report
+    add column id_shelter BIGINT REFERENCES shelter (id) NOT NULL;
+alter table report
+    add CONSTRAINT report_unique_id_and_shelter_id UNIQUE (id, id_shelter);
+--changeset zaytsev:46
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='photo'
+--onFail=MARK_RAN
+alter TABLE photo
+    add column id_shelter BIGINT REFERENCES shelter (id) NOT NULL;
+alter table photo
+    add CONSTRAINT photo_unique_id_and_shelter_id UNIQUE (id, id_shelter);
+--changeset zaytsev:47
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='call_request'
+--onFail=MARK_RAN
+alter TABLE call_request
+    add column id_shelter BIGINT REFERENCES shelter (id) NOT NULL;
+alter table call_request
+    add CONSTRAINT call_request_unique_id_and_shelter_id UNIQUE (id, id_shelter);
+--changeset zaytsev:48
+--precondition-sql-check expectedResult:1 SELECT count(*) FROM pg_tables WHERE tablename='call_request'
+--onFail=MARK_RAN
+alter table call_request
+    add CONSTRAINT unique_id_shelter_id_client_local_date_time_open UNIQUE (id_shelter, id_client, local_date_time_open);

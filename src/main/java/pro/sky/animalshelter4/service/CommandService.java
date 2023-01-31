@@ -5,9 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import pro.sky.animalshelter4.entity.Chat;
+import pro.sky.animalshelter4.entity.Shelter;
 import pro.sky.animalshelter4.model.Command;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,27 +23,28 @@ import static pro.sky.animalshelter4.model.Command.*;
 @Service
 public class CommandService {
 
-    UserService userService;
+    private final ShelterService shelterService;
     private final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
-    public CommandService(UserService userService) {
-        this.userService = userService;
+    public CommandService(ShelterService shelterService) {
+        this.shelterService = shelterService;
     }
 
     /**
      * The method checks whether the command is available to the {@link Chat}
      * for execution. The data for the solution is taken from {@link Command}.
      * The method must be executed after receiving and parsing the necessary data and before executing commands
-     * using {@link UserService#isUserWithTelegramChatIdVolunteer(Long)} (Long)}
+     * using {@link ShelterService#isUserWithTelegramChatIdVolunteerInCurrentShelter(Chat)}
+     * using {@link ShelterService#isUserWithTelegramChatIdOwnerInCurrentShelter(Chat)}
      *
      * @param command must be not null
-     * @param idChat  must be not null
+     * @param chat    must be not null
      * @return true if the command is available to the user, else false
      */
-    public boolean approveLaunchCommand(Command command, Long idChat) {
-        if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
+    public boolean approveLaunchCommand(Command command, Chat chat) {
+        if (shelterService.isUserWithTelegramChatIdVolunteerInCurrentShelter(chat)) {
             return command.isVolunteer();
-        } else if (userService.isUserWithTelegramChatIdOwner(idChat)) {
+        } else if (shelterService.isUserWithTelegramChatIdOwnerInCurrentShelter(chat)) {
             return command.isOwner();
         } else {
             return command.isClient();
@@ -53,15 +56,16 @@ public class CommandService {
      * depending on the user's rights <br>
      * if the id of the volunteer using {@link CommandService#getAllTextCommandAsListForVolunteerExcludeHide()}  <br>
      * if else using {@link CommandService#getAllTextCommandAsListForClientExcludeHide()}  <br>
-     * using {@link UserService#isUserWithTelegramChatIdVolunteer(Long)}
+     * using {@link ShelterService#isUserWithTelegramChatIdVolunteerInCurrentShelter(Chat)}
+     * using {@link ShelterService#isUserWithTelegramChatIdOwnerInCurrentShelter(Chat)}
      *
-     * @param idChat must be not null
+     * @param chat must be not null
      * @return String as list of {@link Command#getTextCommand()}
      */
-    public String getAllTitlesAsListExcludeHide(Long idChat) {
-        if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
+    public String getAllTitlesAsListExcludeHide(Chat chat) {
+        if (shelterService.isUserWithTelegramChatIdVolunteerInCurrentShelter(chat)) {
             return getAllTextCommandAsListForVolunteerExcludeHide();
-        } else if (userService.isUserWithTelegramChatIdOwner(idChat)) {
+        } else if (shelterService.isUserWithTelegramChatIdOwnerInCurrentShelter(chat)) {
             return getAllTextCommandAsListForOwnerExcludeHide();
         } else {
             return getAllTextCommandAsListForClientExcludeHide();
@@ -72,22 +76,25 @@ public class CommandService {
      * The method outputs Pair<List<String>, List<String>>. First list contain names for the buttons,
      * second contain data for the buttons. <br>
      * For example, this use when sending buttons available to the user in the method
-     * {@link TelegramBotSenderService#sendButtonsCommandForChat(Long)} <br>
+     * {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      * if the id of the volunteer using
-     * {@link CommandService#getListsNameButtonAndListsDataButtonForVolunteerExcludeHide()}  <br>
-     * if else using {@link CommandService#getListsNameButtonAndListsDataButtonForClientExcludeHide()}  <br>
-     * using {@link UserService#isUserWithTelegramChatIdVolunteer(Long)}
+     * {@link CommandService#getListsNameButtonAndListsDataButtonForVolunteerExcludeHide(String, int)}
+     * if else using {@link CommandService#getListsNameButtonAndListsDataButtonForClientExcludeHide(String, int)}
+     * using {@link ShelterService#isUserWithTelegramChatIdVolunteerInCurrentShelter(Chat)}
+     * using {@link ShelterService#isUserWithTelegramChatIdOwnerInCurrentShelter(Chat)}
      *
-     * @param idChat must be not null
+     * @param chat must be not null
      * @return Pair<List < nameButtons>, List<dataButtons>>
      */
-    public Pair<List<String>, List<String>> getPairListsForButtonExcludeHide(Long idChat) {
-        if (userService.isUserWithTelegramChatIdVolunteer(idChat)) {
-            return getListsNameButtonAndListsDataButtonForVolunteerExcludeHide();
-        } else if (userService.isUserWithTelegramChatIdOwner(idChat)) {
-            return getListsNameButtonAndListsDataButtonForOwnerExcludeHide();
+    public Pair<List<String>, List<String>> getPairListsForButtonExcludeHide(Chat chat) {
+        String shelterDesignation = chat.getShelter().getshelterDesignation();
+        int indexMen = chat.getIndexMenu();
+        if (shelterService.isUserWithTelegramChatIdVolunteerInCurrentShelter(chat)) {
+            return getListsNameButtonAndListsDataButtonForVolunteerExcludeHide(shelterDesignation, indexMen);
+        } else if (shelterService.isUserWithTelegramChatIdOwnerInCurrentShelter(chat)) {
+            return getListsNameButtonAndListsDataButtonForOwnerExcludeHide(shelterDesignation, indexMen);
         } else {
-            return getListsNameButtonAndListsDataButtonForClientExcludeHide();
+            return getListsNameButtonAndListsDataButtonForClientExcludeHide(shelterDesignation, indexMen);
         }
     }
 
@@ -95,6 +102,7 @@ public class CommandService {
     /**
      * This method allow get all command as text for Client
      * using {@link Command#getOnlyShowCommandForClient()}
+     *
      * @return String Command
      */
     private String getAllTextCommandAsListForClientExcludeHide() {
@@ -110,6 +118,7 @@ public class CommandService {
     /**
      * This method allow get all command as text for Owner
      * using {@link Command#getOnlyShowCommandForOwner()}
+     *
      * @return String Command
      */
     private String getAllTextCommandAsListForOwnerExcludeHide() {
@@ -125,6 +134,7 @@ public class CommandService {
     /**
      * This method allow get all command as text for Volunteer
      * using {@link Command#getOnlyShowCommandForVolunteer()}
+     *
      * @return String Command
      */
     private String getAllTextCommandAsListForVolunteerExcludeHide() {
@@ -141,6 +151,7 @@ public class CommandService {
     /**
      * This method allow get all command as text for Client
      * using {@link Command#getOnlyShowCommandForClient()}
+     *
      * @return String Command
      */
     private List<String> getAllTextCommandForClientExcludeHide() {
@@ -152,6 +163,7 @@ public class CommandService {
     /**
      * This method allow get all command as text for Owner
      * using {@link Command#getOnlyShowCommandForOwner()}
+     *
      * @return String Command
      */
     private List<String> getAllTextCommandForOwnerExcludeHide() {
@@ -163,6 +175,7 @@ public class CommandService {
     /**
      * This method allow get all command as text for Volunteer
      * using {@link Command#getOnlyShowCommandForVolunteer()}
+     *
      * @return String Command
      */
     private List<String> getAllTextCommandForVolunteerExcludeHide() {
@@ -174,54 +187,72 @@ public class CommandService {
 
     /**
      * This method allows you to get some buttons for the client and hide others
+     *
      * @return Pair<List < String>, List<String>> for the client.
      * First list contains the names of the buttons {@link Command#getNameButton()},
      * second one contains data for buttons {@link Command#getTextCommand()}
      */
-    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForClientExcludeHide() {
+    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForClientExcludeHide(
+            String shelterDesignation,
+            int indexMenu) {
         List<String> nameButton = new ArrayList<>();
         List<String> dataButton = new ArrayList<>();
         List<Command> commandList = getOnlyShowCommandForClient();
         for (int i = 0; i < commandList.size(); i++) {
             Command tCom = commandList.get(i);
-            nameButton.add(tCom.getNameButton());
-            dataButton.add(tCom.getTextCommand());
+            boolean contains = Arrays.asList(tCom.getShelterDesignation()).contains(shelterDesignation);
+            if (tCom.getIndexMenu() == indexMenu && contains) {
+                nameButton.add(tCom.getNameButton());
+                dataButton.add(tCom.getTextCommand());
+            }
         }
         return Pair.of(nameButton, dataButton);
     }
 
     /**
      * This method allows you to get some buttons for the owner and hide others
+     *
      * @return Pair<List < String>, List<String>> for the owner.
      * First list contains the names of the buttons {@link Command#getNameButton()},
      * second one contains data for buttons {@link Command#getTextCommand()}
      */
-    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForOwnerExcludeHide() {
+    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForOwnerExcludeHide(
+            String shelterDesignation,
+            int indexMenu) {
         List<String> nameButton = new ArrayList<>();
         List<String> dataButton = new ArrayList<>();
         List<Command> commandList = getOnlyShowCommandForOwner();
         for (int i = 0; i < commandList.size(); i++) {
             Command tCom = commandList.get(i);
-            nameButton.add(tCom.getNameButton());
-            dataButton.add(tCom.getTextCommand());
+            boolean contains = Arrays.asList(tCom.getShelterDesignation()).contains(shelterDesignation);
+            if (tCom.getIndexMenu() == indexMenu && contains) {
+                nameButton.add(tCom.getNameButton());
+                dataButton.add(tCom.getTextCommand());
+            }
         }
         return Pair.of(nameButton, dataButton);
     }
 
     /**
      * This method allows you to get some buttons for the owner and hide volunteer
+     *
      * @return Pair<List < String>, List<String>> for the volunteer.
      * First list contains the names of the buttons {@link Command#getNameButton()},
      * second one contains data for buttons {@link Command#getTextCommand()}
      */
-    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForVolunteerExcludeHide() {
+    private Pair<List<String>, List<String>> getListsNameButtonAndListsDataButtonForVolunteerExcludeHide(
+            String shelterDesignation,
+            int indexMenu) {
         List<String> nameButton = new ArrayList<>();
         List<String> dataButton = new ArrayList<>();
         List<Command> commandList = getOnlyShowCommandForVolunteer();
         for (int i = 0; i < commandList.size(); i++) {
             Command tCom = commandList.get(i);
-            nameButton.add(tCom.getNameButton());
-            dataButton.add(tCom.getTextCommand());
+            boolean contains = Arrays.asList(tCom.getShelterDesignation()).contains(shelterDesignation);
+            if (tCom.getIndexMenu() == indexMenu && contains) {
+                nameButton.add(tCom.getNameButton());
+                dataButton.add(tCom.getTextCommand());
+            }
         }
         return Pair.of(nameButton, dataButton);
     }

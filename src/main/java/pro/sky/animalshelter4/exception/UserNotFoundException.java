@@ -10,8 +10,6 @@ import pro.sky.animalshelter4.service.UserService;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class UserNotFoundException extends RuntimeException{
     public UserNotFoundException(String message) {
-        super(message);
-        Logger logger = LoggerFactory.getLogger(UserService.class);
-        logger.error("User with id = " + message + " not found");
+        super("User with id = " + message + " not found");
     }
 }

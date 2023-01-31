@@ -14,13 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
-import pro.sky.animalshelter4.entity.Animal;
 import pro.sky.animalshelter4.entity.CallRequest;
 import pro.sky.animalshelter4.entity.Chat;
 import pro.sky.animalshelter4.entity.User;
-import pro.sky.animalshelter4.entityDto.AnimalDto;
 import pro.sky.animalshelter4.entityDto.ChatDto;
-import pro.sky.animalshelter4.exception.AnimalNotFoundException;
 import pro.sky.animalshelter4.exception.ChatNotFoundException;
 import pro.sky.animalshelter4.repository.CallRequestRepository;
 import pro.sky.animalshelter4.repository.ChatRepository;
@@ -152,9 +149,9 @@ class ChatControllerTest {
 
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getFirstNameUser()).isEqualTo(chatDto.getFirstNameUser());
-        assertThat(responseEntity.getLast_activity()).isEqualTo(chatDto.getLast_activity());
+        assertThat(responseEntity.getLastActivity()).isEqualTo(chatDto.getLastActivity());
         assertThat(responseEntity.getUserNameTelegram()).isEqualTo(chatDto.getUserNameTelegram());
-        assertThat(responseEntity.getLast_activity()).isEqualTo(chatDto.getLast_activity());
+        assertThat(responseEntity.getLastActivity()).isEqualTo(chatDto.getLastActivity());
     }
 
     @Test
@@ -176,9 +173,9 @@ class ChatControllerTest {
 
         assertThat(responseEntity).isNotNull();
         assertThat(responseEntity.getFirstNameUser()).isEqualTo(chatDto.getFirstNameUser());
-        assertThat(responseEntity.getLast_activity()).isEqualTo(chatDto.getLast_activity());
+        assertThat(responseEntity.getLastActivity()).isEqualTo(chatDto.getLastActivity());
         assertThat(responseEntity.getUserNameTelegram()).isEqualTo(chatDto.getUserNameTelegram());
-        assertThat(responseEntity.getLast_activity()).isEqualTo(chatDto.getLast_activity());
+        assertThat(responseEntity.getLastActivity()).isEqualTo(chatDto.getLastActivity());
     }
 
     @Test
@@ -219,9 +216,9 @@ class ChatControllerTest {
 
         assertThat(chatActual).isNotNull();
         assertThat(chatActual.getFirstNameUser()).isEqualTo("1234567890");
-        assertThat(chatActual.getLast_activity()).isEqualTo(chat.getLast_activity());
+        assertThat(chatActual.getLastActivity()).isEqualTo(chat.getLastActivity());
         assertThat(chatActual.getUserNameTelegram()).isEqualTo(chat.getUserNameTelegram());
-        assertThat(chatActual.getLast_activity()).isEqualTo(chat.getLast_activity());
+        assertThat(chatActual.getLastActivity()).isEqualTo(chat.getLastActivity());
     }
 
 
@@ -260,7 +257,7 @@ class ChatControllerTest {
                 .contains(chat.getLastNameUser().toString())
                 .contains(chat.getFirstNameUser().toString())
                 .contains(chat.getUserNameTelegram().toString())
-                .contains(chat.getLast_activity().toString().substring(0, 18));
+                .contains(chat.getLastActivity().toString().substring(0, 18));
         assertEquals(countChat - 1, chatRepository.findAll().size());
         assertThat(chatRepository.findById(chat.getId()).orElse(null))
                 .isNull();

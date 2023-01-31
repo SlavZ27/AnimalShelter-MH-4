@@ -18,18 +18,15 @@ public class DtoMapperService {
     public final UserRepository userRepository;
     private final ChatRepository chatRepository;
     private final AnimalRepository animalRepository;
-    private final AnimalTypeRepository animalTypeRepository;
+    private final ShelterRepository shelterRepository;
     private final AnimalOwnershipRepository animalOwnershipRepository;
     private final PhotoRepository photoRepository;
 
-    public DtoMapperService(UserRepository userRepository,
-                            ChatRepository chatRepository, AnimalRepository animalRepository, AnimalTypeRepository animalTypeRepository,
-                            AnimalOwnershipRepository animalOwnershipRepository,
-                            PhotoRepository photoRepository) {
+    public DtoMapperService(UserRepository userRepository, ChatRepository chatRepository, AnimalRepository animalRepository, ShelterRepository shelterRepository, AnimalOwnershipRepository animalOwnershipRepository, PhotoRepository photoRepository) {
         this.userRepository = userRepository;
         this.chatRepository = chatRepository;
         this.animalRepository = animalRepository;
-        this.animalTypeRepository = animalTypeRepository;
+        this.shelterRepository = shelterRepository;
         this.animalOwnershipRepository = animalOwnershipRepository;
         this.photoRepository = photoRepository;
     }
@@ -41,7 +38,7 @@ public class DtoMapperService {
         chat.setUserNameTelegram(chatDto.getUserNameTelegram());
         chat.setFirstNameUser(chatDto.getFirstNameUser());
         chat.setLastNameUser(chatDto.getLastNameUser());
-        chat.setLast_activity(chatDto.getLast_activity());
+        chat.setLastActivity(chatDto.getLastActivity());
         return chat;
     }
 
@@ -52,12 +49,12 @@ public class DtoMapperService {
         chatDto.setUserNameTelegram(chat.getUserNameTelegram());
         chatDto.setFirstNameUser(chat.getFirstNameUser());
         chatDto.setLastNameUser(chat.getLastNameUser());
-        chatDto.setLast_activity(chat.getLast_activity());
+        chatDto.setLastActivity(chat.getLastActivity());
         return chatDto;
     }
 
 
-    public CallRequest toEntity(CallRequestDto callRequestDto) {
+    public CallRequest toEntity(CallRequestDto callRequestDto, String shelterDesignation) {
         CallRequest callRequest = new CallRequest();
         callRequest.setId(callRequestDto.getId());
         if (callRequestDto.getIdClient() != null) {
@@ -71,6 +68,13 @@ public class DtoMapperService {
                     findById(callRequestDto.getIdVolunteer()).
                     orElseThrow(() -> new UserNotFoundException(String.valueOf(callRequestDto.getIdVolunteer())));
             callRequest.setVolunteer(user);
+        }
+        if (shelterDesignation == null) {
+            throw new IllegalArgumentException();
+        } else {
+            Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                    new ShelterNotFoundException(shelterDesignation));
+            callRequest.setShelter(shelter);
         }
         callRequest.setOpen(callRequestDto.isOpen());
         callRequest.setLocalDateTimeOpen(callRequestDto.getLocalDateTimeOpen());
@@ -95,7 +99,7 @@ public class DtoMapperService {
     }
 
 
-    public User toEntity(UserDto userDto) {
+    public User toEntity(UserDto userDto, String shelterDesignation) {
         User user = new User();
         user.setId(userDto.getId());
         user.setNameUser(userDto.getNameUser());
@@ -104,6 +108,13 @@ public class DtoMapperService {
                     findById(userDto.getIdChat()).
                     orElseThrow(() -> new ChatNotFoundException(String.valueOf(userDto.getIdChat())));
             user.setChatTelegram(chat);
+        }
+        if (shelterDesignation == null) {
+            throw new IllegalArgumentException();
+        } else {
+            Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                    new ShelterNotFoundException(shelterDesignation));
+            user.setShelter(shelter);
         }
         user.setPhone(userDto.getPhone());
         user.setAddress(userDto.getAddress());
@@ -126,7 +137,7 @@ public class DtoMapperService {
     }
 
 
-    public AnimalOwnership toEntity(AnimalOwnershipDto animalOwnershipDto) {
+    public AnimalOwnership toEntity(AnimalOwnershipDto animalOwnershipDto, String shelterDesignation) {
         AnimalOwnership animalOwnership = new AnimalOwnership();
         animalOwnership.setId(animalOwnershipDto.getId());
         if (animalOwnershipDto.getIdOwner() != null) {
@@ -138,6 +149,13 @@ public class DtoMapperService {
             Animal animal = animalRepository.findById(animalOwnershipDto.getIdAnimal()).orElseThrow(() ->
                     new AnimalNotFoundException(animalOwnershipDto.getIdAnimal().toString()));
             animalOwnership.setAnimal(animal);
+        }
+        if (shelterDesignation == null) {
+            throw new IllegalArgumentException();
+        } else {
+            Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                    new ShelterNotFoundException(shelterDesignation));
+            animalOwnership.setShelter(shelter);
         }
         animalOwnership.setDateStartOwn(animalOwnershipDto.getDateStartOwn());
         animalOwnership.setDateEndTrial(animalOwnershipDto.getDateEndTrial());
@@ -163,29 +181,38 @@ public class DtoMapperService {
         return animalOwnershipDto;
     }
 
-    public AnimalType toEntity(AnimalTypeDto animalTypeDto) {
-        AnimalType animalType = new AnimalType();
-        animalType.setId(animalTypeDto.getId());
-        animalType.setTypeAnimal(animalTypeDto.getTypeAnimal());
-        return animalType;
+    public Shelter toEntity(ShelterDto shelterDto) {
+        Shelter shelter = new Shelter();
+        shelter.setId(shelterDto.getId());
+        shelter.setshelterDesignation(shelterDto.getshelterDesignation());
+        shelter.setNameShelter(shelterDto.getNameShelter());
+        shelter.setAddress(shelterDto.getAddress());
+        shelter.setPhone(shelterDto.getPhone());
+        return shelter;
     }
 
-    public AnimalTypeDto toDto(AnimalType animalType) {
-        AnimalTypeDto animalTypeDto = new AnimalTypeDto();
-        animalTypeDto.setId(animalType.getId());
-        animalTypeDto.setTypeAnimal(animalType.getTypeAnimal());
-        return animalTypeDto;
+    public ShelterDto toDto(Shelter shelter) {
+        ShelterDto shelterDto = new ShelterDto();
+        shelterDto.setId(shelter.getId());
+        shelterDto.setshelterDesignation(shelter.getshelterDesignation());
+        shelterDto.setNameShelter(shelter.getNameShelter());
+        shelterDto.setAddress(shelter.getAddress());
+        shelterDto.setPhone(shelter.getPhone());
+        return shelterDto;
     }
 
-    public Animal toEntity(AnimalDto animalDto) {
+
+    public Animal toEntity(AnimalDto animalDto, String shelterDesignation) {
         Animal animal = new Animal();
         animal.setId(animalDto.getId());
         animal.setNameAnimal(animalDto.getNameAnimal());
         animal.setBorn(animalDto.getBorn());
-        if (animalDto.getIdAnimalType() != null) {
-            AnimalType animalType = animalTypeRepository.findById(animalDto.getIdAnimalType()).orElseThrow(() ->
-                    new AnimalTypeNotFoundException(animalDto.getIdAnimalType().toString()));
-            animal.setAnimalType(animalType);
+        if (shelterDesignation == null) {
+            throw new IllegalArgumentException();
+        } else {
+            Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                    new ShelterNotFoundException(shelterDesignation));
+            animal.setShelter(shelter);
         }
         return animal;
     }
@@ -195,19 +222,23 @@ public class DtoMapperService {
         animalDto.setId(animal.getId());
         animalDto.setNameAnimal(animal.getNameAnimal());
         animalDto.setBorn(animal.getBorn());
-        animalDto.setIdAnimalType(animal.getAnimalType().getId());
         return animalDto;
     }
 
-    public Report toEntity(ReportDto reportDto) {
+    public Report toEntity(ReportDto reportDto, String shelterDesignation) {
         Report report = new Report();
-
         report.setId(reportDto.getId());
-
         if (reportDto.getIdAnimalOwnership() != null) {
             AnimalOwnership animalOwnership = animalOwnershipRepository.findById(reportDto.getIdAnimalOwnership()).
                     orElseThrow(() -> new AnimalOwnershipNotFoundException(reportDto.getIdAnimalOwnership().toString()));
             report.setAnimalOwnership(animalOwnership);
+        }
+        if (shelterDesignation == null) {
+            throw new IllegalArgumentException();
+        } else {
+            Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
+                    new ShelterNotFoundException(shelterDesignation));
+            report.setShelter(shelter);
         }
         report.setReportDate(reportDto.getReportDate());
         report.setDiet(reportDto.getDiet());

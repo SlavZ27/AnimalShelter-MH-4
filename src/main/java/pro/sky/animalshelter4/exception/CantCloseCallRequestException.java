@@ -6,8 +6,6 @@ import pro.sky.animalshelter4.service.CallRequestService;
 
 public class CantCloseCallRequestException extends RuntimeException {
     public CantCloseCallRequestException(String message) {
-        super(message);
-        Logger logger = LoggerFactory.getLogger(CallRequestService.class);
-        logger.error("Can't close callRequest with id = " + message);
+        super("Can't close callRequest with id = " + message);
     }
 }

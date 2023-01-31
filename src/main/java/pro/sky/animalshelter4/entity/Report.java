@@ -1,5 +1,8 @@
 package pro.sky.animalshelter4.entity;
 
+import pro.sky.animalshelter4.exception.AnimalOwnershipBadParameterException;
+import pro.sky.animalshelter4.exception.ReportBadParameterException;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
@@ -11,18 +14,41 @@ public class Report {
     @OneToOne
     @JoinColumn(name = "id_animal_ownership")
     private AnimalOwnership animalOwnership;
-    @JoinColumn(name = "report_date")
+    @Column(name = "report_date")
     private LocalDate reportDate;
+    @Column(name = "diet")
     private String diet;
+    @Column(name = "feeling")
     private String feeling;
+    @Column(name = "behavior")
     private String behavior;
     @OneToOne
     @JoinColumn(name = "id_photo")
     private Photo photo;
-    @JoinColumn(name = "is_approve")
+    @Column(name = "is_approve")
     private Boolean isApprove;
+    @OneToOne
+    @JoinColumn(name = "id_shelter")
+    private Shelter shelter;
 
     public Report() {
+    }
+
+
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        if (shelter == null || shelter.getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getAnimalOwnership() != null &&
+                getAnimalOwnership().getShelter() != null && getAnimalOwnership().getShelter().getId() != null &&
+                !getAnimalOwnership().getShelter().getId().equals(shelter.getId())) {
+            throw new ReportBadParameterException();
+        }
+        this.shelter = shelter;
     }
 
     public Boolean isApprove() {
@@ -47,6 +73,15 @@ public class Report {
     }
 
     public void setAnimalOwnership(AnimalOwnership animalOwnership) {
+        if (animalOwnership == null || animalOwnership.getId() == null ||
+                animalOwnership.getShelter() == null &&
+                        animalOwnership.getShelter().getId() == null) {
+            throw new IllegalArgumentException();
+        }
+        if (getShelter() != null && getShelter().getId() != null &&
+                !getShelter().getId().equals(animalOwnership.getShelter().getId())) {
+            throw new ReportBadParameterException();
+        }
         this.animalOwnership = animalOwnership;
     }
 
@@ -88,6 +123,10 @@ public class Report {
 
     public void setPhoto(Photo photo) {
         this.photo = photo;
+    }
+
+    public Boolean getApprove() {
+        return isApprove;
     }
 
     @Override
