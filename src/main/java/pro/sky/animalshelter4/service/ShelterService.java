@@ -269,7 +269,7 @@ public class ShelterService {
     public User getRandomVolunteerWithShelter(Shelter shelter) {
         Shelter shelterVolunteer = findShelter(shelter.getId());
         if (shelterVolunteer == null) {
-            throw new ShelterNotFoundException("");
+            throw new ShelterNotFoundException(shelter.getId().toString());
         }
         return userService.getRandomVolunteer(shelterVolunteer);
     }

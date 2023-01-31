@@ -23,9 +23,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             , nativeQuery = true)
     Optional<Report> getByIdWithShelter(Long id, Long idShelter);
 
-    @Query(value = "SELECT DISTINCT on (report.id_animal_ownership) report.* FROM report,animal_ownership where report.id_shelter=:idShelter and animal_ownership.is_open=true and  animal_ownership.id=report.id_animal_ownership order by report.id_animal_ownership, report.report_date desc"
+    @Query(value = "SELECT DISTINCT on (report.id_animal_ownership) report.* FROM report,animal_ownership where report.id_shelter=:idShelter and animal_ownership.id_shelter=:idShelter and animal_ownership.date_start_own<:localDateNow and animal_ownership.date_end_trial>:localDateNow and animal_ownership.is_open=true and animal_ownership.id=report.id_animal_ownership order by report.id_animal_ownership, report.report_date desc"
             , nativeQuery = true)
-    List<Report> getLatestUniqueOwnerReportWithOpenAnimalOwnershipWithShelter(Long idShelter);
+    List<Report> getLatestUniqueOwnerReportWithOpenAnimalOwnershipWithShelter(Long idShelter,LocalDate localDateNow);
 
     @Query(value = "select report.* from report where report.id_shelter=:idShelter"
             , nativeQuery = true)

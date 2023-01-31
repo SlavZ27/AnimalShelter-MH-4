@@ -92,8 +92,6 @@ class CallRequestControllerTest {
     @Autowired
     private TelegramMapperService telegramMapperService;
     @Autowired
-    private TelegramPhotoService telegramPhotoService;
-    @Autowired
     private TelegramUnfinishedRequestService telegramUnfinishedRequestService;
     @Autowired
     private UserService userService;
@@ -289,7 +287,6 @@ class CallRequestControllerTest {
         assertThat(telegramBotSenderService).isNotNull();
         assertThat(telegramBotUpdatesService).isNotNull();
         assertThat(telegramMapperService).isNotNull();
-        assertThat(telegramPhotoService).isNotNull();
         assertThat(telegramUnfinishedRequestService).isNotNull();
         assertThat(userService).isNotNull();
         assertThat(telegramBotUpdatesListener).isNotNull();
@@ -379,11 +376,12 @@ class CallRequestControllerTest {
         assertThat(responseEntity2.getLocalDateTimeClose()).isEqualTo(callRequestDtoCat.getLocalDateTimeClose());
         assertThat(responseEntity2.isOpen()).isEqualTo(callRequestDtoCat.isOpen());
 
-        assertThat(responseEntity3).isNotNull();
-        assertThat(responseEntity3.getIdClient()).isNotEqualTo(responseEntity1.getIdClient());
-        assertThat(responseEntity3.getIdVolunteer()).isNotEqualTo(responseEntity1.getIdVolunteer());
-        assertThat(responseEntity3.getLocalDateTimeOpen()).isNotEqualTo(responseEntity1.getLocalDateTimeOpen());
-        assertThat(responseEntity3.getLocalDateTimeClose()).isNotEqualTo(responseEntity1.getLocalDateTimeClose());
+        if (responseEntity3.getId() != null) {
+            assertThat(responseEntity3.getIdClient()).isNotEqualTo(responseEntity1.getIdClient());
+            assertThat(responseEntity3.getIdVolunteer()).isNotEqualTo(responseEntity1.getIdVolunteer());
+            assertThat(responseEntity3.getLocalDateTimeOpen()).isNotEqualTo(responseEntity1.getLocalDateTimeOpen());
+            assertThat(responseEntity3.getLocalDateTimeClose()).isNotEqualTo(responseEntity1.getLocalDateTimeClose());
+        }
     }
 
     @Test

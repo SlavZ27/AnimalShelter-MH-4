@@ -86,8 +86,6 @@ class TelegramBotUpdatesListenerTest {
     @Autowired
     private TelegramMapperService telegramMapperService;
     @Autowired
-    private TelegramPhotoService telegramPhotoService;
-    @Autowired
     private TelegramUnfinishedRequestService telegramUnfinishedRequestService;
     @Autowired
     private UserService userService;
@@ -282,7 +280,6 @@ class TelegramBotUpdatesListenerTest {
         assertThat(telegramBotSenderService).isNotNull();
         assertThat(telegramBotUpdatesService).isNotNull();
         assertThat(telegramMapperService).isNotNull();
-        assertThat(telegramPhotoService).isNotNull();
         assertThat(telegramUnfinishedRequestService).isNotNull();
         assertThat(userService).isNotNull();
         assertThat(telegramBotUpdatesListener).isNotNull();
@@ -1182,15 +1179,15 @@ class TelegramBotUpdatesListenerTest {
                 contains(callRequestUserDogWithoutPhone.getId().toString()) ||
                 actual11.getParameters().get("text").toString().
                         contains(callRequestUserDog.getId().toString()));
-        assertTrue(actual11.getParameters().get("reply_markup").toString().contains(
-                Command.CLOSE_CALL_REQUEST +
-                        TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                        callRequestUserDogWithoutPhone.getId().toString()) ||
+        assertTrue(
                 actual11.getParameters().get("reply_markup").toString().contains(
                         Command.CLOSE_CALL_REQUEST +
                                 TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                                actual11.getParameters().get("text").toString().
-                                        contains(callRequestUserDog.getId().toString())));
+                                callRequestUserDogWithoutPhone.getId().toString()) ||
+                        actual11.getParameters().get("reply_markup").toString().contains(
+                                Command.CLOSE_CALL_REQUEST +
+                                        TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                                        actual11.getParameters().get("text").toString()));
         //Check adding UnfinishedRequestTelegram for change phone if phone empty
         UnfinishedRequestTelegram unfinishedRequestTelegram = unfinishedRequestTelegramRepository.findAll().stream().
                 filter(unfinishedRequestTelegram1 -> unfinishedRequestTelegram1.getChat().getId().
@@ -2740,4 +2737,236 @@ class TelegramBotUpdatesListenerTest {
         Assertions.assertThat(actual1.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
         Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
     }
+
+    @Test
+    public void INFOWithoutShelterTest() {
+        //get userVolunteer
+        User userVolunteer = userRepository.findAll().stream().
+                filter(User::isVolunteer).findAny().orElse(null);
+        //get userClient
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findAny().orElse(null);
+        //get chatVolunteer
+        Chat chatVolunteer = userVolunteer.getChatTelegram();
+        chatVolunteer.setShelter(null);
+        Chat chatClient = userClient.getChatTelegram();
+        chatClient.setShelter(null);
+        chatVolunteer = chatRepository.save(chatVolunteer);
+        chatClient = chatRepository.save(chatClient);
+        //Update include Command.INFO chatVolunteer
+        //Update include Command.INFO chatClient
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatVolunteer.getUserNameTelegram(),
+                        chatVolunteer.getFirstNameUser(),
+                        chatVolunteer.getLastNameUser(),
+                        chatVolunteer.getId(),
+                        Command.INFO.getTextCommand(),
+                        false),
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.INFO.getTextCommand(),
+                        false)
+        ));
+
+        telegramBotUpdatesListener.process(updateList);
+
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(2)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(2);
+        SendMessage actual0 = actualList.get(0);
+        SendMessage actual1 = actualList.get(1);
+
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatVolunteer.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_SHELTER);
+        Assertions.assertThat(actual1.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_SHELTER);
+    }
+
+    @Test
+    public void SET_SHELTERTest() {
+        //get userVolunteer
+        User userVolunteer = userRepository.findAll().stream().
+                filter(User::isVolunteer).findAny().orElse(null);
+        //get userClient
+        User userClient = userRepository.findAll().stream().
+                filter(user -> user.isVolunteer() == false).findAny().orElse(null);
+        //get chatVolunteer
+        Chat chatVolunteer = userVolunteer.getChatTelegram();
+        chatVolunteer.setShelter(null);
+        Chat chatClient = userClient.getChatTelegram();
+        chatClient.setShelter(null);
+        chatVolunteer = chatRepository.save(chatVolunteer);
+        chatClient = chatRepository.save(chatClient);
+        //Update include Command.SET_SHELTER + DOG from chatVolunteer
+        //Update include Command.SET_SHELTER + CAT from chatClient
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatVolunteer.getUserNameTelegram(),
+                        chatVolunteer.getFirstNameUser(),
+                        chatVolunteer.getLastNameUser(),
+                        chatVolunteer.getId(),
+                        Command.SET_SHELTER.getTextCommand() +
+                                TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                                "DOG",
+                        false),
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.SET_SHELTER.getTextCommand() +
+                                TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                                "CAT",
+                        false)
+        ));
+
+        telegramBotUpdatesListener.process(updateList);
+
+        chatVolunteer = chatRepository.findById(chatVolunteer.getId()).orElse(null);
+        chatClient = chatRepository.findById(chatClient.getId()).orElse(null);
+        assertThat(chatVolunteer.getShelter().getshelterDesignation().equals("DOG"));
+        assertThat(chatClient.getShelter().getshelterDesignation().equals("CAT"));
+
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(2)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(2);
+        SendMessage actual0 = actualList.get(0);
+        SendMessage actual1 = actualList.get(1);
+
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chatVolunteer.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+        Assertions.assertThat(actual1.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+
+        //opposite
+        updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatVolunteer.getUserNameTelegram(),
+                        chatVolunteer.getFirstNameUser(),
+                        chatVolunteer.getLastNameUser(),
+                        chatVolunteer.getId(),
+                        Command.SET_SHELTER.getTextCommand() +
+                                TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                                "CAT",
+                        false),
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chatClient.getUserNameTelegram(),
+                        chatClient.getFirstNameUser(),
+                        chatClient.getLastNameUser(),
+                        chatClient.getId(),
+                        Command.SET_SHELTER.getTextCommand() +
+                                TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                                "DOG",
+                        false)
+        ));
+
+        telegramBotUpdatesListener.process(updateList);
+
+        chatVolunteer = chatRepository.findById(chatVolunteer.getId()).orElse(null);
+        chatClient = chatRepository.findById(chatClient.getId()).orElse(null);
+        assertThat(chatVolunteer.getShelter().getshelterDesignation().equals("CAT"));
+        assertThat(chatClient.getShelter().getshelterDesignation().equals("DOG"));
+
+        argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(4)).execute(argumentCaptor.capture());
+        actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(4);
+        SendMessage actual2 = actualList.get(2);
+        SendMessage actual3 = actualList.get(3);
+
+        Assertions.assertThat(actual2.getParameters().get("chat_id")).isEqualTo(chatVolunteer.getId());
+        Assertions.assertThat(actual2.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+        Assertions.assertThat(actual3.getParameters().get("chat_id")).isEqualTo(chatClient.getId());
+        Assertions.assertThat(actual3.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+    }
+
+    @Test
+    public void MENU_INFO_MENU_ACTION_MENU_BACK1_MENU_BACK2_MENU_BACK3Test() {
+        Chat chat1 = chatRepository.findAll().stream().findAny().orElse(null);
+        Chat chat2 = chatRepository.findAll().stream().findAny().orElse(null);
+        Chat chat3 = chatRepository.findAll().stream().findAny().orElse(null);
+        Chat chat4 = chatRepository.findAll().stream().findAny().orElse(null);
+        Chat chat5 = chatRepository.findAll().stream().findAny().orElse(null);
+        //Update include Command.MENU_INFO chatVolunteer
+        //Update include Command.MENU_INFO chatClient
+        List<Update> updateList = new ArrayList<>(List.of(
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chat1.getUserNameTelegram(),
+                        chat1.getFirstNameUser(),
+                        chat1.getLastNameUser(),
+                        chat1.getId(),
+                        Command.MENU_INFO.getTextCommand(),
+                        false),
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chat2.getUserNameTelegram(),
+                        chat2.getFirstNameUser(),
+                        chat2.getLastNameUser(),
+                        chat2.getId(),
+                        Command.MENU_ACTION.getTextCommand(),
+                        false),
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chat3.getUserNameTelegram(),
+                        chat3.getFirstNameUser(),
+                        chat3.getLastNameUser(),
+                        chat3.getId(),
+                        Command.MENU_BACK1.getTextCommand(),
+                        false),
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chat4.getUserNameTelegram(),
+                        chat4.getFirstNameUser(),
+                        chat4.getLastNameUser(),
+                        chat4.getId(),
+                        Command.MENU_BACK2.getTextCommand(),
+                        false),
+                generator.generateUpdateCallbackQueryWithReflection(
+                        chat5.getUserNameTelegram(),
+                        chat5.getFirstNameUser(),
+                        chat5.getLastNameUser(),
+                        chat5.getId(),
+                        Command.MENU_BACK3.getTextCommand(),
+                        false)
+        ));
+
+        telegramBotUpdatesListener.process(updateList);
+
+        chat1 = chatRepository.findById(chat1.getId()).orElse(null);
+        assertThat(chat1.getIndexMenu().equals(2));
+        chat2 = chatRepository.findById(chat2.getId()).orElse(null);
+        assertThat(chat1.getIndexMenu().equals(3));
+        chat3 = chatRepository.findById(chat3.getId()).orElse(null);
+        assertThat(chat1.getIndexMenu().equals(0));
+        chat4 = chatRepository.findById(chat4.getId()).orElse(null);
+        assertThat(chat1.getIndexMenu().equals(0));
+        chat5 = chatRepository.findById(chat5.getId()).orElse(null);
+        assertThat(chat1.getIndexMenu().equals(0));
+
+
+        ArgumentCaptor<SendMessage> argumentCaptor = ArgumentCaptor.forClass(SendMessage.class);
+        verify(telegramBot, times(5)).execute(argumentCaptor.capture());
+        List<SendMessage> actualList = argumentCaptor.getAllValues();
+        Assertions.assertThat(actualList.size()).isEqualTo(5);
+        SendMessage actual0 = actualList.get(0);
+        SendMessage actual1 = actualList.get(1);
+        SendMessage actual2 = actualList.get(2);
+        SendMessage actual3 = actualList.get(3);
+        SendMessage actual4 = actualList.get(4);
+
+        Assertions.assertThat(actual0.getParameters().get("chat_id")).isEqualTo(chat1.getId());
+        Assertions.assertThat(actual0.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+        Assertions.assertThat(actual1.getParameters().get("chat_id")).isEqualTo(chat2.getId());
+        Assertions.assertThat(actual1.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+        Assertions.assertThat(actual2.getParameters().get("chat_id")).isEqualTo(chat3.getId());
+        Assertions.assertThat(actual2.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+        Assertions.assertThat(actual3.getParameters().get("chat_id")).isEqualTo(chat4.getId());
+        Assertions.assertThat(actual3.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+        Assertions.assertThat(actual4.getParameters().get("chat_id")).isEqualTo(chat5.getId());
+        Assertions.assertThat(actual4.getParameters().get("text")).isEqualTo(TelegramBotSenderService.MESSAGE_SELECT_COMMAND);
+    }
+
 }

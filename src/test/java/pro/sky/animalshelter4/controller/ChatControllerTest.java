@@ -94,8 +94,6 @@ class ChatControllerTest {
     @Autowired
     private TelegramMapperService telegramMapperService;
     @Autowired
-    private TelegramPhotoService telegramPhotoService;
-    @Autowired
     private TelegramUnfinishedRequestService telegramUnfinishedRequestService;
     @Autowired
     private UserService userService;
@@ -291,7 +289,6 @@ class ChatControllerTest {
         assertThat(telegramBotSenderService).isNotNull();
         assertThat(telegramBotUpdatesService).isNotNull();
         assertThat(telegramMapperService).isNotNull();
-        assertThat(telegramPhotoService).isNotNull();
         assertThat(telegramUnfinishedRequestService).isNotNull();
         assertThat(userService).isNotNull();
         assertThat(telegramBotUpdatesListener).isNotNull();
