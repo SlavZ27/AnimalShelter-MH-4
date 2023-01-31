@@ -55,8 +55,7 @@ public class TelegramMapperService {
             logger.debug("Method toDPO detected message into update");
 //message from
             if (update.message().from() != null &&
-                    update.message().from().id() != null &&
-                    update.message().from().username() != null) {
+                    update.message().from().id() != null) {
                 if (update.message().from().id() < 0) {
                     logger.error("Method toDPO detected userId < 0");
                     return null;
@@ -97,8 +96,7 @@ public class TelegramMapperService {
             updateDpo.setInteractionUnit(InteractionUnit.CALLBACK_QUERY);
 //callbackQuery from
             if (update.callbackQuery().from() != null &&
-                    update.callbackQuery().from().id() != null &&
-                    update.callbackQuery().from().username() != null) {
+                    update.callbackQuery().from().id() != null) {
                 if (update.callbackQuery().from().id() < 0) {
                     logger.error("Method toDPO detected userId < 0");
                     return null;

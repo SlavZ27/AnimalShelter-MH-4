@@ -143,7 +143,7 @@ public class AnimalOwnership {
         return "AnimalOwnership\n" +
                 "Owner: " + owner +
                 "\nanimal: " + animal +
-                "\n dateStartOwn: " + dateStartOwn.toString() +
+                "\ndateStartOwn: " + dateStartOwn.toString() +
                 "\ndateEndTrial: " + dateEndTrial.toString();
     }
 }

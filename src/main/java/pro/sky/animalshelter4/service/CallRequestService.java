@@ -236,16 +236,23 @@ public class CallRequestService {
      * This method, using method repository allow get all open call request volunteer
      * Using: {@link CallRequestRepository#getOpenByUserIdForVolunteerWithShelter(Long, Long)}
      *
-     * @param userVolunteer is not null
+     * @param usersVolunteer is not null
      * @return List<CallRequest>
      */
-    public CallRequest getAllOpenCallRequestVolunteer(User userVolunteer, Shelter shelter) {
+    public CallRequest getAllOpenCallRequestVolunteers(List<User> usersVolunteer) {
         logger.info(
-                "Method getAllOpenCallRequestVolunteer was start for return all CallRequest Volunteer with id = {}"
-                , userVolunteer.getId());
-        return callRequestRepository.getOpenByUserIdForVolunteerWithShelter(
-                userVolunteer.getId(),
-                userVolunteer.getShelter().getId());
+                "Method getAllOpenCallRequestVolunteer was start for return all CallRequest Volunteers");
+        CallRequest callRequest = null;
+        for (int i = 0; i < usersVolunteer.size(); i++) {
+            callRequest =
+                    callRequestRepository.getOpenByUserIdForVolunteerWithShelter(
+                            usersVolunteer.get(i).getId(),
+                            usersVolunteer.get(i).getShelter().getId());
+            if (callRequest != null) {
+                break;
+            }
+        }
+        return callRequest;
     }
 
     /**

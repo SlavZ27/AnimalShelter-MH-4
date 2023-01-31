@@ -135,8 +135,11 @@ public class TelegramBotUpdatesService {
                 case CHANGE_SHELTER:
                     chatService.changeShelter(updateDpo);
                     break;
-                case MENU_INFO:
-                    chatService.setMenuInfo(updateDpo);
+                case MENU_INFO_SHELTER:
+                    chatService.setMenuInfoShelter(updateDpo);
+                    break;
+                case MENU_INFO_ANIMAL:
+                    chatService.setMenuInfoAnimal(updateDpo);
                     break;
                 case MENU_ACTION:
                     chatService.setMenuAction(updateDpo);
