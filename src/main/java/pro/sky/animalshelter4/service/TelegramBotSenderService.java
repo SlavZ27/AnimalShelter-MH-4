@@ -40,7 +40,7 @@ public class TelegramBotSenderService {
     public static final String MESSAGE_SELECT_COMMAND = "Select action";
     public static final String MESSAGE_SELECT_SHELTER = "Select shelter";
     public static final String MESSAGE_SORRY_I_DONT_KNOW_COMMAND = "Sorry, I don't know this command";
-    public static final String MESSAGE_SORRY_I_DONT_KNOW_YOUR_PHONE = "I do not know your phone number. Please write";
+    public static final String MESSAGE_SORRY_I_DONT_KNOW_YOUR_PHONE = "I want to know your phone number for communication. Please write";
     public static final String MESSAGE_SORRY_I_KNOW_THIS = "Sorry.\nI know only this command:\n";
     public static final String MESSAGE_HELLO = "Hello ";
     public static final String NAME_BUTTON_FOR_CANCEL = "Cancel";
@@ -246,27 +246,27 @@ public class TelegramBotSenderService {
     public Pair<Integer, Integer> getTableSize(int countElements) {
         int width = 0;
         int height = 0;
-        if (countElements == 1) {
-            width = 1;
-            height = 1;
-        } else if (countElements > 4) {
-            width = 4;
-            if (countElements % 4 == 0) {
-                height = countElements / 4;
-            } else {
-                height = countElements / 4 + 1;
-            }
-        } else if (countElements % 4 == 0) {
-            width = 4;
-            height = countElements / 4;
-        } else if (countElements % 3 == 0) {
-            width = 3;
-            height = countElements / 3;
-        } else if (countElements % 2 == 0) {
-            width = 2;
-            height = countElements / 2;
-        }
-        return Pair.of(width, height);
+//        if (countElements == 1) {
+//            width = 1;
+//            height = 1;
+//        } else if (countElements > 4) {
+//            width = 4;
+//            if (countElements % 4 == 0) {
+//                height = countElements / 4;
+//            } else {
+//                height = countElements / 4 + 1;
+//            }
+//        } else if (countElements % 4 == 0) {
+//            width = 4;
+//            height = countElements / 4;
+//        } else if (countElements % 3 == 0) {
+//            width = 3;
+//            height = countElements / 3;
+//        } else if (countElements % 2 == 0) {
+//            width = 2;
+//            height = countElements / 2;
+//        }
+        return Pair.of(1, countElements);
     }
 
 
@@ -312,11 +312,16 @@ public class TelegramBotSenderService {
      * @param pathFile must be not null
      * @throws IOException
      */
-    public void sendPhoto(Long idChat, String pathFile) throws IOException {
+    public void sendPhotoFS(Long idChat, String pathFile) throws IOException {
         Path path = Paths.get(pathFile);
         byte[] file = Files.readAllBytes(path);
         SendPhoto sendPhoto = new SendPhoto(idChat, file);
-        telegramBot.execute(sendPhoto).message();
+        telegramBot.execute(sendPhoto);
+    }
+
+    public void sendPhoto(Long idChat, String idMedia) {
+        SendPhoto sendPhoto = new SendPhoto(idChat, idMedia);
+        telegramBot.execute(sendPhoto);
     }
 
     /**

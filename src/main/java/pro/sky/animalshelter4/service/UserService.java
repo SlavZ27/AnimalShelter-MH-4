@@ -323,9 +323,9 @@ public class UserService {
      * @param chatVolunteer is not null
      * @return getAllOpenCallRequestVolunteer
      */
-    public CallRequest getOpenCallRequestForVolunteerWithChatAndShelter(Chat chatVolunteer, Shelter shelter) {
-        User userVolunteer = getUserFromChatAndShelter(chatVolunteer, shelter);
-        return callRequestService.getAllOpenCallRequestVolunteer(userVolunteer, shelter);
+    public CallRequest getOpenCallRequestForVolunteerWithChat(Chat chatVolunteer) {
+        List<User> userVolunteers = userRepository.getUsersFromChat(chatVolunteer.getId());
+        return callRequestService.getAllOpenCallRequestVolunteers(userVolunteers);
     }
 
     /**
@@ -365,14 +365,14 @@ public class UserService {
      */
     public AnimalOwnership createOwnershipAnimalWithShelter(Long idUserClient, Shelter shelter, Animal animal) {
         User userClient = findUserWithShelter(idUserClient, shelter);
-        if (userClient == null || !userClient.getShelter().getId().equals(shelter.getId())) {
-            return null;
-        }
         AnimalOwnership animalOwnership = new AnimalOwnership();
         animalOwnership.setOwner(userClient);
         animalOwnership.setAnimal(animal);
+        animalOwnership.setOpen(true);
+        animalOwnership.setApprove(null);
         animalOwnership.setDateStartOwn(LocalDate.now());
         animalOwnership.setDateEndTrial(LocalDate.now().plusDays(30));
+        animalOwnership.setShelter(shelter);
         return animalOwnershipService.addAnimalOwnership(animalOwnership);
     }
 
@@ -427,7 +427,7 @@ public class UserService {
      */
     public Report approveReportWithIdReportWithShelter(Shelter shelter, Long idReport, boolean approve) {
         User userOwner = userRepository.getUserOwnerReportWithShelter(idReport, shelter.getId());
-        if (userOwner == null || userOwner.getShelter() == null || !userOwner.getShelter().equals(shelter)) {
+        if (userOwner == null || userOwner.getShelter() == null || !userOwner.getShelter().getId().equals(shelter.getId())) {
             return null;
         }
         return animalOwnershipService.approveReportWithShelter(idReport, shelter, approve);

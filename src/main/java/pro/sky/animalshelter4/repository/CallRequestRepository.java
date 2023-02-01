@@ -15,23 +15,23 @@ public interface CallRequestRepository extends JpaRepository<CallRequest, Long> 
 
     @Query(value = "select call_request.* from call_request where call_request.is_open=true and id_client=:idUser and call_request.id_shelter=:idShelter limit 1"
             , nativeQuery = true)
-    CallRequest getFirstOpenByUserIdForClientWithShelter(Long idShelter, Long idUser);
+    CallRequest getFirstOpenByUserIdForClientWithShelter(Long idUser, Long idShelter);
 
     @Query(value = "select call_request.* from call_request where call_request.is_open=true and id_volunteer=:idUser and call_request.id_shelter=:idShelter limit 1"
             , nativeQuery = true)
-    CallRequest getOpenByUserIdForVolunteerWithShelter(Long idShelter, Long idUser);
+    CallRequest getOpenByUserIdForVolunteerWithShelter(Long idUser, Long idShelter);
 
     @Query(value = "select call_request.* from call_request where call_request.is_open=true and id_volunteer=:idUser and call_request.id_shelter=:idShelter"
             , nativeQuery = true)
-    List<CallRequest> getAllOpenByUserIdForVolunteerWithShelter(Long idShelter, Long idUser);
+    List<CallRequest> getAllOpenByUserIdForVolunteerWithShelter(Long idUser, Long idShelter);
 
     @Query(value = "select call_request.* from call_request where call_request.is_open=true and id_client=:idUser and call_request.id_shelter=:idShelter"
             , nativeQuery = true)
-    List<CallRequest> getAllOpenByUserIdForClientWithShelter(Long idShelter, Long idUser);
+    List<CallRequest> getAllOpenByUserIdForClientWithShelter(Long idUser, Long idShelter);
 
     @Query(value = "select call_request.* from call_request where call_request.id_volunteer=:idUser and call_request.id_shelter=:idShelter"
             , nativeQuery = true)
-    List<CallRequest> getAllCallRequestVolunteerWithShelter(Long idShelter, Long idUser);
+    List<CallRequest> getAllCallRequestVolunteerWithShelter(Long idUser, Long idShelter);
 
     @Query(value = "select call_request.* from call_request where call_request.is_open=true and call_request.id_shelter=:idShelter"
             , nativeQuery = true)

@@ -122,7 +122,16 @@ class TelegramMapperServiceTest {
                                 50L,
                                 Command.START.getTextCommand(),
                                 false),
-                        null
+                        new UpdateDPO(
+                                50L,
+                                null,
+                                null,
+                                null,
+                                Command.START,
+                                "",
+                                null,
+                                InteractionUnit.COMMAND
+                        )
                 ),
                 //chatId = null
                 Arguments.of(

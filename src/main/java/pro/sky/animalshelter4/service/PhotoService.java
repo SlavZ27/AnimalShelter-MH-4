@@ -39,12 +39,20 @@ public class PhotoService {
      * This method add new Photo and save photo
      * <p>
      *
-     * @param photo is not null
+     * @param idMedia is not null
+     * @param shelter is not null
      *              <r>
      * @return photo
      */
-    public Photo addPhoto(Photo photo) {
+    public Photo addPhotoWIthShelter(String idMedia, Shelter shelter) {
         logger.info("Method addPhoto was start for create new Photo");
+        Photo photo = photoRepository.findByIdPhoto(idMedia);
+        if (photo != null) {
+            return photo;
+        }
+        photo = new Photo();
+        photo.setIdMedia(idMedia);
+        photo.setShelter(shelter);
         return photoRepository.save(photo);
     }
 
