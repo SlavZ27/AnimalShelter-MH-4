@@ -56,11 +56,11 @@ public class UserService {
 
 
     /**
-     * The method adds a new user to the repository and returns the same instance
+     * This method uses method repository, allows creat user
      * Using {@link UserRepository#save(Object)}
-     *
-     * @param userDto is not by null.
-     * @return User
+     * @param userDto is not null
+     * @param shelterDesignation is not null
+     * @return dtoMapperService.toDto(userRepository.save(user));
      */
     public UserDto createUser(UserDto userDto, String shelterDesignation) {
         logger.info("Method createUser was start for create new User");
@@ -70,11 +70,10 @@ public class UserService {
     }
 
     /**
-     * The method adds a new user to the repository and returns the same instance
+     * This method uses method repository, allows add user
      * Using {@link UserRepository#save(Object)}
-     *
-     * @param user is not by null.
-     * @return User
+     * @param user is not null
+     * @return dtoMapperService.toDto(userRepository.save(user));
      */
     public User addUser(User user) {
         logger.info("Method addUser was start for create new User");
@@ -82,11 +81,11 @@ public class UserService {
     }
 
     /**
-     * The method outputs the user from the database using the repository by its chat_id
-     * Using {@link UserRepository#findById(Object)}
-     *
-     * @param id is not by null.
-     * @return User by id
+     * This method, uses method repository, allows read user
+     * Using {@link UserRepository#save(Object)}
+     * @param id is not null
+     * @param shelterDesignation is not null
+     * @return userRepository.getUserByIdAndShelter(id, shelter.getId()).
      */
     public UserDto readUser(Long id, String shelterDesignation) {
         logger.info("Method readUser was start for find User by id");
@@ -98,11 +97,11 @@ public class UserService {
     }
 
     /**
-     * The method outputs the user from the database using the repository by its chat_id
+     * This method, uses method repository, allows find user with shelter
      * Using {@link UserRepository#findById(Object)}
-     *
      * @param id is not by null.
-     * @return User by id
+     * @param shelter is not by null.
+     * @return userRepository.getUserByIdAndShelter(id, shelter.getId())
      */
     public User findUserWithShelter(Long id, Shelter shelter) {
         logger.info("Method readUser was start for find User by id");
@@ -111,11 +110,11 @@ public class UserService {
     }
 
     /**
-     * The method update a new user to the repository and returns the same instance
+     * This method, uses method repository, allows update User
      * Using {@link UserRepository#save(Object)}
-     *
      * @param userDto is not by null.
-     * @return User
+     * @param shelterDesignation is not by null.
+     * @return (userRepository.save(oldUser)
      */
     public UserDto updateUser(UserDto userDto, String shelterDesignation) {
         logger.info("Method updateUser was start for update User");
@@ -135,11 +134,11 @@ public class UserService {
     }
 
     /**
-     * The method delete the user from the database using the repository by its chat_id
+     * This method, uses method repository, allows del User
      * Using {@link UserRepository#delete(Object)}
-     *
      * @param id is not by null.
-     * @return User by id
+     * @param shelterDesignation is not by null.
+     * @return dtoMapperService.toDto(deleteUserWithShelter(user, shelter)
      */
     public UserDto deleteUser(Long id, String shelterDesignation) {
         Shelter shelter = shelterRepository.getShelterByshelterDesignation(shelterDesignation).orElseThrow(() ->
@@ -150,11 +149,11 @@ public class UserService {
     }
 
     /**
-     * The method delete the user from the database using the repository by its chat_id
+     * This method, uses method repository, allows del User
      * Using {@link UserRepository#delete(Object)}
-     *
      * @param user is not by null.
-     * @return User by id
+     * @param shelter is not by null.
+     * @return userFound
      */
     public User deleteUserWithShelter(User user, Shelter shelter) {
         logger.info("Method deleteUser was start for delete User");
@@ -170,7 +169,7 @@ public class UserService {
     /**
      * The all method outputs the volunteers from the database using the repository
      * Using {@link UserRepository#getAllVolunteersWithShelter(Long)}
-     *
+     * @param shelterDesignation is not null
      * @return full volunteers
      */
     public List<UserDto> getAllVolunteers(String shelterDesignation) {
@@ -185,7 +184,7 @@ public class UserService {
     /**
      * The all method outputs the clients from the database using the repository
      * Using {@link UserRepository#getAllClientsWithShelter(Long)}
-     *
+     * @param shelterDesignation is not null
      * @return full clients
      */
     public List<UserDto> getAllClientsDto(String shelterDesignation) {
@@ -199,7 +198,7 @@ public class UserService {
     /**
      * The all method outputs the clients from the database using the repository
      * Using {@link UserRepository#getAllClientsWithShelter(Long)}
-     *
+     * @param shelter is not null
      * @return full clients
      */
     public List<User> getAllClientsEntityWithShelter(Shelter shelter) {
@@ -211,7 +210,7 @@ public class UserService {
      * Method check by user id whether this user is a volunteer
      * using {@link UserRepository#findUserWithTelegramChatIdAndShelterId(Long idChatTelegram, Long idShelter)}
      *
-     * @param chat    is not by null
+     * @param chat is not by null
      * @param shelter is not by null
      * @return volonter or null
      */
@@ -324,9 +323,9 @@ public class UserService {
      * @param chatVolunteer is not null
      * @return getAllOpenCallRequestVolunteer
      */
-    public CallRequest getOpenCallRequestForVolunteerWithChatAndShelter(Chat chatVolunteer, Shelter shelter) {
-        User userVolunteer = getUserFromChatAndShelter(chatVolunteer, shelter);
-        return callRequestService.getAllOpenCallRequestVolunteer(userVolunteer, shelter);
+    public CallRequest getOpenCallRequestForVolunteerWithChat(Chat chatVolunteer) {
+        List<User> userVolunteers = userRepository.getUsersFromChat(chatVolunteer.getId());
+        return callRequestService.getAllOpenCallRequestVolunteers(userVolunteers);
     }
 
     /**
@@ -334,6 +333,7 @@ public class UserService {
      *
      * @param chatVolunteer is not null
      * @param idCallRequest is not null
+     * @param shelter is not null
      */
     public CallRequest closeCallRequestForVolunteerWithChatInShelter(
             Chat chatVolunteer,
@@ -346,7 +346,7 @@ public class UserService {
 
     /**
      * This method allows update date last notification user to the Present time
-     *
+     * @param user is not null
      * @return user with a new LocalDateTime
      */
     public void changeUserDateLastNotificationToNow(User user) {
@@ -365,14 +365,14 @@ public class UserService {
      */
     public AnimalOwnership createOwnershipAnimalWithShelter(Long idUserClient, Shelter shelter, Animal animal) {
         User userClient = findUserWithShelter(idUserClient, shelter);
-        if (userClient == null || !userClient.getShelter().getId().equals(shelter.getId())) {
-            return null;
-        }
         AnimalOwnership animalOwnership = new AnimalOwnership();
         animalOwnership.setOwner(userClient);
         animalOwnership.setAnimal(animal);
+        animalOwnership.setOpen(true);
+        animalOwnership.setApprove(null);
         animalOwnership.setDateStartOwn(LocalDate.now());
         animalOwnership.setDateEndTrial(LocalDate.now().plusDays(30));
+        animalOwnership.setShelter(shelter);
         return animalOwnershipService.addAnimalOwnership(animalOwnership);
     }
 
@@ -427,7 +427,7 @@ public class UserService {
      */
     public Report approveReportWithIdReportWithShelter(Shelter shelter, Long idReport, boolean approve) {
         User userOwner = userRepository.getUserOwnerReportWithShelter(idReport, shelter.getId());
-        if (userOwner == null || userOwner.getShelter() == null || !userOwner.getShelter().equals(shelter)) {
+        if (userOwner == null || userOwner.getShelter() == null || !userOwner.getShelter().getId().equals(shelter.getId())) {
             return null;
         }
         return animalOwnershipService.approveReportWithShelter(idReport, shelter, approve);

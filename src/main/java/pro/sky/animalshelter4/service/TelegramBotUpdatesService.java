@@ -112,9 +112,9 @@ public class TelegramBotUpdatesService {
                 try {
                     chatService.checkShelterIndexOfChatFromUpdateDPO(updateDpo);
                 } catch (ChatDontHaveShelterIndex chatDontHaveShelterIndex) {
-                    updateDpo.setCommand(Command.SET_SHELTER);
+                    updateDpo.setCommand(Command.CHANGE_SHELTER);
                 }
-                if (!updateDpo.getCommand().equals(Command.SET_SHELTER)) {
+                if (!updateDpo.getCommand().equals(Command.CHANGE_SHELTER)) {
                     if (!chatService.approveLaunchCommand(
                             updateDpo.getCommand(),
                             updateDpo.getIdChat())) {
@@ -132,18 +132,20 @@ public class TelegramBotUpdatesService {
                 case SET_SHELTER:
                     chatService.setShelter(updateDpo);
                     break;
-                case MENU_INFO:
-                    chatService.setMenuInfo(updateDpo);
+                case CHANGE_SHELTER:
+                    chatService.changeShelter(updateDpo);
+                    break;
+                case MENU_INFO_SHELTER:
+                    chatService.setMenuInfoShelter(updateDpo);
+                    break;
+                case MENU_INFO_ANIMAL:
+                    chatService.setMenuInfoAnimal(updateDpo);
                     break;
                 case MENU_ACTION:
                     chatService.setMenuAction(updateDpo);
                     break;
                 case MENU_BACK1:
-                    chatService.setMenu0(updateDpo);
-                    break;
                 case MENU_BACK2:
-                    chatService.setMenu0(updateDpo);
-                    break;
                 case MENU_BACK3:
                     chatService.setMenu0(updateDpo);
                     break;

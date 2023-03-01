@@ -4,7 +4,6 @@ import org.springframework.stereotype.Component;
 
 /**
  * This class was created to respond to the HOW command request.
- * This object is used in class {@link pro.sky.animalshelter4.service.ChatService#sendHowTakeDog(Long)}
  * The class has getters.
  */
 @Component

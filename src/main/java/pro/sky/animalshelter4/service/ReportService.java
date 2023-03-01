@@ -201,6 +201,7 @@ public class ReportService {
             report = new Report();
             report.setAnimalOwnership(animalOwnership);
             report.setReportDate(LocalDate.now());
+            report.setShelter(animalOwnership.getShelter());
             return reportRepository.save(report);
         }
         return report;
@@ -209,7 +210,7 @@ public class ReportService {
     /**
      * This method,using  the method repository,allows generate update report, and using class
      * Using{@link PhotoRepository#findByIdPhoto(String)}
-     * Using{@link PhotoService#addPhoto(Photo)}
+     * Using{@link PhotoService#addPhotoWIthShelter(String, Shelter)} 
      * Using{@link ReportRepository#save(Object)}
      *
      * @param animalOwnership
@@ -233,13 +234,7 @@ public class ReportService {
             report.setBehavior(behavior);
         }
         if (idMedia != null) {
-            Photo photo = photoRepository.findByIdPhoto(idMedia);
-            if (photo == null) {
-                photo = new Photo();
-            }
-            photo.setIdMedia(idMedia);
-            photo = photoService.addPhoto(photo);
-            report.setPhoto(photo);
+            report.setPhoto(photoService.addPhotoWIthShelter(idMedia, animalOwnership.getShelter()));
         }
         report.setReportDate(LocalDate.now());
         return reportRepository.save(report);

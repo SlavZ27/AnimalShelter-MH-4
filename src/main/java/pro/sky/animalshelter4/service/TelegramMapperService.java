@@ -55,8 +55,7 @@ public class TelegramMapperService {
             logger.debug("Method toDPO detected message into update");
 //message from
             if (update.message().from() != null &&
-                    update.message().from().id() != null &&
-                    update.message().from().username() != null) {
+                    update.message().from().id() != null) {
                 if (update.message().from().id() < 0) {
                     logger.error("Method toDPO detected userId < 0");
                     return null;
@@ -97,8 +96,7 @@ public class TelegramMapperService {
             updateDpo.setInteractionUnit(InteractionUnit.CALLBACK_QUERY);
 //callbackQuery from
             if (update.callbackQuery().from() != null &&
-                    update.callbackQuery().from().id() != null &&
-                    update.callbackQuery().from().username() != null) {
+                    update.callbackQuery().from().id() != null) {
                 if (update.callbackQuery().from().id() < 0) {
                     logger.error("Method toDPO detected userId < 0");
                     return null;
@@ -186,16 +184,15 @@ public class TelegramMapperService {
      * @return long message
      */
     public Long mapStringToLong(String message) {
-        if (!StringUtils.isNumeric(message)) {
-            throw new IllegalArgumentException(message);
-        }
         return Long.parseLong(message, 10);
     }
 
+    /**
+     * This method juxtapose string to long
+     * @param message is not null
+     * @return Long message
+     */
     public Integer mapStringToInt(String message) {
-        if (!StringUtils.isNumeric(message)) {
-            throw new IllegalArgumentException(message);
-        }
         return Integer.parseInt(message, 10);
     }
 

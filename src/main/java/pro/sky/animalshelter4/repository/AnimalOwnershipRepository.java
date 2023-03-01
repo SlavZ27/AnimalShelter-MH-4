@@ -22,11 +22,12 @@ public interface AnimalOwnershipRepository extends JpaRepository<AnimalOwnership
 
     @Query(value = "SELECT animal_ownership.* FROM animal_ownership where " +
             "animal_ownership.id_shelter=:id_shelter and " +
+            "animal_ownership.date_start_own<:dateStartOwnLess and " +
             "animal_ownership.is_open=true and " +
             "animal_ownership.id not in " +
             "(select distinct report.id_animal_ownership from report)"
             , nativeQuery = true)
-    List<AnimalOwnership> getAllOpenAnimalOwnershipWithoutReportsWithIdShelter(Long id_shelter);
+    List<AnimalOwnership> getAllOpenAnimalOwnershipWithoutReportsWithIdShelter(Long id_shelter,LocalDate dateStartOwnLess);
 
     @Query(value = "SELECT animal_ownership.* FROM animal_ownership where " +
             "animal_ownership.id_shelter=:id_shelter and " +
@@ -47,7 +48,7 @@ public interface AnimalOwnershipRepository extends JpaRepository<AnimalOwnership
             "animal_ownership.id_shelter=:id_shelter and " +
             "animal_ownership.id=:id"
             , nativeQuery = true)
-    Optional<AnimalOwnership> getByIdWithIdShelter(Long id_shelter, Long id);
+    Optional<AnimalOwnership> getByIdWithIdShelter(Long id, Long id_shelter);
 
     @Query(value = "SELECT animal_ownership.* FROM animal_ownership where " +
             "animal_ownership.id_shelter=:id_shelter"

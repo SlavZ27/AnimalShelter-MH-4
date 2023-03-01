@@ -42,6 +42,11 @@ public class ChatService {
         this.commandService = commandService;
     }
 
+    /**
+     * This methop allows give animals shelter
+     *
+     * @param updateDpo is not null
+     */
     public void setShelter(UpdateDPO updateDpo) {
         Chat chat = chatRepository.getChatById(updateDpo.getIdChat());
         if (chat == null) {
@@ -65,6 +70,12 @@ public class ChatService {
         }
     }
 
+    /**
+     * THis method aloows sheck Shelter using index chat
+     *
+     * @param updateDpo is not null
+     * @return Chat by id
+     */
     public boolean checkShelterIndexOfChatFromUpdateDPO(UpdateDPO updateDpo) {
         logger.info("Method checkShelterIndexOfChatFromUpdateDPO was start for find ShelterIndex Of Chat by id = {}",
                 updateDpo.getIdChat());
@@ -240,24 +251,34 @@ public class ChatService {
      * @param updateDpo is not by null
      */
     public void changePhoneUser(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String phone = updateDpo.getMessage();
         logger.info("Method tryChangePhoneFromTelegram was start for change phone by User with chat id = {}",
                 chat.getId());
         User user = null;
-        try {
-            user = shelterService.changeUserPhoneInCurrentShelter(chat, phone);
-        } catch (BadPhoneNumberException e) {
-            telegramBotSenderService.sendMessageWithButtonCancel(
-                    chat.getId(),
-                    UserService.MESSAGE_BAD_PHONE,
-                    TelegramBotSenderService.NAME_BUTTON_FOR_CANCEL);
-            return;
+        if (phone == null || phone.length() == 0) {
+            startChangePhoneByUserFromTelegram(chat);
+        } else {
+            try {
+                user = shelterService.changeUserPhoneInCurrentShelter(chat, phone);
+            } catch (BadPhoneNumberException e) {
+                telegramBotSenderService.sendMessageWithButtonCancel(
+                        chat.getId(),
+                        UserService.MESSAGE_BAD_PHONE,
+                        TelegramBotSenderService.NAME_BUTTON_FOR_CANCEL);
+                return;
+            }
+            telegramUnfinishedRequestService.delUnfinishedRequestForChat(chat);
+            telegramBotSenderService.sendMessage(chat.getId(), UserService.MESSAGE_PHONE_IS_OK +
+                    " " + user.getPhone());
+            telegramBotSenderService.sendButtonsCommandForChat(chat);
         }
-        telegramUnfinishedRequestService.delUnfinishedRequestForChat(chat);
-        telegramBotSenderService.sendMessage(chat.getId(), UserService.MESSAGE_PHONE_IS_OK +
-                " " + user.getPhone());
-        telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
 
@@ -269,8 +290,15 @@ public class ChatService {
      * @return unfinished request
      */
     public Command getUnfinishedRequestForChat(UpdateDPO updateDpo) {
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return null;
+        }
         return telegramUnfinishedRequestService.
-                findUnfinishedRequestForChat(getChatFromUpdateDPO(updateDpo));
+                findUnfinishedRequestForChat(chat);
     }
 
     /**
@@ -281,7 +309,13 @@ public class ChatService {
      * @param updateDpo must be not null
      */
     public void sendSorryIKnowThis(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         telegramBotSenderService.sendMessage(chat.getId(), TelegramBotSenderService.MESSAGE_SORRY_I_KNOW_THIS);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
@@ -295,7 +329,13 @@ public class ChatService {
      * @param updateDpo must be not null
      */
     public void sendUnknownProcess(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         telegramBotSenderService.sendMessage(chat.getId(),
                 TelegramBotSenderService.MESSAGE_SORRY_I_DONT_KNOW_COMMAND);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -322,8 +362,14 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void createCallRequest(UpdateDPO updateDpo) {
-        Chat chatClient = getChatFromUpdateDPO(updateDpo);
-        CallRequest callRequest = null;
+        Chat chatClient;
+        try {
+            chatClient = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
+        CallRequest callRequest;
         try {
             callRequest = shelterService.createCallRequestForClientWithChatWithRandomVolunteerInCurrentShelter(chatClient);
         } catch (VolunteersIsAbsentException e) {
@@ -353,7 +399,13 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void sendNotificationAboutCallRequestsToTelegramVolunteer(UpdateDPO updateDpo) {
-        Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        Chat chatVolunteer;
+        try {
+            chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         sendNotificationAboutCallRequestsToTelegramVolunteer(chatVolunteer, true);
         telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer);
     }
@@ -367,32 +419,51 @@ public class ChatService {
      * @param requiredResponse MESSAGE_YOU_DONT_HAVE_CALL_REQUEST
      */
     private void sendNotificationAboutCallRequestsToTelegramVolunteer(Chat chatVolunteer, boolean requiredResponse) {
-        CallRequest callRequest = shelterService.getOpenCallRequestForVolunteerWithChatInCurrentShelter(chatVolunteer);
+        CallRequest callRequest = shelterService.getOpenCallRequestForVolunteerWithChat(chatVolunteer);
         if (callRequest != null) {
             StringBuilder sb = new StringBuilder();
             sb.append(CallRequestService.MESSAGE_YOU_HAVE_CALL_REQUEST);
-            sb.append("\n");
             sb.append(callRequest.getId());
             sb.append(" ");
-            sb.append(callRequest.getClient().getChatTelegram().getFirstNameUser());
-            sb.append(" ");
-            sb.append(callRequest.getClient().getChatTelegram().getLastNameUser());
-            sb.append(" @");
-            sb.append(callRequest.getClient().getChatTelegram().getUserNameTelegram());
+            sb.append(callRequest.getShelter().getNameShelter());
+            sb.append("\n");
+            if (callRequest.getClient().getChatTelegram().getFirstNameUser() != null &&
+                    callRequest.getClient().getChatTelegram().getFirstNameUser().length() > 0) {
+                sb.append(" ");
+                sb.append(callRequest.getClient().getChatTelegram().getFirstNameUser());
+            }
+            if (callRequest.getClient().getChatTelegram().getFirstNameUser() != null &&
+                    callRequest.getClient().getChatTelegram().getFirstNameUser().length() > 0) {
+                sb.append(" ");
+                sb.append(callRequest.getClient().getChatTelegram().getFirstNameUser());
+            }
+            if (callRequest.getClient().getChatTelegram().getLastNameUser() != null &&
+                    callRequest.getClient().getChatTelegram().getLastNameUser().length() > 0) {
+                sb.append(" ");
+                sb.append(callRequest.getClient().getChatTelegram().getLastNameUser());
+            }
+            if (callRequest.getClient().getChatTelegram().getUserNameTelegram() != null &&
+                    callRequest.getClient().getChatTelegram().getUserNameTelegram().length() > 0) {
+                sb.append(" ");
+                sb.append(" @");
+                sb.append(callRequest.getClient().getChatTelegram().getUserNameTelegram());
+            }
             if (callRequest.getClient().getPhone() != null &&
                     callRequest.getClient().getPhone().length() > 0) {
                 sb.append(" ");
                 sb.append(callRequest.getClient().getPhone());
             }
             sb.append("\n");
-
-            telegramBotSenderService.sendMessage(chatVolunteer.getId(), sb.toString());
-            telegramBotSenderService.sendMessageWithOneButton(
-                    chatVolunteer.getId(),
-                    sb.toString(),
-                    "Close " + callRequest.getId(),
-                    Command.CLOSE_CALL_REQUEST.getTextCommand() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                            callRequest.getId());
+            if (chatVolunteer.getShelter().getId().equals(callRequest.getShelter().getId())) {
+                telegramBotSenderService.sendMessageWithOneButton(
+                        chatVolunteer.getId(),
+                        sb.toString(),
+                        "Close " + callRequest.getId(),
+                        Command.CLOSE_CALL_REQUEST.getTextCommand() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                                callRequest.getId());
+            } else {
+                telegramBotSenderService.sendMessage(chatVolunteer.getId(), sb.toString());
+            }
         } else if (requiredResponse) {
             telegramBotSenderService.sendMessage(
                     chatVolunteer.getId(),
@@ -410,7 +481,13 @@ public class ChatService {
      * @Exception : CallRequestNotFoundException, CantCloseCallRequestException
      */
     public void closeCallRequest(UpdateDPO updateDpo) {
-        Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        Chat chatVolunteer;
+        try {
+            chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         try {
             shelterService.closeCallRequestForVolunteerWithChatInCurrentShelter(
                     chatVolunteer,
@@ -440,7 +517,13 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void closeUnfinishedRequest(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         telegramUnfinishedRequestService.delUnfinishedRequestForChat(chat);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
@@ -454,7 +537,13 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void createOwn(UpdateDPO updateDpo) {
-        Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        Chat chatVolunteer;
+        try {
+            chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = updateDpo.getMessage();
         List<User> clientList = shelterService.getAllClientsEntityWithCurrentShelter(chatVolunteer);
         List<Animal> animalList = shelterService.getAllNotBusyAnimalsWithCurrentShelter(chatVolunteer);
@@ -577,7 +666,13 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void addAnimal(UpdateDPO updateDpo) {
-        Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        Chat chatVolunteer;
+        try {
+            chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = updateDpo.getMessage();
         //send invitation name
         if (message == null || message.length() == 0) {
@@ -610,7 +705,13 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void report(UpdateDPO updateDpo) {
-        Chat chatOwner = getChatFromUpdateDPO(updateDpo);
+        Chat chatOwner;
+        try {
+            chatOwner = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         telegramUnfinishedRequestService.addUnfinishedRequestForChat(chatOwner, Command.REPORT);
         String message = updateDpo.getMessage();
         Report report = shelterService.getTodayReportOwnerWithChatAndCurrentShelter(chatOwner);
@@ -719,7 +820,13 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void approveReport(UpdateDPO updateDpo) {
-        Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        Chat chatVolunteer;
+        try {
+            chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = updateDpo.getMessage();
         if (message != null && message.length() > 0 && message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
             String[] messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
@@ -758,7 +865,13 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void viewReport(UpdateDPO updateDpo) {
-        Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        Chat chatVolunteer;
+        try {
+            chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = updateDpo.getMessage();
         if (message == null || message.length() == 0) {
             Report report = shelterService.getOpenAndNotApproveReportWithCurrentShelter(chatVolunteer);
@@ -773,6 +886,9 @@ public class ChatService {
                 nameButtons.add(ReportService.BUTTON_BAD);
                 dataButtons.add(report.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL + false);
                 telegramBotSenderService.sendMessage(chatVolunteer.getId(), report.toString());
+                if (report.getPhoto() != null && report.getPhoto().getIdMedia() != null) {
+                    telegramBotSenderService.sendPhoto(chatVolunteer.getId(), report.getPhoto().getIdMedia());
+                }
                 telegramBotSenderService.sendButtonsWithOneData(
                         chatVolunteer.getId(),
                         ReportService.MESSAGE_APPROVE_OR_NOT,
@@ -791,7 +907,7 @@ public class ChatService {
      *
      * @param lateList is not null
      */
-    public void sendNotificationAboutReport(List<AnimalOwnership> lateList) {
+    public void sendNotificationToOwnerAboutReport(List<AnimalOwnership> lateList) {
         if (lateList == null || lateList.size() == 0) {
             return;
         }
@@ -863,13 +979,20 @@ public class ChatService {
      * @param updateDpo
      */
     public void viewAnimalOwnership(UpdateDPO updateDpo) {
-        Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        Chat chatVolunteer;
+        try {
+            chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = updateDpo.getMessage();
         if (message == null || message.length() == 0) {
             AnimalOwnership animalOwnership =
                     shelterService.getOneNotApproveOpenAnimalOwnershipWithNotTrialWithCurrentShelter(chatVolunteer);
             if (animalOwnership == null) {
                 telegramBotSenderService.sendMessage(chatVolunteer.getId(), AnimalOwnershipService.MESSAGE_ALL_ANIMAL_OWNERSHIP_ARE_APPROVE);
+                telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer);
             } else {
                 List<String> nameButtons = new ArrayList<>();
                 List<String> dataButtons = new ArrayList<>();
@@ -879,7 +1002,12 @@ public class ChatService {
                 dataButtons.add(animalOwnership.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL + false);
                 nameButtons.add("+week");
                 dataButtons.add(Command.EXTEND_TRIAL.getTextCommand() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
-                        animalOwnership.getId());
+                        animalOwnership.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                        AnimalOwnershipService.COUNT_EXTENDED_DAYS_1);
+                nameButtons.add("+month");
+                dataButtons.add(Command.EXTEND_TRIAL.getTextCommand() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                        animalOwnership.getId() + TelegramBotSenderService.REQUEST_SPLIT_SYMBOL +
+                        AnimalOwnershipService.COUNT_EXTENDED_DAYS_2);
                 telegramBotSenderService.sendMessage(chatVolunteer.getId(), animalOwnership.toString());
                 telegramBotSenderService.sendButtonsWithOneData(
                         chatVolunteer.getId(),
@@ -901,7 +1029,13 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void approveAnimalOwnership(UpdateDPO updateDpo) {
-        Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        Chat chatVolunteer;
+        try {
+            chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = updateDpo.getMessage();
         if (message != null && message.length() > 0 && message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
             String[] messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
@@ -947,36 +1081,56 @@ public class ChatService {
      * @param updateDpo is not null
      */
     public void extendTrial(UpdateDPO updateDpo) {
-        Chat chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        Chat chatVolunteer;
+        try {
+            chatVolunteer = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = updateDpo.getMessage();
-        if (message != null && message.length() > 0 && !message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
-            Long idAnimalOwnership = telegramMapperService.mapStringToLong(message);
-            AnimalOwnership animalOwnership = null;
-            try {
-                int countDays = AnimalOwnershipService.count_extended_days;
-                animalOwnership = shelterService.extendAnimalOwnershipWithCurrentShelter(chatVolunteer, idAnimalOwnership, countDays);
-            } catch (AnimalOwnershipNotFoundException e) {
-                //don't do anything
-                return;
-            }
-            if (animalOwnership != null) {
-                telegramBotSenderService.sendMessage(chatVolunteer.getId(),
-                        animalOwnership.toString());
-                telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer);
-                telegramBotSenderService.sendMessage(animalOwnership.getOwner().getChatTelegram().getId(),
-                        animalOwnership.toString());
+        if (message != null && message.length() > 0 && message.contains(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL)) {
+            String[] messageMas = message.split(TelegramBotSenderService.REQUEST_SPLIT_SYMBOL);
+            if (messageMas.length == 2) {
+                Long idAnimalOwnership = telegramMapperService.mapStringToLong(messageMas[0]);
+                int count_extended_days = telegramMapperService.mapStringToInt(messageMas[1]);
+                AnimalOwnership animalOwnership = null;
+                try {
+                    animalOwnership = shelterService.extendAnimalOwnershipWithCurrentShelter(
+                            chatVolunteer,
+                            idAnimalOwnership,
+                            count_extended_days);
+                } catch (AnimalOwnershipNotFoundException e) {
+                    //don't do anything
+                    return;
+                }
+                if (animalOwnership != null) {
+                    telegramBotSenderService.sendMessage(chatVolunteer.getId(),
+                            animalOwnership.toString());
+                    telegramBotSenderService.sendButtonsCommandForChat(chatVolunteer);
+                    telegramBotSenderService.sendMessage(animalOwnership.getOwner().getChatTelegram().getId(),
+                            animalOwnership.toString());
 
+                }
             }
         }
     }
 
     /**
      * This method send info dogs disabilities
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
     public void sendInfoDogsDisabilities(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoDogsWithDisabilities(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -984,11 +1138,19 @@ public class ChatService {
 
     /**
      * This method send info list documents
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
     public void sendInfoListDocuments(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoListOfDocuments(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -996,11 +1158,19 @@ public class ChatService {
 
     /**
      * This method send info recommend home dog
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
     public void sendInfoRecommendHomeDog(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoRecommendationsHomeDog(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -1008,11 +1178,19 @@ public class ChatService {
 
     /**
      * This method send info recommend home dog small
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
     public void sendInfoRecommendHomeDogSmall(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoRecommendationsHomeSmallDog(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -1020,11 +1198,19 @@ public class ChatService {
 
     /**
      * This method send info refuse
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
     public void sendInfoRefuse(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoRefuseDogFromShelter(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -1032,11 +1218,19 @@ public class ChatService {
 
     /**
      * This method send info tips
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
     public void sendInfoTips(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoTipsFromDogHandler(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -1044,11 +1238,19 @@ public class ChatService {
 
     /**
      * This method send info transportation
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
     public void sendInfoTransportation(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoTransportationAnimals(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -1056,11 +1258,19 @@ public class ChatService {
 
     /**
      * This method send info need handler
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
     public void sendInfoNeedHandler(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoWhyDoYouNeedDogHandler(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -1068,11 +1278,19 @@ public class ChatService {
 
     /**
      * This method send info get dog
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo is not null
      */
     public void sendInfoGetDog(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoGettingKnowDog(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -1081,13 +1299,19 @@ public class ChatService {
 
     /**
      * A method with a prepared message for sending a message with information about the shelter
-     * using {@link InfoAboutShelterCat#getInfoEn()}
-     * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo must be not null
      */
     public void sendInfoAboutShelter(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoAboutShelter(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
@@ -1095,18 +1319,32 @@ public class ChatService {
 
     /**
      * A method with a prepared message for sending a message with information about how to take a dog from a shelter
-     * using {@link InfoTakeADog#getInfoEn()}
-     * using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendMessage(Long, String)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
      *
      * @param updateDpo must be not null
      */
     public void sendHowTakeDog(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         String message = shelterService.getInfoTakeADog(chat);
         telegramBotSenderService.sendMessage(chat.getId(), message);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
+    /**
+     * The method approves the startup command
+     * Using {@link ChatRepository#findById(Object)}
+     * Using {@link CommandService#approveLaunchCommand(Command, Chat)}
+     *
+     * @param command must be not null
+     * @param idChat  must be not null
+     */
     public boolean approveLaunchCommand(Command command, Long idChat) {
         Chat chat = chatRepository.findById(idChat).orElse(null);
         if (chat == null) {
@@ -1116,24 +1354,80 @@ public class ChatService {
         return commandService.approveLaunchCommand(command, chat);
     }
 
-    public void setMenuInfo(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+    /**
+     * The method displays information about the network menu
+     * Using {@link ChatRepository#save(Object)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
+     *
+     * @param updateDpo is not null
+     */
+    public void setMenuInfoShelter(UpdateDPO updateDpo) {
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
+        chat.setIndexMenu(1);
+        chat = chatRepository.save(chat);
+        telegramBotSenderService.sendButtonsCommandForChat(chat);
+    }
+
+    public void setMenuInfoAnimal(UpdateDPO updateDpo) {
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         chat.setIndexMenu(2);
         chat = chatRepository.save(chat);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
+    /**
+     * Method set menu action
+     * Using {@link ChatRepository#save(Object)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
+     *
+     * @param updateDpo is not null
+     */
     public void setMenuAction(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         chat.setIndexMenu(3);
         chat = chatRepository.save(chat);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
     }
 
+    /**
+     * Method set menu 0
+     * Using {@link ChatRepository#save(Object)}
+     * Using {@link TelegramBotSenderService#sendButtonsCommandForChat(Chat)}
+     *
+     * @param updateDpo is not null
+     */
     public void setMenu0(UpdateDPO updateDpo) {
-        Chat chat = getChatFromUpdateDPO(updateDpo);
+        Chat chat;
+        try {
+            chat = getChatFromUpdateDPO(updateDpo);
+        } catch (ChatDontHaveShelterIndex e) {
+            telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
+            return;
+        }
         chat.setIndexMenu(0);
         chat = chatRepository.save(chat);
         telegramBotSenderService.sendButtonsCommandForChat(chat);
+    }
+
+    public void changeShelter(UpdateDPO updateDpo) {
+        telegramBotSenderService.sendSelectShelter(updateDpo.getIdChat());
     }
 }

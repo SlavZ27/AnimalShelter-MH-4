@@ -74,17 +74,21 @@ public class User {
     }
 
     public void setPhone(String phone) {
-        char[] chars = phone.toCharArray();
-        StringBuilder validatePhone = new StringBuilder();
-        for (int i = 0; i < chars.length; i++) {
-            if (Character.isDigit(chars[i])) {
-                validatePhone.append(chars[i]);
-            }
-        }
-        if (5 > validatePhone.toString().length() || validatePhone.toString().length() > 15) {
-            throw new BadPhoneNumberException(phone);
+        if (phone == null) {
+            this.phone = null;
         } else {
-            this.phone = validatePhone.toString();
+            char[] chars = phone.toCharArray();
+            StringBuilder validatePhone = new StringBuilder();
+            for (int i = 0; i < chars.length; i++) {
+                if (Character.isDigit(chars[i])) {
+                    validatePhone.append(chars[i]);
+                }
+            }
+            if (5 > validatePhone.toString().length() || validatePhone.toString().length() > 15) {
+                throw new BadPhoneNumberException(phone);
+            } else {
+                this.phone = validatePhone.toString();
+            }
         }
     }
 

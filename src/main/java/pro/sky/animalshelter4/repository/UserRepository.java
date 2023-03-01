@@ -19,7 +19,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             , nativeQuery = true)
     User findUserWithTelegramChatIdAndShelterId(Long idChatTelegram, Long idShelter);
 
-    @Query(value = "select users.* from users where users.id_telegram_chat=:idChatTelegram and users.id_shelter=:idShelter and users.id in (SELECT animal_ownership.id_user from animal_ownership) limit 1"
+    @Query(value = "select users.* from users where users.id_telegram_chat=:idChatTelegram and users.id_shelter=:idShelter and users.id in (SELECT animal_ownership.id_user from animal_ownership where animal_ownership.is_open=true) limit 1"
             , nativeQuery = true)
     User findUserWithShelterIdAndTelegramChatIdInAnimalOwnership(Long idChatTelegram, Long idShelter);
 
@@ -35,8 +35,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
             , nativeQuery = true)
     List<User> getAllClientsWithShelter(Long id_shelter);
 
-    @Query(value = "select users.* from users,report,animal_ownership where id_shelter=:id_shelter and users.id=animal_ownership.id_user and animal_ownership.id=report.id_animal_ownership and report.id=:id_report limit 1"
+    @Query(value = "select users.* from users,report,animal_ownership where users.id_shelter=:id_shelter and users.id=animal_ownership.id_user and animal_ownership.id=report.id_animal_ownership and report.id=:id_report limit 1"
             , nativeQuery = true)
     User getUserOwnerReportWithShelter(Long id_report, Long id_shelter);
 
+    @Query(value = "select users.* from users where users.id_telegram_chat=:idTelegramChat"
+            , nativeQuery = true)
+    List<User> getUsersFromChat(Long idTelegramChat);
 }

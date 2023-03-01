@@ -148,6 +148,11 @@ public class AnimalService {
         return animalFound;
     }
 
+    /**
+     * This method using ,method repository get all not busy animals with shelter
+     * @param shelter is not null
+     * @return List<Animal>
+     */
     public List<Animal> getAllNotBusyAnimalsWithShelter(Shelter shelter) {
         return animalRepository.getAllNotBusyAnimalsWithShelter(shelter.getId());
     }

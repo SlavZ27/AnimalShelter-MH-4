@@ -20,7 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import pro.sky.animalshelter4.Generator;
 import pro.sky.animalshelter4.entity.*;
+import pro.sky.animalshelter4.entityDto.CallRequestDto;
 import pro.sky.animalshelter4.entityDto.ReportDto;
+import pro.sky.animalshelter4.exception.CallRequestNotFoundException;
+import pro.sky.animalshelter4.exception.ReportNotFoundException;
 import pro.sky.animalshelter4.listener.TelegramBotUpdatesListener;
 import pro.sky.animalshelter4.repository.*;
 import pro.sky.animalshelter4.service.*;
@@ -30,8 +33,10 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
@@ -41,6 +46,8 @@ class ReportControllerTest {
     @LocalServerPort
     private int port;
     private final static String REQUEST_MAPPING_STRING = "report";
+    private final static String SHELTER1 = "DOG";
+    private final static String SHELTER2 = "CAT";
     @InjectMocks
     @Autowired
     private ReportController reportController;
@@ -89,8 +96,6 @@ class ReportControllerTest {
     @Autowired
     private TelegramMapperService telegramMapperService;
     @Autowired
-    private TelegramPhotoService telegramPhotoService;
-    @Autowired
     private TelegramUnfinishedRequestService telegramUnfinishedRequestService;
     @Autowired
     private UserService userService;
@@ -111,113 +116,140 @@ class ReportControllerTest {
         callRequestRepository.deleteAll();
         userRepository.deleteAll();
         animalRepository.deleteAll();
-        shelterRepository.deleteAll();
         unfinishedRequestTelegramRepository.deleteAll();
         chatRepository.deleteAll();
+        shelterRepository.deleteAll();
 
+//        int shelterInt = CAT DOG;
+        // count of all other entities = count * shelterInt
         int userVolunteerInt = 5;
         int userClientInt = 100;
         int chatInt = userClientInt + userVolunteerInt;
-        int callRequestInt = 40;                       // callRequest < chat
+        int callRequestInt = 40;                            // callRequest < chat
         int animalInt = 50;
-        int animalOwnershipInt = 30;                   // animal > animalOwnership
+        int animalOwnershipInt = 30;                        // animal > animalOwnership
         int animalTypeInt = 6;
         int reportInt = 30;
         int photoInt = reportInt;
 
 
-        //generate and remember userVolunteer with chat
-        List<User> userVolunteerList = new ArrayList<>();
-        List<Chat> chatVolunteerList = new ArrayList<>();
-        for (int i = 0; i < userVolunteerInt; i++) {
-            //generate chat
-            Chat chatV = generator.generateChat(-1L, "", "", "", null, true);
-            chatV = chatRepository.save(chatV);
-            //generate userVolunteer with chatV
-            User userVolunteer = generator.generateUser(null, null, chatV, null, null, true, null, true);
-            userVolunteer = userRepository.save(userVolunteer);
-            userVolunteerList.add(userVolunteer);
-            chatVolunteerList.add(chatV);
-        }
-        //generate and remember userClient with chat
-        List<User> userClientList = new ArrayList<>();
-        List<Chat> chatClientList = new ArrayList<>();
-        for (int j = 0; j < userClientInt; j++) {
-            //generate chatC
-            Chat chatC = generator.generateChat(-1L, "", "", "", null, true);
-            chatC = chatRepository.save(chatC);
-            //generate userClient with chatC
-            User userClient = generator.generateUser(null, null, chatC, null, null, false, null, true);
-            userClient = userRepository.save(userClient);
-            userClientList.add(userClient);
-            chatClientList.add(chatC);
-        }
-        //generate callRequest
-        List<User> userClientList2 = new ArrayList<>(userClientList);
-        for (int i = 0; i < callRequestInt; i++) {
-            CallRequest callRequest = new CallRequest();
-            callRequest.setVolunteer(userVolunteerList.get(random.nextInt(userVolunteerList.size())));
-            int index = random.nextInt(userClientList2.size());
-            callRequest.setClient(userClientList2.get(i));
-            userClientList2.remove(index);
-            callRequest.setOpen(generator.generateBool());
-            callRequest.setLocalDateTimeClose(generator.generateDateTime(true, LocalDateTime.now()));
-            callRequest.setLocalDateTimeOpen(generator.generateDateTime(true, callRequest.getLocalDateTimeClose()));
-            callRequestRepository.save(callRequest);
-        }
-        //generate animalType
-        List<Animal> animalList = new ArrayList<>();
-        for (int i = 0; i < animalTypeInt; i++) {
-            Shelter shelter = new Shelter();
-            shelter = shelterRepository.save(shelter);
+        //generate and remember shelter
+        Shelter shelterDog = new Shelter();
+        shelterDog.setNameShelter("Shelter of dog");
+        shelterDog.setPhone("123456789");
+        shelterDog.setAddress("123 123 123");
+        shelterDog.setshelterDesignation("DOG");
+        Shelter shelterCat = new Shelter();
+        shelterCat.setNameShelter("Shelter of cat");
+        shelterCat.setPhone("987654321");
+        shelterCat.setAddress("456 4564 45");
+        shelterCat.setshelterDesignation("CAT");
+        shelterRepository.save(shelterDog);
+        shelterRepository.save(shelterCat);
+        List<Shelter> shelterList = new ArrayList<>();
+        shelterList.add(shelterDog);
+        shelterList.add(shelterCat);
+
+        for (int k = 0; k < shelterList.size(); k++) {
+            Shelter shelter = shelterList.get(k);
+            //generate and remember userVolunteer with chat
+            List<User> userVolunteerList = new ArrayList<>();
+            List<Chat> chatVolunteerList = new ArrayList<>();
+            for (int i = 0; i < userVolunteerInt; i++) {
+                //generate chat
+                Chat chatV = generator.generateChat(-1L, "", "", "", null, true);
+                chatV.setShelter(shelter);
+                chatV = chatRepository.save(chatV);
+                //generate userVolunteer with chatV
+                User userVolunteer = generator.generateUser(null, null, chatV, null, null, true, null, true);
+                userVolunteer.setShelter(shelter);
+                userVolunteer = userRepository.save(userVolunteer);
+                userVolunteerList.add(userVolunteer);
+                chatVolunteerList.add(chatV);
+            }
+            //generate and remember userClient with chat
+            List<User> userClientList = new ArrayList<>();
+            List<Chat> chatClientList = new ArrayList<>();
+            for (int j = 0; j < userClientInt; j++) {
+                //generate chatC
+                Chat chatC = generator.generateChat(-1L, "", "", "", null, true);
+                chatC.setShelter(shelter);
+                chatC = chatRepository.save(chatC);
+                //generate userClient with chatC
+                User userClient = generator.generateUser(null, null, chatC, null, null, false, null, true);
+                userClient.setShelter(shelter);
+                userClient = userRepository.save(userClient);
+                userClientList.add(userClient);
+                chatClientList.add(chatC);
+            }
+            //generate callRequest
+            List<User> userClientList2 = new ArrayList<>(userClientList);
+            for (int i = 0; i < callRequestInt; i++) {
+                CallRequest callRequest = new CallRequest();
+                callRequest.setVolunteer(userVolunteerList.get(random.nextInt(userVolunteerList.size())));
+                int index = random.nextInt(userClientList2.size());
+                callRequest.setClient(userClientList2.get(i));
+                userClientList2.remove(index);
+                callRequest.setOpen(generator.generateBool());
+                callRequest.setLocalDateTimeClose(generator.generateDateTime(true, LocalDateTime.now()));
+                callRequest.setLocalDateTimeOpen(generator.generateDateTime(true, callRequest.getLocalDateTimeClose()));
+                callRequest.setShelter(shelter);
+                callRequestRepository.save(callRequest);
+            }
+            //generate animalType
+            List<Animal> animalList = new ArrayList<>();
             for (int j = 0; j < animalInt; j++) {
                 //generate and remember animal
                 Animal animal = new Animal();
                 animal.setNameAnimal(generator.generateNameIfEmpty(null));
                 animal.setBorn(generator.generateDate(true, LocalDate.now()));
+                animal.setShelter(shelter);
                 animal = animalRepository.save(animal);
                 animalList.add(animal);
             }
-        }
-        //generate and remember animalOwnership
-        List<AnimalOwnership> animalOwnershipList = new ArrayList<>();
-        for (int i = 0; i < animalOwnershipInt; i++) {
-            AnimalOwnership animalOwnership = new AnimalOwnership();
-            int index = random.nextInt(userClientList.size());
-            animalOwnership.setOwner(userClientList.get(index));
-            userClientList.remove(index);
-            index = random.nextInt(animalList.size());
-            animalOwnership.setAnimal(animalList.get(index));
-            animalList.remove(index);
-            Boolean b = generator.generateBoolWithNull();
-            if (b != null) {
-                animalOwnership.setApprove(b);
+            //generate and remember animalOwnership
+            List<AnimalOwnership> animalOwnershipList = new ArrayList<>();
+            for (int i = 0; i < animalOwnershipInt; i++) {
+                AnimalOwnership animalOwnership = new AnimalOwnership();
+                int index = random.nextInt(userClientList.size());
+                animalOwnership.setOwner(userClientList.get(index));
+                userClientList.remove(index);
+                index = random.nextInt(animalList.size());
+                animalOwnership.setAnimal(animalList.get(index));
+                animalList.remove(index);
+                Boolean b = generator.generateBoolWithNull();
+                if (b != null) {
+                    animalOwnership.setApprove(b);
+                }
+                animalOwnership.setOpen(generator.generateBool());
+                animalOwnership.setDateEndTrial(generator.generateDate(false, LocalDate.now()));
+                animalOwnership.setDateStartOwn(generator.generateDate(true, animalOwnership.getDateEndTrial()));
+                animalOwnership.setShelter(shelter);
+                animalOwnership = animalOwnershipRepository.save(animalOwnership);
+                animalOwnershipList.add(animalOwnership);
             }
-            animalOwnership.setOpen(generator.generateBool());
-            animalOwnership.setDateEndTrial(generator.generateDate(false, LocalDate.now()));
-            animalOwnership.setDateStartOwn(generator.generateDate(true, animalOwnership.getDateEndTrial()));
-            animalOwnership = animalOwnershipRepository.save(animalOwnership);
-            animalOwnershipList.add(animalOwnership);
-        }
-        //generate report and photo
-        for (int i = 0; i < reportInt; i++) {
-            Photo photo = new Photo();
-            photo.setIdMedia(generator.generateMessageIfEmpty(null));
-            photo = photoRepository.save(photo);
-            Report report = new Report();
-            report.setReportDate(generator.generateDate(true, LocalDate.now()));
-            report.setPhoto(photo);
-            int index = random.nextInt(animalOwnershipList.size());
-            report.setAnimalOwnership(animalOwnershipList.get(index));
-            animalOwnershipList.remove(index);
-            Boolean b = generator.generateBoolWithNull();
-            if (b != null) {
-                report.setApprove(b);
+            //generate report and photo
+            for (int i = 0; i < reportInt; i++) {
+                Photo photo = new Photo();
+                photo.setIdMedia(generator.generateMessageIfEmpty(null));
+                photo.setShelter(shelter);
+                photo = photoRepository.save(photo);
+                Report report = new Report();
+                report.setReportDate(generator.generateDate(true, LocalDate.now()));
+                report.setPhoto(photo);
+                int index = random.nextInt(animalOwnershipList.size());
+                report.setAnimalOwnership(animalOwnershipList.get(index));
+                animalOwnershipList.remove(index);
+                Boolean b = generator.generateBoolWithNull();
+                if (b != null) {
+                    report.setApprove(b);
+                }
+                report.setDiet(generator.generateMessageIfEmpty(null));
+                report.setBehavior(generator.generateMessageIfEmpty(null));
+                report.setFeeling(generator.generateMessageIfEmpty(null));
+                report.setShelter(shelter);
+                reportRepository.save(report);
             }
-            report.setDiet(generator.generateMessageIfEmpty(null));
-            report.setBehavior(generator.generateMessageIfEmpty(null));
-            report.setFeeling(generator.generateMessageIfEmpty(null));
-            reportRepository.save(report);
         }
     }
 
@@ -229,9 +261,9 @@ class ReportControllerTest {
         callRequestRepository.deleteAll();
         userRepository.deleteAll();
         animalRepository.deleteAll();
-        shelterRepository.deleteAll();
         unfinishedRequestTelegramRepository.deleteAll();
         chatRepository.deleteAll();
+        shelterRepository.deleteAll();
     }
 
     @Test
@@ -259,138 +291,259 @@ class ReportControllerTest {
         assertThat(telegramBotSenderService).isNotNull();
         assertThat(telegramBotUpdatesService).isNotNull();
         assertThat(telegramMapperService).isNotNull();
-        assertThat(telegramPhotoService).isNotNull();
         assertThat(telegramUnfinishedRequestService).isNotNull();
         assertThat(userService).isNotNull();
         assertThat(telegramBotUpdatesListener).isNotNull();
-        assertThat(testRestTemplate).isNotNull();
-        assertThat(reportController).isNotNull();
     }
 
 
     @Test
     void createReport() {
-        Report report =
-                reportRepository.findAll().stream().findAny().orElse(null);
-        assertThat(report).isNotNull();
-        ReportDto reportDto = dtoMapperService.toDto(report);
-        reportRepository.delete(report);
-        assertThat(reportRepository.findById(report.getId()).orElse(null))
-                .isNull();
+        Report reportDog =
+                reportRepository.findAll().stream().
+                        filter(report -> report.getShelter().getshelterDesignation().equals("DOG")).
+                        findAny().orElse(null);
+        Report reportCat =
+                reportRepository.findAll().stream().
+                        filter(report -> report.getShelter().getshelterDesignation().equals("CAT")).
+                        findAny().orElse(null);
+        ReportDto reportDtoDog = dtoMapperService.toDto(reportDog);
+        ReportDto reportDtoCat = dtoMapperService.toDto(reportCat);
+        reportRepository.delete(reportDog);
+        reportRepository.delete(reportCat);
+
         final int countReport = reportRepository.findAll().size();
 
-        ReportDto responseEntity = testRestTemplate.
-                postForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
-                        reportDto,
+        ReportDto responseEntity1 = testRestTemplate.
+                postForObject("http://localhost:" + port + "/" + SHELTER1 + "/" + REQUEST_MAPPING_STRING,
+                        reportDtoDog,
                         ReportDto.class);
-        assertEquals(countReport + 1, reportRepository.findAll().size());
+        ReportDto responseEntity2 = testRestTemplate.
+                postForObject("http://localhost:" + port + "/" + SHELTER2 + "/" + REQUEST_MAPPING_STRING,
+                        reportDtoCat,
+                        ReportDto.class);
+        assertEquals(countReport + 2, reportRepository.findAll().size());
 
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getReportDate().toString()).isEqualTo(reportDto.getReportDate().toString());
-        assertThat(responseEntity.getDiet()).isEqualTo(reportDto.getDiet());
-        assertThat(responseEntity.getBehavior()).isEqualTo(reportDto.getBehavior());
-        assertThat(responseEntity.getFeeling()).isEqualTo(reportDto.getFeeling());
-        assertThat(responseEntity.getApprove()).isEqualTo(reportDto.getApprove());
-        assertThat(responseEntity.getIdAnimalOwnership()).isEqualTo(reportDto.getIdAnimalOwnership());
-        assertThat(responseEntity.getIdPhoto()).isEqualTo(reportDto.getIdPhoto());
-        assertThat(responseEntity.getLinkPhoto()).isEqualTo(reportDto.getLinkPhoto());
+        assertThat(responseEntity1).isNotNull();
+        assertThat(responseEntity1.getReportDate().toString()).isEqualTo(reportDtoDog.getReportDate().toString());
+        assertThat(responseEntity1.getDiet()).isEqualTo(reportDtoDog.getDiet());
+        assertThat(responseEntity1.getBehavior()).isEqualTo(reportDtoDog.getBehavior());
+        assertThat(responseEntity1.getFeeling()).isEqualTo(reportDtoDog.getFeeling());
+        assertThat(responseEntity1.getApprove()).isEqualTo(reportDtoDog.getApprove());
+        assertThat(responseEntity1.getIdAnimalOwnership()).isEqualTo(reportDtoDog.getIdAnimalOwnership());
+        assertThat(responseEntity1.getIdPhoto()).isEqualTo(reportDtoDog.getIdPhoto());
+        assertThat(responseEntity1.getLinkPhoto()).isEqualTo(reportDtoDog.getLinkPhoto());
+
+        assertThat(responseEntity2).isNotNull();
+        assertThat(responseEntity2.getReportDate().toString()).isEqualTo(reportDtoCat.getReportDate().toString());
+        assertThat(responseEntity2.getDiet()).isEqualTo(reportDtoCat.getDiet());
+        assertThat(responseEntity2.getBehavior()).isEqualTo(reportDtoCat.getBehavior());
+        assertThat(responseEntity2.getFeeling()).isEqualTo(reportDtoCat.getFeeling());
+        assertThat(responseEntity2.getApprove()).isEqualTo(reportDtoCat.getApprove());
+        assertThat(responseEntity2.getIdAnimalOwnership()).isEqualTo(reportDtoCat.getIdAnimalOwnership());
+        assertThat(responseEntity2.getIdPhoto()).isEqualTo(reportDtoCat.getIdPhoto());
+        assertThat(responseEntity2.getLinkPhoto()).isEqualTo(reportDtoCat.getLinkPhoto());
     }
 
     @Test
     void readReport() {
-        Report report=
-                reportRepository.findAll().stream().findAny().orElse(null);
-        assertThat(report).isNotNull();
+        Report reportDog =
+                reportRepository.findAll().stream().
+                        filter(report1 -> report1.getShelter().getshelterDesignation().equals("DOG")).
+                        findAny().orElse(null);
+        Report reportCat =
+                reportRepository.findAll().stream().
+                        filter(report1 -> report1.getShelter().getshelterDesignation().equals("CAT")).
+                        findAny().orElse(null);
 
-        ReportDto reportDto = dtoMapperService.toDto(report);
-        assertThat(reportRepository.findById(reportDto.getId()).orElse(null))
-                .isNotNull();
+        ReportDto reportDtoDog = dtoMapperService.toDto(reportDog);
+        ReportDto reportDtoCat = dtoMapperService.toDto(reportCat);
 
         final int countReport = reportRepository.findAll().size();
 
-        ReportDto responseEntity = testRestTemplate.
-                getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + report.getId(),
+        ReportDto responseEntity1 = testRestTemplate.
+                getForObject("http://localhost:" + port + "/" + SHELTER1 + "/" + REQUEST_MAPPING_STRING + "/" + reportDog.getId(),
+                        ReportDto.class);
+        ReportDto responseEntity2 = testRestTemplate.
+                getForObject("http://localhost:" + port + "/" + SHELTER2 + "/" + REQUEST_MAPPING_STRING + "/" + reportCat.getId(),
+                        ReportDto.class);
+        ReportDto responseEntity3 = testRestTemplate.
+                getForObject("http://localhost:" + port + "/" + SHELTER1 + "/" + REQUEST_MAPPING_STRING + "/" + reportCat.getId(),
                         ReportDto.class);
         assertEquals(countReport, reportRepository.findAll().size());
 
-        assertThat(responseEntity).isNotNull();
-        assertThat(responseEntity.getReportDate().toString()).isEqualTo(reportDto.getReportDate().toString());
-        assertThat(responseEntity.getId().toString()).isEqualTo(reportDto.getId().toString());
-        assertThat(responseEntity.getDiet()).isEqualTo(reportDto.getDiet());
-        assertThat(responseEntity.getBehavior()).isEqualTo(reportDto.getBehavior());
-        assertThat(responseEntity.getFeeling()).isEqualTo(reportDto.getFeeling());
-        assertThat(responseEntity.getApprove()).isEqualTo(reportDto.getApprove());
-        assertThat(responseEntity.getIdAnimalOwnership()).isEqualTo(reportDto.getIdAnimalOwnership());
-        assertThat(responseEntity.getIdPhoto()).isEqualTo(reportDto.getIdPhoto());
-        assertThat(responseEntity.getLinkPhoto()).isEqualTo(reportDto.getLinkPhoto());
+        assertThat(responseEntity1).isNotNull();
+        assertThat(responseEntity1.getReportDate().toString()).isEqualTo(reportDtoDog.getReportDate().toString());
+        assertThat(responseEntity1.getId().toString()).isEqualTo(reportDtoDog.getId().toString());
+        assertThat(responseEntity1.getDiet()).isEqualTo(reportDtoDog.getDiet());
+        assertThat(responseEntity1.getBehavior()).isEqualTo(reportDtoDog.getBehavior());
+        assertThat(responseEntity1.getFeeling()).isEqualTo(reportDtoDog.getFeeling());
+        assertThat(responseEntity1.getApprove()).isEqualTo(reportDtoDog.getApprove());
+        assertThat(responseEntity1.getIdAnimalOwnership()).isEqualTo(reportDtoDog.getIdAnimalOwnership());
+        assertThat(responseEntity1.getIdPhoto()).isEqualTo(reportDtoDog.getIdPhoto());
+        assertThat(responseEntity1.getLinkPhoto()).isEqualTo(reportDtoDog.getLinkPhoto());
+
+        assertThat(responseEntity2).isNotNull();
+        assertThat(responseEntity2.getReportDate().toString()).isEqualTo(reportDtoCat.getReportDate().toString());
+        assertThat(responseEntity2.getId().toString()).isEqualTo(reportDtoCat.getId().toString());
+        assertThat(responseEntity2.getDiet()).isEqualTo(reportDtoCat.getDiet());
+        assertThat(responseEntity2.getBehavior()).isEqualTo(reportDtoCat.getBehavior());
+        assertThat(responseEntity2.getFeeling()).isEqualTo(reportDtoCat.getFeeling());
+        assertThat(responseEntity2.getApprove()).isEqualTo(reportDtoCat.getApprove());
+        assertThat(responseEntity2.getIdAnimalOwnership()).isEqualTo(reportDtoCat.getIdAnimalOwnership());
+        assertThat(responseEntity2.getIdPhoto()).isEqualTo(reportDtoCat.getIdPhoto());
+        assertThat(responseEntity2.getLinkPhoto()).isEqualTo(reportDtoCat.getLinkPhoto());
+
+        if (responseEntity3.getId() != null) {
+            assertThat(responseEntity3.getReportDate().toString()).isNotEqualTo(responseEntity1.getReportDate().toString());
+            assertThat(responseEntity3.getId().toString()).isNotEqualTo(responseEntity1.getId().toString());
+            assertThat(responseEntity3.getDiet()).isNotEqualTo(responseEntity1.getDiet());
+            assertThat(responseEntity3.getBehavior()).isNotEqualTo(responseEntity1.getBehavior());
+            assertThat(responseEntity3.getFeeling()).isNotEqualTo(responseEntity1.getFeeling());
+            assertThat(responseEntity3.getApprove()).isNotEqualTo(responseEntity1.getApprove());
+            assertThat(responseEntity3.getIdAnimalOwnership()).isNotEqualTo(responseEntity1.getIdAnimalOwnership());
+            assertThat(responseEntity3.getIdPhoto()).isNotEqualTo(responseEntity1.getIdPhoto());
+            assertThat(responseEntity3.getLinkPhoto()).isNotEqualTo(responseEntity1.getLinkPhoto());
+        }
+    }
+
+    @Test
+    void readCallRequestNegative() {
+        List<Long> reportIdList = reportRepository.findAll().stream().map(Report::getId).collect(Collectors.toList());
+        Long index = (long) random.nextInt(reportIdList.size());
+        while (reportIdList.contains(index)) {
+            index = (long) random.nextInt(reportIdList.size());
+        }
+
+        ReportDto responseEntity1 = testRestTemplate.
+                getForObject("http://localhost:" + port + "/" + SHELTER1 + "/" + REQUEST_MAPPING_STRING + "/" + index,
+                        ReportDto.class);
+        ReportDto responseEntity2 = testRestTemplate.
+                getForObject("http://localhost:" + port + "/" + SHELTER2 + "/" + REQUEST_MAPPING_STRING + "/" + index,
+                        ReportDto.class);
+
+        Long finalIndex = index;
+        assertThatExceptionOfType(ReportNotFoundException.class).isThrownBy(() ->
+                reportService.readReport(finalIndex, "DOG"));
+        assertThatExceptionOfType(ReportNotFoundException.class).isThrownBy(() ->
+                reportService.readReport(finalIndex, "CAT"));
     }
 
     @Test
     void updateReport() {
-        Report report =
-                reportRepository.findAll().stream().findAny().orElse(null);
-        assertThat(report).isNotNull();
+        Report reportDog =
+                reportRepository.findAll().stream().
+                        filter(report1 -> report1.getShelter().getshelterDesignation().equals("DOG")).
+                        findAny().orElse(null);
+        Report reportCat =
+                reportRepository.findAll().stream().
+                        filter(report1 -> report1.getShelter().getshelterDesignation().equals("CAT")).
+                        findAny().orElse(null);
 
-        ReportDto reportDto = dtoMapperService.toDto(report);
-        assertThat(reportDto).isNotNull();
-        assertThat(reportRepository.findById(reportDto.getId()).orElse(null))
-                .isNotNull();
-        reportDto.setBehavior("fgfrergth");
+        ReportDto reportDtoDog = dtoMapperService.toDto(reportDog);
+        ReportDto reportDtoCat = dtoMapperService.toDto(reportCat);
+
+        reportDtoDog.setBehavior("fgfrergth");
+        reportDtoCat.setBehavior("fgfrergth");
 
         final int countReport = reportRepository.findAll().size();
         testRestTemplate.
-                put("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
-                        reportDto);
+                put("http://localhost:" + port + "/" + SHELTER1 + "/" + REQUEST_MAPPING_STRING,
+                        reportDtoDog);
+        testRestTemplate.
+                put("http://localhost:" + port + "/" + SHELTER2 + "/" + REQUEST_MAPPING_STRING,
+                        reportDtoCat);
         assertEquals(countReport, reportRepository.findAll().size());
 
-        Report reportActual = reportRepository.findById(reportDto.getId()).orElse(null);
+        Report reportActual1 = reportRepository.findById(reportDtoDog.getId()).orElse(null);
+        Report reportActual2 = reportRepository.findById(reportDtoCat.getId()).orElse(null);
 
-        assertThat(reportActual).isNotNull();
-        assertThat(reportActual.getBehavior()).isEqualTo("fgfrergth");
-        assertThat(reportActual.getReportDate().toString()).isEqualTo(report.getReportDate().toString());
-        assertThat(reportActual.getId().toString()).isEqualTo(report.getId().toString());
-        assertThat(reportActual.getDiet()).isEqualTo(report.getDiet());
-        assertThat(reportActual.getFeeling()).isEqualTo(report.getFeeling());
-        assertThat(reportActual.getAnimalOwnership().getId()).isEqualTo(report.getAnimalOwnership().getId());
-        assertThat(reportActual.getPhoto().getId()).isEqualTo(report.getPhoto().getId());
+        assertThat(reportActual1).isNotNull();
+        assertThat(reportActual1.getBehavior()).isEqualTo("fgfrergth");
+        assertThat(reportActual1.getReportDate().toString()).isEqualTo(reportDog.getReportDate().toString());
+        assertThat(reportActual1.getId().toString()).isEqualTo(reportDog.getId().toString());
+        assertThat(reportActual1.getDiet()).isEqualTo(reportDog.getDiet());
+        assertThat(reportActual1.getFeeling()).isEqualTo(reportDog.getFeeling());
+        assertThat(reportActual1.getAnimalOwnership().getId()).isEqualTo(reportDog.getAnimalOwnership().getId());
+        assertThat(reportActual1.getPhoto().getId()).isEqualTo(reportDog.getPhoto().getId());
+
+        assertThat(reportActual2).isNotNull();
+        assertThat(reportActual2.getBehavior()).isEqualTo("fgfrergth");
+        assertThat(reportActual2.getReportDate().toString()).isEqualTo(reportCat.getReportDate().toString());
+        assertThat(reportActual2.getId().toString()).isEqualTo(reportCat.getId().toString());
+        assertThat(reportActual2.getDiet()).isEqualTo(reportCat.getDiet());
+        assertThat(reportActual2.getFeeling()).isEqualTo(reportCat.getFeeling());
+        assertThat(reportActual2.getAnimalOwnership().getId()).isEqualTo(reportCat.getAnimalOwnership().getId());
+        assertThat(reportActual2.getPhoto().getId()).isEqualTo(reportCat.getPhoto().getId());
 
     }
 
     @Test
     void deleteReport() {
         final int countReport = reportRepository.findAll().size();
-        Report report = reportRepository.findAll().stream().findFirst().orElse(null);
 
-        ResponseEntity<String> responseEntity = testRestTemplate
-                .exchange("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING + "/" + report.getId()
+        Report reportDog =
+                reportRepository.findAll().stream().
+                        filter(report1 -> report1.getShelter().getshelterDesignation().equals("DOG")).
+                        findAny().orElse(null);
+        Report reportCat =
+                reportRepository.findAll().stream().
+                        filter(report1 -> report1.getShelter().getshelterDesignation().equals("CAT")).
+                        findAny().orElse(null);
+
+        ResponseEntity<String> responseEntity1 = testRestTemplate
+                .exchange("http://localhost:" + port + "/" + SHELTER1 + "/" + REQUEST_MAPPING_STRING + "/" + reportDog.getId()
                         , HttpMethod.DELETE,
                         HttpEntity.EMPTY,
                         new ParameterizedTypeReference<>() {
                         });
 
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody())
-                .contains(report.getId().toString())
-                .contains(report.getBehavior().toString())
-                .contains(report.getReportDate().toString())
-                .contains(report.getId().toString())
-                .contains(report.getDiet().toString())
-                .contains(report.getFeeling().toString())
-                .contains(report.getAnimalOwnership().getId().toString())
-                .contains(report.getPhoto().getId().toString());
+        ResponseEntity<String> responseEntity2 = testRestTemplate
+                .exchange("http://localhost:" + port + "/" + SHELTER2 + "/" + REQUEST_MAPPING_STRING + "/" + reportCat.getId()
+                        , HttpMethod.DELETE,
+                        HttpEntity.EMPTY,
+                        new ParameterizedTypeReference<>() {
+                        });
 
-        assertEquals(countReport - 1, reportRepository.findAll().size());
-        assertThat(reportRepository.findById(report.getId()).orElse(null))
+        assertThat(responseEntity1.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity1.getBody())
+                .contains(reportDog.getId().toString())
+                .contains(reportDog.getBehavior().toString())
+                .contains(reportDog.getReportDate().toString())
+                .contains(reportDog.getId().toString())
+                .contains(reportDog.getDiet().toString())
+                .contains(reportDog.getFeeling().toString())
+                .contains(reportDog.getAnimalOwnership().getId().toString())
+                .contains(reportDog.getPhoto().getId().toString());
+
+        assertThat(responseEntity2.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity2.getBody())
+                .contains(reportCat.getId().toString())
+                .contains(reportCat.getBehavior().toString())
+                .contains(reportCat.getReportDate().toString())
+                .contains(reportCat.getId().toString())
+                .contains(reportCat.getDiet().toString())
+                .contains(reportCat.getFeeling().toString())
+                .contains(reportCat.getAnimalOwnership().getId().toString())
+                .contains(reportCat.getPhoto().getId().toString());
+
+        assertEquals(countReport - 2, reportRepository.findAll().size());
+        assertThat(reportRepository.findById(reportDog.getId()).orElse(null))
+                .isNull();
+        assertThat(reportRepository.findById(reportCat.getId()).orElse(null))
                 .isNull();
     }
 
     @Test
     public void getAllReportTest() {
         final long countReport = reportRepository.findAll().size();
-        ReportDto[] reportDtos = testRestTemplate
-                .getForObject("http://localhost:" + port + "/" + REQUEST_MAPPING_STRING,
+        ReportDto[] reportDtos1 = testRestTemplate
+                .getForObject("http://localhost:" + port + "/" + SHELTER1 + "/" + REQUEST_MAPPING_STRING,
                         ReportDto[].class);
-        assertThat(reportDtos.length)
+        ReportDto[] reportDtos2 = testRestTemplate
+                .getForObject("http://localhost:" + port + "/" + SHELTER2 + "/" + REQUEST_MAPPING_STRING,
+                        ReportDto[].class);
+        assertThat(reportDtos1.length + reportDtos1.length)
                 .isEqualTo(countReport);
     }
 }

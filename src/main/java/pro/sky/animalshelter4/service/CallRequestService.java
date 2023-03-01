@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CallRequestService {
-    public final static String MESSAGE_YOU_HAVE_CALL_REQUEST = "You have call request by ";
+    public final static String MESSAGE_YOU_HAVE_CALL_REQUEST = "You have call request ";
     public final static String MESSAGE_YOU_DONT_HAVE_CALL_REQUEST = "You don't have any call request by ";
     public final static String MESSAGE_SUCCESSFUL_CREATION = "OK. Volunteer will call you";
     public final static String MESSAGE_YOU_CAN_CLOSE_CALL_REQUEST = "Press button with ID for close";
@@ -65,6 +65,7 @@ public class CallRequestService {
             callRequest.setLocalDateTimeOpen(LocalDateTime.now());
             callRequest.setClient(userClient);
             callRequest.setVolunteer(userVolunteer);
+            callRequest.setShelter(userClient.getShelter());
             return addCallRequest(callRequest);
         }
     }
@@ -215,6 +216,12 @@ public class CallRequestService {
     }
 
 
+    /**
+     * This method, using method repository allow get all open call request volunter
+     * Using: {@link CallRequestRepository#getAllOpenByUserIdForVolunteerWithShelter(Long, Long)}
+     *
+     * @return List<CallRequestDto>
+     */
     public List<CallRequestDto> getAllOpenCallRequestVolunteer(Long id, String shelterDesignation) {
         logger.info(
                 "Method getAllOpenCallRequestVolunteer was start for return all CallRequest Volunteer with id = {}"
@@ -229,16 +236,23 @@ public class CallRequestService {
      * This method, using method repository allow get all open call request volunteer
      * Using: {@link CallRequestRepository#getOpenByUserIdForVolunteerWithShelter(Long, Long)}
      *
-     * @param userVolunteer is not null
+     * @param usersVolunteer is not null
      * @return List<CallRequest>
      */
-    public CallRequest getAllOpenCallRequestVolunteer(User userVolunteer, Shelter shelter) {
+    public CallRequest getAllOpenCallRequestVolunteers(List<User> usersVolunteer) {
         logger.info(
-                "Method getAllOpenCallRequestVolunteer was start for return all CallRequest Volunteer with id = {}"
-                , userVolunteer.getId());
-        return callRequestRepository.getOpenByUserIdForVolunteerWithShelter(
-                userVolunteer.getShelter().getId(),
-                userVolunteer.getId());
+                "Method getAllOpenCallRequestVolunteer was start for return all CallRequest Volunteers");
+        CallRequest callRequest = null;
+        for (int i = 0; i < usersVolunteer.size(); i++) {
+            callRequest =
+                    callRequestRepository.getOpenByUserIdForVolunteerWithShelter(
+                            usersVolunteer.get(i).getId(),
+                            usersVolunteer.get(i).getShelter().getId());
+            if (callRequest != null) {
+                break;
+            }
+        }
+        return callRequest;
     }
 
     /**

@@ -33,7 +33,8 @@ public class AnimalOwnershipService {
     public final static String MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_GOOD = "AnimalOwnership is placed good";
     public final static String MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_BAD = "AnimalOwnership is placed bad";
     public final static String MESSAGE_ANIMAL_OWNERSHIP_IS_PLACED_BAD_OWNER = "Recommendations for the owner";
-    public final static int count_extended_days = 7;
+    public final static int COUNT_EXTENDED_DAYS_1 = 7;
+    public final static int COUNT_EXTENDED_DAYS_2 = 30;
 
 
     private final AnimalOwnershipRepository animalOwnershipRepository;
@@ -68,7 +69,7 @@ public class AnimalOwnershipService {
     }
 
     /**
-     * This method using method repository, allows create AnimalOwnership
+     * This method using method repository, allows create AnimalOwnershipDto
      *
      * @param animalOwnershipDto is not null
      * @return animalOwnershipDto
@@ -143,6 +144,7 @@ public class AnimalOwnershipService {
         oldAnimalOwnership.setOpen(newAnimalOwnership.isOpen());
         return dtoMapperService.toDto(animalOwnershipRepository.save(oldAnimalOwnership));
     }
+
     /**
      * This method using method repository allows del AnimalOwnership
      *
@@ -156,6 +158,7 @@ public class AnimalOwnershipService {
                 new ShelterNotFoundException(shelterDesignation));
         return dtoMapperService.toDto(deleteAnimalOwnership(animalOwnership, shelter));
     }
+
     /**
      * This method using method repository allows del AnimalOwnership
      *
@@ -177,6 +180,7 @@ public class AnimalOwnershipService {
 
     /**
      * This method using method repository allows get actual AnimalOwnership
+     *
      * @param userOwner is not null
      * @return AnimalOwnership
      */
@@ -227,7 +231,7 @@ public class AnimalOwnershipService {
      * This method using method repository allows approve report
      *
      * @param idReport is not null
-     * @param approve is not null
+     * @param approve  is not null
      * @return idReport, approve
      */
     public Report approveReportWithShelter(Long idReport, Shelter shelter, boolean approve) {
@@ -248,12 +252,12 @@ public class AnimalOwnershipService {
      * This method using method repository allows approve AnimalOwnership
      *
      * @param idAnimalOwnership is not null
-     * @param approve is not null
+     * @param approve           is not null
      * @return animalOwnership
      */
     public AnimalOwnership approveAnimalOwnershipWithShelter(Shelter shelter, Long idAnimalOwnership, boolean approve) {
         AnimalOwnership animalOwnership = animalOwnershipRepository.
-                getByIdWithIdShelter(shelter.getId(), idAnimalOwnership).
+                getByIdWithIdShelter(idAnimalOwnership, shelter.getId()).
                 orElseThrow(() -> new AnimalOwnershipNotFoundException(idAnimalOwnership.toString()));
         if (!animalOwnership.isOpen()) {
             throw new AnimalOwnershipAlreadyCloseException(idAnimalOwnership.toString());
@@ -271,7 +275,7 @@ public class AnimalOwnershipService {
      */
     public AnimalOwnership extendTrialAnimalOwnershipWithShelter(Shelter shelter, Long idAnimalOwnership, int countDays) {
         AnimalOwnership animalOwnership = animalOwnershipRepository.
-                getByIdWithIdShelter(shelter.getId(), idAnimalOwnership).
+                getByIdWithIdShelter(idAnimalOwnership, shelter.getId()).
                 orElseThrow(() -> new AnimalOwnershipNotFoundException(idAnimalOwnership.toString()));
         animalOwnership.setDateEndTrial(animalOwnership.getDateEndTrial().plusDays(countDays));
         return animalOwnershipRepository.save(animalOwnership);
