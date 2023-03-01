@@ -3,7 +3,7 @@
 
 # AnimalShelter4
 
-Project created to manage communication with the clients of the animal shelter
+ Project created to manage communication with the clients of the animal shelter
 
 The main task is to give the most complete information about how a person has to prepare for a meeting with a new family member.
 ## Table of Contents
